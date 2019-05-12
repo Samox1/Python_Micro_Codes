@@ -77,7 +77,8 @@ else:
 # print(number1)
 # print(number3)
 # print(Q1, Q3)
-print(Q3-Q1)
+finalQ = float(Q3-Q1)
+print(round(finalQ,1))
 
 
 # -------------------------------------------------------------------------------------------------------- #
@@ -90,6 +91,7 @@ print("---------- Task 3 ----------")
 
 N = int(input())                             # Input N numbers in List
 number = list(map(int, input().split()))     # Input numbers
+# print(number)
 
 mean = sum(number) / N
 # print(mean)
