@@ -1,6 +1,8 @@
-# Usefull shortcuts:
-#       Ctrl + / = Comment block of lines
-#       Ctrl + D = Duplicate line
+# Nice shortcuts:
+#   Ctrl + R = Replace
+#   Ctrl + F = Find
+#   Ctrl + D = Duplicate line
+#   Ctrl + / = Comment block of lines
 
 print("-----------------------------------------------------------------------------------")
 # Problem Solving Training
