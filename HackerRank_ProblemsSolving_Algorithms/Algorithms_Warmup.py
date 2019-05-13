@@ -9,7 +9,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Solve me first
 
-# print("---------- Task 1 ----------")
+print("---------- Task 1 ----------")
 #
 # def solveMeFirst(a,b):
 #     return a+b
@@ -25,7 +25,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Simple Array Sum
 
-# print("---------- Task 2 ----------")
+print("---------- Task 2 ----------")
 #
 # import os
 # import sys
@@ -52,7 +52,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Compare the Triplets
 
-# print("---------- Task 3 ----------")
+print("---------- Task 3 ----------")
 #
 # import math
 # import os
@@ -85,7 +85,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - A Very Big Sum
 
-# print("---------- Task 4 ----------")
+print("---------- Task 4 ----------")
 #
 # import math
 # import os
@@ -114,7 +114,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Plus Minus
 
-# print("---------- Task 5 ----------")
+print("---------- Task 5 ----------")
 #
 # import math
 # import os
@@ -155,7 +155,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Staircase
 
-# print("---------- Task 6 ----------")
+print("---------- Task 6 ----------")
 #
 # import math
 # import os
@@ -180,7 +180,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Mini-Max Sum
 
-# print("---------- Task 7 ----------")
+print("---------- Task 7 ----------")
 #
 # import math
 # import os
@@ -212,7 +212,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Birthday Cake Candles
 
-# print("---------- Task 8 ----------")
+print("---------- Task 8 ----------")
 #
 # import math
 # import os
@@ -244,7 +244,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Birthday Cake Candles
 
-# print("---------- Task 8 ----------")
+print("---------- Task 9 ----------")
 #
 # import os
 # import sys
@@ -283,7 +283,7 @@ print("-------------------------------------------------------------------------
 # You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
 # This is: Problem Solving (Algorithms) - Diagonal Difference
 
-# print("---------- Task 9 ----------")
+print("---------- Task 10 ----------")
 #
 # import math
 # import os
