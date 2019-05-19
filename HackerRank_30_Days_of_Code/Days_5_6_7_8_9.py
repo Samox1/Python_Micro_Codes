@@ -1,3 +1,10 @@
+# Nice shortcuts:
+#   Ctrl + R = Replace
+#   Ctrl + F = Find
+#   Ctrl + D = Duplicate line
+#   Ctrl + / = Comment block of lines
+
+
 # 30 Days of Code
 # You can find this on: HackerRank -> Challenges (Tutorials) -> 30 Days of Code
 # This is: Day 5 - Loops
@@ -82,19 +89,27 @@ print("---------- Day 7 ----------")
 print("-----------------------------------------------------------------------------------")
 # 30 Days of Code
 # You can find this on: HackerRank -> Challenges (Tutorials) -> 30 Days of Code
-# This is: Day 8 -
+# This is: Day 8 - Dictionaries and Maps
 
 print("---------- Day 8 ----------")
+print("Done but HackerRank is broken at Case 1 - error: {-truncated-}")
+print("On PC the python code work OK without error on the same input")
 
 n = int(input())
-kappa = dict
+kappa = {}
 
 for i in range(n):
-    arr = input().rstrip().split()
-    print(arr)
-    kappa = {arr[0]: int(arr[1])}
-    print(str(kappa))
+    arr = list(input().rstrip().split())
+    if(len(arr) > 1):
+        kappa[arr[0]] = int(arr[1])
 
+for i in range(n):
+    arr = list(input().rstrip().split())
+    if kappa.get(arr[0],) != None:
+        buf = arr[0] + "=" + str(kappa.get(arr[0]))
+        print(buf)
+    else:
+        print("Not found")
 
 
 print("-----------------------------------------------------------------------------------")
