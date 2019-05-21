@@ -54,6 +54,20 @@ print("---------- Day 11 ----------")
 
 
 
+# # Python Tutorial:
+# if __name__ == '__main__':
+#     # n = int(input())
+#     arr = list(map(int, input().split()))
+#
+#     arr = sorted(arr, reverse=True)
+#     print(arr)
+#
+#     for i in arr:
+#         if i < max(arr):
+#             second = i
+#             break
+#
+#     print(second)
 
 
 # # Codility Test for TCL:
@@ -101,6 +115,7 @@ print("---------- Day 11 ----------")
 #     print(permute(a, 0, n - 1))
 
 
+# # Second Task in Codility for TCL:
 
 # counter = 0
 #
