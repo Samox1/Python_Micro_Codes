@@ -11,6 +11,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/Python_Micro_Codes$1D_to_2D_pic.coverage" NAME="1D_to_2D_pic Coverage Results" MODIFIED="1555965025247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Python_Micro_Codes$Days_5_6_7_8_9.coverage" NAME="Days_5_6_7_8_9 Coverage Results" MODIFIED="1558101397974" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/HackerRank_30_Days_of_Code" />
+    <SUITE FILE_PATH="coverage/Python_Micro_Codes$Days_10_11_12_13_14.coverage" NAME="Days_10_11_12_13_14 Coverage Results" MODIFIED="1558354967456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/HackerRank_30_Days_of_Code" />
   </component>
   <component name="FavoritesManager">
     <favorites_list name="Python_Micro_Codes" />
@@ -20,7 +21,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/1D_txt_to_2D_pic/1D_txt_to_2D_pic.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
+            <state relative-caret-position="306">
               <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -29,11 +30,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_5_6_7_8_9.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="539">
-              <caret line="87" column="23" selection-start-line="87" selection-start-column="23" selection-end-line="87" selection-end-column="23" />
+              <caret line="119" column="23" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_10_11_12_13_14.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="556">
+              <caret line="59" lean-forward="true" selection-start-line="59" selection-end-line="59" />
+              <folding>
+                <marker date="1558355230025" expanded="true" signature="306:816" ph="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -56,14 +69,15 @@
         <option value="$PROJECT_DIR$/1D_to_2D_pic.py" />
         <option value="$PROJECT_DIR$/Training 1/Train 1.py" />
         <option value="$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_5_6_7_8_9.py" />
+        <option value="$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_10_11_12_13_14.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="y" value="-9" />
-    <option name="width" value="1937" />
-    <option name="height" value="1057" />
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="x" value="-10" />
+    <option name="y" value="-10" />
+    <option name="width" value="1939" />
+    <option name="height" value="1059" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -71,6 +85,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -96,7 +111,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -118,7 +132,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.Days_5_6_7_8_9">
+  <component name="RunManager" selected="Python.Days_10_11_12_13_14">
     <configuration name="1D_to_2D_pic" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python_Micro_Codes" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -133,6 +147,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="C:\Users\Szymon\Documents\GitHub\Python_Micro_Codes\1D_txt_to_2D_pic.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Days_10_11_12_13_14" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python_Micro_Codes" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/HackerRank_30_Days_of_Code" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_10_11_12_13_14.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -187,6 +223,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Days_10_11_12_13_14" />
         <item itemvalue="Python.Days_5_6_7_8_9" />
         <item itemvalue="Python.Train 1" />
         <item itemvalue="Python.1D_to_2D_pic" />
@@ -206,18 +243,20 @@
       <workItem from="1555962964827" duration="2989000" />
       <workItem from="1556898966030" duration="1632000" />
       <workItem from="1558100941844" duration="527000" />
+      <workItem from="1558352823361" duration="1888000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5148000" />
+    <option name="totallyTimeSpent" value="7036000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.26510066" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.26912752" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5021097" side_tool="true" weight="0.24966443" />
+      <window_info anchor="bottom" id="Concurrent Activities Diagram" weight="0.3286119" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32719547" />
@@ -231,6 +270,7 @@
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.32827735" />
       <window_info anchor="bottom" id="Python Console" order="12" weight="0.32827735" />
+      <window_info anchor="right" id="Coverage" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -269,7 +309,7 @@
     <entry file="file://$PROJECT_DIR$/Training 1/Train 1.py" />
     <entry file="file://$PROJECT_DIR$/1D_txt_to_2D_pic/1D_txt_to_2D_pic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
+        <state relative-caret-position="306">
           <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -280,7 +320,17 @@
     <entry file="file://$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_5_6_7_8_9.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="539">
-          <caret line="87" column="23" selection-start-line="87" selection-start-column="23" selection-end-line="87" selection-end-column="23" />
+          <caret line="119" column="23" selection-start-line="119" selection-start-column="23" selection-end-line="119" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_10_11_12_13_14.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="556">
+          <caret line="59" lean-forward="true" selection-start-line="59" selection-end-line="59" />
+          <folding>
+            <marker date="1558355230025" expanded="true" signature="306:816" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
