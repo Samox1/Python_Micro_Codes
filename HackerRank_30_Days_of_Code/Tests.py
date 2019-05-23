@@ -7,29 +7,52 @@
 
 # Python Tutorial on HackerRank
 # You can find this on: HackerRank -> Practice -> Python
-# This is: Python - Basic Data Types - List
+# This is: Python -> Basic Data Types -> List
 
-if __name__ == '__main__':
-    N = int(input())
-    L = []
-
-    for i in range(0, N):
-        in_put = list(input().rstrip().split())
-        # print(in_put)
-
-        if in_put[0] == "insert":
-            L.insert(int(in_put[1]),int(in_put[2]))
-        elif in_put[0] == "print":
-            print(L)
-        elif in_put[0] == "remove":
-            L.remove(int(in_put[1]))
-        elif in_put[0] == "append":
-            L.append(int(in_put[1]))
-        elif in_put[0] == "sort":
-            L.sort()
-        elif in_put[0] == "pop":
-            L.pop(len(L)-1)
-        elif in_put[0] == "reverse":
-            L.reverse()
+# if __name__ == '__main__':
+#     N = int(input())
+#     L = []
+#
+#     for i in range(0, N):
+#         in_put = list(input().rstrip().split())
+#         # print(in_put)
+#
+#         if in_put[0] == "insert":
+#             L.insert(int(in_put[1]),int(in_put[2]))
+#         elif in_put[0] == "print":
+#             print(L)
+#         elif in_put[0] == "remove":
+#             L.remove(int(in_put[1]))
+#         elif in_put[0] == "append":
+#             L.append(int(in_put[1]))
+#         elif in_put[0] == "sort":
+#             L.sort()
+#         elif in_put[0] == "pop":
+#             L.pop(len(L)-1)
+#         elif in_put[0] == "reverse":
+#             L.reverse()
 
 # --------------------------------------------------------------- #
+
+# Python Tutorial on HackerRank
+# You can find this on: HackerRank -> Practice -> Python
+# This is: Python -> Strings -> Find a string
+
+def count_substring(string, sub_string):
+    counter = 0
+    for i in range(0, len(string)):
+        index = string.find(sub_string)
+        if index >= 0:
+            # print(index)
+            # print(index)
+            counter += 1
+            string = string[index+1:]
+
+    return counter
+
+if __name__ == '__main__':
+    string = input().strip()
+    sub_string = input().strip()
+
+    count = count_substring(string, sub_string)
+    print("Count:",count)
