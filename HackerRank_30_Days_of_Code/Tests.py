@@ -38,21 +38,87 @@
 # You can find this on: HackerRank -> Practice -> Python
 # This is: Python -> Strings -> Find a string
 
-def count_substring(string, sub_string):
-    counter = 0
-    for i in range(0, len(string)):
-        index = string.find(sub_string)
-        if index >= 0:
-            # print(index)
-            # print(index)
-            counter += 1
-            string = string[index+1:]
+# def count_substring(string, sub_string):
+#     counter = 0
+#     for i in range(0, len(string)):
+#         index = string.find(sub_string)
+#         if index >= 0:
+#             # print(index)
+#             # print(index)
+#             counter += 1
+#             string = string[index+1:]
+#
+#     return counter
+#
+# if __name__ == '__main__':
+#     string = input().strip()
+#     sub_string = input().strip()
+#
+#     count = count_substring(string, sub_string)
+#     print("Count:",count)
 
-    return counter
 
-if __name__ == '__main__':
-    string = input().strip()
-    sub_string = input().strip()
+# --------------------------------------------------------------- #
 
-    count = count_substring(string, sub_string)
-    print("Count:",count)
+# Python Tutorial on HackerRank
+# You can find this on: HackerRank -> Practice -> Python
+# This is: Python -> Strings -> String Validators
+
+# if __name__ == '__main__':
+#     s = input()
+#     num = False
+#     alfa = False
+#     digit = False
+#     lower = False
+#     upper = False
+#
+#     for i in s:
+#         if i.isalnum() == True:
+#             num = True
+#         if i.isalpha() == True:
+#             alfa = True
+#         if i.isdigit() == True:
+#             digit = True
+#         if i.islower() == True:
+#             lower = True
+#         if i.isupper() == True:
+#             upper = True
+#
+#     print(num)
+#     print(alfa)
+#     print(digit)
+#     print(lower)
+#     print(upper)
+
+
+# --------------------------------------------------------------- #
+
+# Python Tutorial on HackerRank
+# You can find this on: HackerRank -> Practice -> Python
+# This is: Python -> Strings -> Text Alignment
+
+
+# Replace all ______ with rjust, ljust or center.
+
+thickness = int(input()) #This must be an odd number
+c = 'H'
+
+#Top Cone
+for i in range(thickness):
+    print((c*i).______(thickness-1)+c+(c*i).______(thickness-1))
+
+#Top Pillars
+for i in range(thickness+1):
+    print((c*thickness).______(thickness*2)+(c*thickness).______(thickness*6))
+
+#Middle Belt
+for i in range((thickness+1)//2):
+    print((c*thickness*5).______(thickness*6))
+
+#Bottom Pillars
+for i in range(thickness+1):
+    print((c*thickness).______(thickness*2)+(c*thickness).______(thickness*6))
+
+#Bottom Cone
+for i in range(thickness):
+    print(((c*(thickness-i-1)).______(thickness)+c+(c*(thickness-i-1)).______(thickness)).______(thickness*6))
