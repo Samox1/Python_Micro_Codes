@@ -316,3 +316,42 @@ print("---------- Task 10 ----------")
 #     # result = diagonalDifference(n,arr)
 #     # fptr.write(str(result) + '\n')
 #     # fptr.close()
+
+
+print("-----------------------------------------------------------------------------------")
+# Problem Solving Training
+# You can find this on: HackerRank -> Challenges (Tutorials) -> Problem Solving (Algorithms)
+# This is: Problem Solving (Algorithms) - Grading Students
+
+print("---------- Task 11 ----------")
+
+import os
+import sys
+
+#
+# Complete the gradingStudents function below.
+#
+def gradingStudents(grades):
+    # Write your code here.
+    for i in range(len(grades)):
+        if grades[i]>=38 and grades[i]%5>=3:
+            grades[i]=grades[i]+(5 - grades[i]%5)
+    return grades
+
+if __name__ == '__main__':
+    # f = open(os.environ['OUTPUT_PATH'], 'w')
+
+    n = int(input())
+
+    grades = []
+
+    for _ in range(n):
+        grades_item = int(input())
+        grades.append(grades_item)
+
+    result = gradingStudents(grades)
+
+    print(result)                           # as a kolumn (string)
+    # f.write('\n'.join(map(str, result)))
+    # f.write('\n')
+    # f.close()
