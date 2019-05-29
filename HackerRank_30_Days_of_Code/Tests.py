@@ -147,17 +147,35 @@
 # You can find this on: HackerRank -> Practice -> Python
 # This is: Python -> Strings -> Designer Door Mat
 
+# if __name__ == '__main__':
+#     size = list(map(int,input().rstrip().split())) #This must be an odd number
+#     welcome = "-WELCOME-"
+#     myl = "---"
+#     stat = ".|."
+#
+#     if size[0]>5 and size[0]%2==1 and size[1]==(size[0]*3):
+#         maximum = (size[0]//2)
+#         for i in range(0,maximum):
+#             print(myl*(maximum-i) + (2*i+1)*stat + myl*(maximum-i))
+#         print(myl*(maximum-1) + welcome + myl*(maximum-1))
+#         for i in range(0,maximum):
+#             print(myl*(i+1) + (2*(maximum)-(2*i+1))*stat + myl*(i+1))
+
+
+# --------------------------------------------------------------- #
+
+# Python Tutorial on HackerRank
+# You can find this on: HackerRank -> Practice -> Python
+# This is: Python -> Strings -> String Formatting
+
+def print_formatted(number):
+    octal = len(str(oct(number)[2:]))
+    hexa = len(str(hex(number)[2:]))
+    binar = len(str(bin(number)[2:]))
+
+    for i in range(1,number+1):
+        print(str(i).rjust(binar) + " " + str(oct(i)[2:]).rjust(binar) + " " + str(hex(i)[2:]).rjust(binar).upper() + " " + str(bin(i)[2:]).rjust(binar))
+
 if __name__ == '__main__':
-    size = list(map(int,input().rstrip().split())) #This must be an odd number
-    welcome = "-WELCOME-"
-    myl = "---"
-    stat = ".|."
-
-    if size[0]>5 and size[0]%2==1 and size[1]==(size[0]*3):
-        maximum = (size[0]//2)
-        for i in range(0,maximum):
-            print(myl*(maximum-i) + (2*i+1)*stat + myl*(maximum-i))
-        print(myl*(maximum-1) + welcome + myl*(maximum-1))
-        for i in range(0,maximum):
-            print(myl*(i+1) + (2*(maximum)-(2*i+1))*stat + myl*(i+1))
-
+    n = int(input())
+    print_formatted(n)
