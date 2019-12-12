@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7bd7aba3-cf8d-49b5-8b5d-cf32531b541c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="7bd7aba3-cf8d-49b5-8b5d-cf32531b541c" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +21,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/1D_txt_to_2D_pic/1D_txt_to_2D_pic.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
+            <state relative-caret-position="306">
               <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -44,7 +42,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_10_11_12_13_14.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="884">
+            <state relative-caret-position="624">
               <caret line="52" selection-start-line="52" selection-end-line="52" />
             </state>
           </provider>
@@ -246,16 +244,17 @@
       <workItem from="1558419342070" duration="409000" />
       <workItem from="1575970530835" duration="228000" />
       <workItem from="1575971011849" duration="1653000" />
+      <workItem from="1576098960559" duration="39000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9326000" />
+    <option name="totallyTimeSpent" value="9365000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.20067114" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.2033557" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" sideWeight="0.5021097" side_tool="true" weight="0.24966443" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -311,7 +310,7 @@
     <entry file="file://$PROJECT_DIR$/Training 1/Train 1.py" />
     <entry file="file://$PROJECT_DIR$/1D_txt_to_2D_pic/1D_txt_to_2D_pic.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
+        <state relative-caret-position="306">
           <caret line="19" column="28" selection-start-line="19" selection-start-column="28" selection-end-line="19" selection-end-column="28" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -328,7 +327,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/HackerRank_30_Days_of_Code/Days_10_11_12_13_14.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="884">
+        <state relative-caret-position="624">
           <caret line="52" selection-start-line="52" selection-end-line="52" />
         </state>
       </provider>
