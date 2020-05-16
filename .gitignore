@@ -114,3 +114,4 @@ dmypy.json
 .pyre/
 .idea/workspace.xml
 *.xml
+CIM_import_program/CIM_MIKRONIKA.xlsx
