@@ -1,0 +1,1116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<rdf:RDF xmlns:cim="http://iec.ch/TC57/2013/CIM-schema-cim16#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:md="http://iec.ch/TC57/61970-552/ModelDescription/1#">
+<md:FullModel rdf:about="urn:uuid:8c36a100-f3c5-4a2a-a52a-064e7d29bd1a">
+	<md:Model.created>2020-04-23T10:42:07</md:Model.created>
+	<md:Model.scenarioTime>2020-04-23T10:42:07</md:Model.scenarioTime>
+	<md:Model.version>1</md:Model.version>
+	<md:Model.modelingAuthoritySet>http://MIKRONIKA</md:Model.modelingAuthoritySet>
+	<md:Model.description></md:Model.description>
+	<md:Model.profile></md:Model.profile>
+</md:FullModel>
+
+	<cim:DiscreteValue rdf:ID="_b76d7401e4ed40649573510496bd916b">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:DiscreteValue.Discrete rdf:resource="#_89bb87a723104d70b4704a4f754d2ff2" />
+		<cim:MeasurementValue.MeasurementValueSource rdf:resource="#_3f2c1e80a65f4f81a1cc62abbbb790ae" />
+	</cim:DiscreteValue>
+
+	<cim:DiscreteValue rdf:ID="_3a14f33535a040c79cbfb6d55d04ff74">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:DiscreteValue.Discrete rdf:resource="#_c3816253fa88489c8de40c815455c7ae" />
+		<cim:MeasurementValue.MeasurementValueSource rdf:resource="#_3f2c1e80a65f4f81a1cc62abbbb790ae" />
+	</cim:DiscreteValue>
+
+	<cim:DiscreteValue rdf:ID="_a4462f7418d24e63a1edeb5cab3153f8">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:DiscreteValue.Discrete rdf:resource="#_8a4c9ec019ef45a4a1ea5eca9860ea45" />
+		<cim:MeasurementValue.MeasurementValueSource rdf:resource="#_3f2c1e80a65f4f81a1cc62abbbb790ae" />
+	</cim:DiscreteValue>
+
+	<cim:DiscreteValue rdf:ID="_1a356244ad424a77acdf0ed3711c5736">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:DiscreteValue.Discrete rdf:resource="#_16986df52928479b8055b7af348ee550" />
+		<cim:MeasurementValue.MeasurementValueSource rdf:resource="#_3f2c1e80a65f4f81a1cc62abbbb790ae" />
+	</cim:DiscreteValue>
+
+	<cim:Fuse rdf:ID="_067305ff995f4ff3893ec582115d3599">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_ce31422925764f0baa12b179a999981f" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_b5d7480166dc4ebbb87f74242a696dc0">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_067305ff995f4ff3893ec582115d3599" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_0f52cabbeef149839b5289ee1c2faef7">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_067305ff995f4ff3893ec582115d3599" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_ae9a889f8bd04e7c8469c315a3e87e74" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_ae9a889f8bd04e7c8469c315a3e87e74">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_2ef5a74061c64350be75ec6f6eae443f" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_c55683d8a91f4499a25344d4e6829314">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_067305ff995f4ff3893ec582115d3599" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_c37ff1d31a6246869a3164fb025190ae">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_7aa09f53bff848b08f8504727db92335" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_72a0395de97f4126b1cb2e2f667599dc">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_c37ff1d31a6246869a3164fb025190ae" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_7b730de673724052a8a18ecf0baf84a0">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_c37ff1d31a6246869a3164fb025190ae" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_6c4dd3af337b41798ae5c1fc2773faf9" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_6c4dd3af337b41798ae5c1fc2773faf9">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_2ef5a74061c64350be75ec6f6eae443f" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_90dfdb07a0fd485fa01dc79ae9801053">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_c37ff1d31a6246869a3164fb025190ae" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_73dd91a5899a41fba49788dfa0df5b97">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_f373e844478540b7b3e07c890e8676d2" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_91b608aad435445385e513dc9df8aaa7">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_73dd91a5899a41fba49788dfa0df5b97" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_e3636acd58494db38b40344f06a85fe7">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_73dd91a5899a41fba49788dfa0df5b97" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_6e016ba2397f4f2b8068459582565d4a" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_6e016ba2397f4f2b8068459582565d4a">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_335c9aaa12c547a7a8f3dc7803e67cb0" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_465601eb5c174bc484399a5d8352e2dd">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_73dd91a5899a41fba49788dfa0df5b97" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_9fa987b3c2aa41a1b59c8f0b5ee3f0a9">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_4bd2280ee01040b19b304667730097ff" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_26badde4f8e947fda39d2e0af4a9bdec">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_9fa987b3c2aa41a1b59c8f0b5ee3f0a9" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_377934642c5f4f5a90e348174948087d">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_9fa987b3c2aa41a1b59c8f0b5ee3f0a9" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_6690c3cf319c4c7c84e18ba1292f1c42" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_6690c3cf319c4c7c84e18ba1292f1c42">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_335c9aaa12c547a7a8f3dc7803e67cb0" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_999fd189ea6d4b42bc4b8e8f15128028">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_9fa987b3c2aa41a1b59c8f0b5ee3f0a9" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_5b5553e55fae40329d7104e0dfdfc40d">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_c1bae6316db3476c9ce2e425b971b0bf" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_87df1cd2e2054c229b9fdb4bf409a889">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_5b5553e55fae40329d7104e0dfdfc40d" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_027a2a6b2f9e4643b803f6ebe2682be1">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_5b5553e55fae40329d7104e0dfdfc40d" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_10ad5fd43b5349c8baba00e35a6b16fa" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_a3b305053af5463d94f4d505e29c338b">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_5b5553e55fae40329d7104e0dfdfc40d" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_610dbd71f0514281882df28cf452fe60" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_610dbd71f0514281882df28cf452fe60">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_335c9aaa12c547a7a8f3dc7803e67cb0" />
+	</cim:ConnectivityNode>
+
+	<cim:CurrentTransformer rdf:ID="_3117188b7d64458e969fbe0141ac00d7">
+		<cim:IdentifiedObject.name>PPR</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_d60b74d8ca6747f0b15a68dfafa80aa6" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_8da48a5d2f8b45a9bef38d96e9f8c88f" />
+		<cim:PowerSystemResource.AssetDatasheet rdf:resource="#_5f5e7d2a397e428097a388c49bd3ea6d" />
+	</cim:CurrentTransformer>
+
+	<cim:Fuse rdf:ID="_387bac9b6db646d48bf6a73ce21165ce">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_5f4acfd990724ba9ba277093a85992a8" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_ce1ea278cf904ee497e336c535a3e580">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_387bac9b6db646d48bf6a73ce21165ce" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_b9dfbc03f2524c288033e277dab00897">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_387bac9b6db646d48bf6a73ce21165ce" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_db3681bd4ffb43b198c659861ae89bd8" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_db3681bd4ffb43b198c659861ae89bd8">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_c8bf7a8451474ea397ff882237ce184e" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_dc8d105298684e96bdcdb7d61bc06ea1">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_387bac9b6db646d48bf6a73ce21165ce" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_46b36260864246d8a08c5ba093b1f9db">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_e3439e4b45964e04a365b7d2a19e8391" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_053ad2d67e054d03bf1a61f50c577352">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_46b36260864246d8a08c5ba093b1f9db" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_05892d1b8a2b47d1a9f4c675f70d970b">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_46b36260864246d8a08c5ba093b1f9db" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_d18975fae7134fc19300b90c0f657880" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_d18975fae7134fc19300b90c0f657880">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_e216e28d70774a5e86bbde4d84a29ec2" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_9bf9567cbf5a4bf29714e6d908476837">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_46b36260864246d8a08c5ba093b1f9db" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_c6a44aafa984477baab126ec2a23e2b1">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b239dc9343fb457c85b3a9202c207039" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_5af8c9dd006d43a385f75026d78530bb">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_c6a44aafa984477baab126ec2a23e2b1" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_1198f34982d74eed8d6de173345d2cb5">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_c6a44aafa984477baab126ec2a23e2b1" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_b927ee504a6d468fb0d13a2f006c7e1a" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_b927ee504a6d468fb0d13a2f006c7e1a">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_e216e28d70774a5e86bbde4d84a29ec2" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_a44f517b6d5b45929b2c2d83ba380438">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_c6a44aafa984477baab126ec2a23e2b1" />
+	</cim:Terminal>
+
+	<cim:PotentialTransformer rdf:ID="_e06177ee4f9644cb92442379af74134e">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_03fba03a92a748a99b7bb773a34f93b0" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_99d28aca6e1b49b58c3094827ef06827" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_d79afb330cae45f8aef6f0b375dea0f1">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_ff976f1771c44aa68a4e191ee8cfb996" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_2e12ca6dbebc4e348196f2273b4b362d" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_c0c8db2695804b19a24bca476474a5b2">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_d54318f431d847d3a318f559f14930b6" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_689e9ee2d22c417cb3176e1cd64efdf2" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_172dd584fa0e4eb2b6c4ed5dc66be506">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_4d7afc6b0f10412db9ef45281547b88a" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_dd0463c22b1341268555634923f77675" />
+	</cim:PotentialTransformer>
+
+	<cim:ACLineSegment rdf:ID="_dcea0d840cdd406cb415e23dce317360">
+		<cim:IdentifiedObject.name>Most kablowy</cim:IdentifiedObject.name>
+		<cim:ConductingEquipment.BaseVoltage rdf:resource="#BV_6" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_efde00ff412049c280deb00d50b73548" />
+	</cim:ACLineSegment>
+
+	<cim:Terminal rdf:ID="_4102483373c74bf98977070ab0af554b">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_dcea0d840cdd406cb415e23dce317360" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_39584c37b4e94615aa0e22e67f0cef2d" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_462ce0e3444241f28a1a347ba04b8ec5">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_dcea0d840cdd406cb415e23dce317360" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_4829ba533b0545419385a2d099664ce2" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_4829ba533b0545419385a2d099664ce2">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_e216e28d70774a5e86bbde4d84a29ec2" />
+	</cim:ConnectivityNode>
+
+	<cim:PotentialTransformer rdf:ID="_a182ee1b66ba47609aef85122617608e">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_ebad35d946544356aa58e6bd648dc183" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_d57a2b5b61e8421584a3af83c2ec9950" />
+	</cim:PotentialTransformer>
+
+	<cim:SurgeArrester rdf:ID="_0e0e63957d1a49fc9f6b3ddb6ed10a1f">
+		<cim:IdentifiedObject.name>Odgromnik</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_ecb76082b64c4483962cf452c1d8c9aa" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_8ac38665287e4dc180a226aa0d1bf90d" />
+	</cim:SurgeArrester>
+
+	<cim:SurgeArrester rdf:ID="_84420ea506024d6ca06de001697c79ca">
+		<cim:IdentifiedObject.name>Odgromnik</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_ec48c838c29d47c38535a891fd0a96ac" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_d56203e6d0b74a30814c55e42ff2610f" />
+	</cim:SurgeArrester>
+
+	<cim:PotentialTransformer rdf:ID="_e496474e80ac4489bd51581def833883">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_e88cea0b5a0c431abd9c8d6ddc08857c" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_a3612eb7325249e9a148acc6d5063b7c" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_25420e18f664456fb3253966a3412bd7">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_5aefd50dbe2b42f3a1d98a3a5ead4eb5" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_46cda4b7e3ee4b5386d62b21a9cc41cc" />
+	</cim:PotentialTransformer>
+
+	<cim:SurgeArrester rdf:ID="_fbbbf54edd2f49dab67692ffbb144458">
+		<cim:IdentifiedObject.name>Odgromnik</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_c51df6d29bf84c41b4625b5f2ce1d09d" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_e6bb27b4beb54cec9089f03fa5bc2b3d" />
+	</cim:SurgeArrester>
+
+	<cim:PotentialTransformer rdf:ID="_7e4e1d0d7a2c4b2bb51dd6fbe4846f63">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_0ed9448b942f42aea6e0df87957e2d85" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_4590bda260034afdac75bacfa3642afc" />
+	</cim:PotentialTransformer>
+
+	<cim:CurrentTransformer rdf:ID="_612fc69b4ba44ce8a0df3cfd678d964c">
+		<cim:IdentifiedObject.name>PPR</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_9278b571bd8f4d1c93ef3bb9fee1d2f9" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_ce888e42f8104ec786fd818ef28d28f7" />
+		<cim:PowerSystemResource.AssetDatasheet rdf:resource="#_da2845b6497945db80cd8c63b0649f95" />
+	</cim:CurrentTransformer>
+
+	<cim:CurrentTransformer rdf:ID="_626efe20493c4c228a727716b5e1f41b">
+		<cim:IdentifiedObject.name>PPR</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_8cb76e6275884171be8f9e0d9605d991" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_90dfb68edbae4b128627f04106532e1d" />
+		<cim:PowerSystemResource.AssetDatasheet rdf:resource="#_5f5e7d2a397e428097a388c49bd3ea6d" />
+	</cim:CurrentTransformer>
+
+	<cim:CurrentTransformer rdf:ID="_846f488951c6496f8ec7b29071abdd6f">
+		<cim:IdentifiedObject.name>PPR</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_37529dbdde42468c9046df7e12ff2438" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_1c173e60c3024f289812437d1c6e43d7" />
+		<cim:PowerSystemResource.AssetDatasheet rdf:resource="#_5f5e7d2a397e428097a388c49bd3ea6d" />
+	</cim:CurrentTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_054b926326f24cd89aab01df08afe872">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_105e34b99fc04b10b542fcaae005f474" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b98ed2e5e3244a65bd25cb89328cdc81" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_bb9f686ff8df426a987cd201a3a87646">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_fab42a3772dc408d9cf78a5a012806c3" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_57510d6daf9b46e5a312ffb0f21162e7" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_ad0516517f0746cc983a552c89e7e909">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_78f8cb610c134b5cbb9bc25f1934639f" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_f6e45bb0ce664672a4fbd7db114c0747" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_5ffdea5b947947ac8fc6a050beeeca79">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_9eb467c225044509a43b9e926ba37fc6" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_94463a2cd5d14087b446f819ffdefae9" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_553801f43d6c4d02a07428b175aa8db6">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_e6af0cfd93034e78a91a2be697504898" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_7c4299ef45f9479c8d793622838ac84c" />
+	</cim:PotentialTransformer>
+
+	<cim:Jumper rdf:ID="_7ab4d072e8634d33984a4b47b78e3cf9">
+		<cim:IdentifiedObject.name>Jumper</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_7c4299ef45f9479c8d793622838ac84c" />
+	</cim:Jumper>
+
+	<cim:Terminal rdf:ID="_3946d39de0dd4baea8bbcd3a58d1680e">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_7ab4d072e8634d33984a4b47b78e3cf9" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_8bd7a48d64c4407da59d5d5eca8f297f" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_e6af0cfd93034e78a91a2be697504898">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_7ab4d072e8634d33984a4b47b78e3cf9" />
+	</cim:Terminal>
+
+	<cim:PotentialTransformer rdf:ID="_2cb1cee021294c56a10d73a708b35b18">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_66b4b71c79a54cc8a5bf3c717babff05" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_9f85fce499404efbaf2aa41ce354c870" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_4f76b5dd8ace48309aff1f677a5631b8">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_e4df020a72e74e01a5d02f3d28fad34d" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_a0b2f77297f84829a4d44c12f00fd763" />
+	</cim:PotentialTransformer>
+
+	<cim:PotentialTransformer rdf:ID="_5ab6786d235e4542bbd0987bdb1e57e6">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_6209a7943f314ac1bdb9bb8b931035de" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_732440370e6a4ebca750ff647e439302" />
+	</cim:PotentialTransformer>
+
+	<cim:Fuse rdf:ID="_54038eb5078f4158a94673da9ec5cfaf">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik 1</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_220fce5ce8244d8f987280b55b43050c" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_559cffbe76234f1faf5783e66cf935d5">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_54038eb5078f4158a94673da9ec5cfaf" />
+	</cim:Discrete>
+
+	<cim:Fuse rdf:ID="_ffeac5c1fea74177bb157e7a35bca15b">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik 2</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_220fce5ce8244d8f987280b55b43050c" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_273293ae70d04febb7a4267f8ebd1afd">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_ffeac5c1fea74177bb157e7a35bca15b" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_0877d7f0eb17489abc7d8835838c07c6">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_ffeac5c1fea74177bb157e7a35bca15b" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_4b6a0fbbcd234a7abc8c214f733c3a39" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_4b6a0fbbcd234a7abc8c214f733c3a39">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_6ba301f569ab4a07b844d978da85e155" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_370df5d12b0b430e950783a1ee2e163c">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_54038eb5078f4158a94673da9ec5cfaf" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_b6bb17af846d48029dfd6350d411b2ee" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_b6bb17af846d48029dfd6350d411b2ee">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_6ba301f569ab4a07b844d978da85e155" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_31278e6b607b4e76a18d0ed5da4727e6">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_54038eb5078f4158a94673da9ec5cfaf" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_621e85b725104fdcbb699e5867ce8d78">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_ffeac5c1fea74177bb157e7a35bca15b" />
+	</cim:Terminal>
+
+	<cim:Disconnector rdf:ID="_39179dcc6ff64fe7b87df2d517cbd186">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_6b23c63fffe04f70a0c15b0ba252beb3" />
+	</cim:Disconnector>
+
+	<cim:Discrete rdf:ID="_4bbbc4c0bcb14427ba282079f277646c">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_39179dcc6ff64fe7b87df2d517cbd186" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_9a12a9cbced044729d41d4586b2573bc">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_39179dcc6ff64fe7b87df2d517cbd186" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_13195af55d4946fa82ef873b50be21b2" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_13195af55d4946fa82ef873b50be21b2">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_c8bf7a8451474ea397ff882237ce184e" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_ba39ccb080374f1583ad48a5094bbd88">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_39179dcc6ff64fe7b87df2d517cbd186" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_9bffa859550a4337a87610365e8ce65f">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_9a82a54bc71a4b7e8c2f6ba8410493e3" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_37589cc82dce4cc69b9e179231e2b4f9">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_9bffa859550a4337a87610365e8ce65f" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_c5382f59e960421c9b5e22ec1d26db6e">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_9bffa859550a4337a87610365e8ce65f" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_77b1244dfe2c40858ebea0bea3d8a757" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_77b1244dfe2c40858ebea0bea3d8a757">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_da6b2afa94364ba69e49c4375f185444">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_9bffa859550a4337a87610365e8ce65f" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_f7ab1f5ddbf047d69e997ea5dfda73cd">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_5da824e58aa04c51b51b0d50901b475a" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_917a895466e446d98050a8e4e736580f">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_f7ab1f5ddbf047d69e997ea5dfda73cd" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_5f2f46741b4241b2995b92d488fa1a2b">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_f7ab1f5ddbf047d69e997ea5dfda73cd" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_fd767952988f40af9f9359fb964278f2" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_fd767952988f40af9f9359fb964278f2">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_c442a781a190470e91515b5f9215ffb1" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_5f2c881cae814fcc8b0efd936afde598">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_f7ab1f5ddbf047d69e997ea5dfda73cd" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_2a3a67ae4aee49998fe864cf06fd2318">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_2c32bfd40d584eae8ac794114b7d9b45" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_8745c8bf26f246d4b0dc4fbc14c1e65b">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_2a3a67ae4aee49998fe864cf06fd2318" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_11c9443ce5a74ebc823498688e78abb3">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_2a3a67ae4aee49998fe864cf06fd2318" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_0fd811db84c344eca8d6cad834f86407" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_0fd811db84c344eca8d6cad834f86407">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_6ba301f569ab4a07b844d978da85e155" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_0407331b0425467da0a907f90a892202">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_2a3a67ae4aee49998fe864cf06fd2318" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_a96eb848b4b14ee6a7a187c96c18ff44">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_ee0d6b44cda443928c791428969ca987" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_91cbec4a4da944e3878f64b179474f3d">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_a96eb848b4b14ee6a7a187c96c18ff44" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_c9a1262688484f6cbe5897f29b292fd3">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_a96eb848b4b14ee6a7a187c96c18ff44" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_7cfbfaf38f5a4fbfa1810a4529b8126a" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_7cfbfaf38f5a4fbfa1810a4529b8126a">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_c2d7d321008b4f0da947d5175d593908" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_3eb461cc02c344fc9ba8d8b4d8e60d86">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_a96eb848b4b14ee6a7a187c96c18ff44" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_1be6f69acefc4da98c917c1efbd94dc8">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_43f7836c72d5468cb7e24744beaccbb8" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_2ca0381830b64b88b6df4baeb73edab6">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_1be6f69acefc4da98c917c1efbd94dc8" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_6d4d297e2bdd4980959d5cfa47f07a40">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_1be6f69acefc4da98c917c1efbd94dc8" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_fab01aeeec064b739828bea15472ba15" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_fab01aeeec064b739828bea15472ba15">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_71f9d98f7459456193db9cc265168707">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_1be6f69acefc4da98c917c1efbd94dc8" />
+	</cim:Terminal>
+
+	<cim:PotentialTransformer rdf:ID="_58552f533f794c34840e689ddec4260e">
+		<cim:IdentifiedObject.name>VT1</cim:IdentifiedObject.name>
+		<cim:AuxiliaryEquipment.Terminal rdf:resource="#_ae9e9434c9e747d49087e1709fca5526" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_86e88276e68a490984d4e85e292cac08" />
+	</cim:PotentialTransformer>
+
+	<cim:Fuse rdf:ID="_78dc2ac1d3e74e178468bf9b0d55569d">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_25461af5a1be4e7aa6b52f5352c26b42" />
+	</cim:Fuse>
+
+
+	<cim:Terminal rdf:ID="_bc936cb168d24674b17f71a5ccd46ca0">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_617f776bf8ef4fd0b571568f9c234141" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_4ba017ec95c4480ab3ac7f950f10c39c" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_4ba017ec95c4480ab3ac7f950f10c39c">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:Disconnector rdf:ID="_279fd34b513448f38e07b10adcf01ed6">
+		<cim:IdentifiedObject.aliasName>Odłącznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Odłącznik rezystora/dławika</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_38168e4efa5843e2a368911790cca57a" />
+	</cim:Disconnector>
+
+	<cim:Discrete rdf:ID="_2457c40848044abd946f887c3ec79d8b">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_279fd34b513448f38e07b10adcf01ed6" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_13d2b37dd4ff4aeaa61759b5d68a9746">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_279fd34b513448f38e07b10adcf01ed6" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_4ba017ec95c4480ab3ac7f950f10c39c" />
+		<cim:Terminal.phases rdf:resource="http://iec.ch/TC57/2012/CIM-schema-cim16#PhaseCode.N" />
+	</cim:Terminal>
+
+	<cim:SeriesCompensator rdf:ID="_21d999636a37471cabb48c7fa9066152">
+		<cim:IdentifiedObject.name>Dławik 1</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_38168e4efa5843e2a368911790cca57a" />
+	</cim:SeriesCompensator>
+
+	<cim:Terminal rdf:ID="_a2090653953c4e008cbdca3eee8b1f16">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_21d999636a37471cabb48c7fa9066152" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_fef42ef19cb24c60b753d29c5d5282d8" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_1aad2d69b9f94d95bbf56f283810fc20">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_21d999636a37471cabb48c7fa9066152" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_a6b93a1faaf84a65afdb5176643fcc71" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_7d1e17dc3fa04921ae3214d179f94e58">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_279fd34b513448f38e07b10adcf01ed6" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_fef42ef19cb24c60b753d29c5d5282d8" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_fef42ef19cb24c60b753d29c5d5282d8">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:Ground rdf:ID="_66fe7a4e2c1d4d7cb1ec77df1661726b">
+		<cim:IdentifiedObject.name>Uziom D1</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_38168e4efa5843e2a368911790cca57a" />
+	</cim:Ground>
+
+	<cim:Terminal rdf:ID="_c73478f85185452da19387b3a3c6fec5">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_66fe7a4e2c1d4d7cb1ec77df1661726b" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_a6b93a1faaf84a65afdb5176643fcc71" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_a6b93a1faaf84a65afdb5176643fcc71">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:ACLineSegment rdf:ID="_2ac8aa8a9ec84ab8a0eb56e49bd49f7c">
+		<cim:IdentifiedObject.name>Most kablowy</cim:IdentifiedObject.name>
+		<cim:ConductingEquipment.BaseVoltage rdf:resource="#_b4c0271be32d4f6e992aaa6e4888aaf0" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b2f99ea9c81e4d0e8389eedeb7815cd3" />
+	</cim:ACLineSegment>
+
+	<cim:Terminal rdf:ID="_c3a0cb4f3969496c916564b06269d1d1">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_2ac8aa8a9ec84ab8a0eb56e49bd49f7c" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_48afcd0233c244bfa3926c15ef55e0c4" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_f59018c955c745e09c9e1200038ba843">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_2ac8aa8a9ec84ab8a0eb56e49bd49f7c" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_97f6c05078404d7c8cb322bef983e5c1" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_97f6c05078404d7c8cb322bef983e5c1">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:Disconnector rdf:ID="_4001efe2b6b04e7090bb524fd3ee89a3">
+		<cim:IdentifiedObject.aliasName>Odłącznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Odłącznik rezystora/dławika</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b2f99ea9c81e4d0e8389eedeb7815cd3" />
+	</cim:Disconnector>
+
+	<cim:Discrete rdf:ID="_c18891727d9c41799cf87250ce10a75e">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_4001efe2b6b04e7090bb524fd3ee89a3" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_3c13ccac72dc4743a8ca26f83788d991">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_4001efe2b6b04e7090bb524fd3ee89a3" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_97f6c05078404d7c8cb322bef983e5c1" />
+		<cim:Terminal.phases rdf:resource="http://iec.ch/TC57/2012/CIM-schema-cim16#PhaseCode.N" />
+	</cim:Terminal>
+
+	<cim:SeriesCompensator rdf:ID="_1e980dd2020c45ed9e31ee8bfb83000b">
+		<cim:IdentifiedObject.name>Dławik 1</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b2f99ea9c81e4d0e8389eedeb7815cd3" />
+	</cim:SeriesCompensator>
+
+	<cim:Terminal rdf:ID="_fa56d22ce8e6438382b4a405203f2b0d">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_1e980dd2020c45ed9e31ee8bfb83000b" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_1be356e2999d4bf984271822952734c1" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_3543199a30d3468baa2a2190073d370b">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_1e980dd2020c45ed9e31ee8bfb83000b" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_c70b69e625014e9eac27aba4f9376195" />
+	</cim:Terminal>
+
+	<cim:Ground rdf:ID="_8545928d719a4434b9c748310c0f148a">
+		<cim:IdentifiedObject.name>Uziom D1</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b2f99ea9c81e4d0e8389eedeb7815cd3" />
+	</cim:Ground>
+
+	<cim:Terminal rdf:ID="_054798330fbe4faa96c02913484e23de">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_8545928d719a4434b9c748310c0f148a" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_c70b69e625014e9eac27aba4f9376195" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_75fd8ced692e4163927e329d3975a94a">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_4001efe2b6b04e7090bb524fd3ee89a3" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_1be356e2999d4bf984271822952734c1" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_1be356e2999d4bf984271822952734c1">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:ConnectivityNode rdf:ID="_c70b69e625014e9eac27aba4f9376195">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:ACLineSegment rdf:ID="_14f670c6cd25430bbc7a8bc3b9797d6c">
+		<cim:IdentifiedObject.name>Most kablowy</cim:IdentifiedObject.name>
+		<cim:ConductingEquipment.BaseVoltage rdf:resource="#_b4c0271be32d4f6e992aaa6e4888aaf0" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_82134d063eea4dd9ae25843eb3a85b19" />
+	</cim:ACLineSegment>
+
+	<cim:Terminal rdf:ID="_d7cb8561490a4217ae6ab0177d662e53">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_14f670c6cd25430bbc7a8bc3b9797d6c" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_9180763c077b4e3fb62a718b16dca3bd" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_fdf26b38c8b547deb31fb4dca8d3084b">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_14f670c6cd25430bbc7a8bc3b9797d6c" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_938398cc862f41e083de155f166d5e49" />
+	</cim:Terminal>
+
+	<cim:Disconnector rdf:ID="_a469a995250043b28ea63e859e548c35">
+		<cim:IdentifiedObject.aliasName>Odłącznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Odłącznik baterii kondensatorów</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_82134d063eea4dd9ae25843eb3a85b19" />
+	</cim:Disconnector>
+
+	<cim:Discrete rdf:ID="_9ad3e120058a43ee899d09d4a712201a">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_a469a995250043b28ea63e859e548c35" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_f4c62c36496f481586378f0b9fd079b9">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_a469a995250043b28ea63e859e548c35" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_938398cc862f41e083de155f166d5e49" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_938398cc862f41e083de155f166d5e49">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:LinearShuntCompensator rdf:ID="_75b238c4cc804f169f27a5e5a1eebb93">
+		<cim:IdentifiedObject.name>BKR</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_82134d063eea4dd9ae25843eb3a85b19" />
+	</cim:LinearShuntCompensator>
+
+	<cim:Terminal rdf:ID="_990cb6d10c8f499597ecdc4671948ea1">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_75b238c4cc804f169f27a5e5a1eebb93" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_5489c0cf6f3e4332bbc0b770bac4e2ae" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_805cff0264fc4f5eacf88eabb750a4db">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_a469a995250043b28ea63e859e548c35" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_5489c0cf6f3e4332bbc0b770bac4e2ae" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_5489c0cf6f3e4332bbc0b770bac4e2ae">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:BusbarSection rdf:ID="_124c2912df3b4b24a18e19bafa5acaed">
+		<cim:IdentifiedObject.name>1B1</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:BusbarSection>
+
+	<cim:Terminal rdf:ID="_0e371fc575864268ad09ef604a3300d5">
+		<cim:IdentifiedObject.name>T</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_124c2912df3b4b24a18e19bafa5acaed" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_5a1830fbb7d54bbbb1a89064b4b980c6" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_5a1830fbb7d54bbbb1a89064b4b980c6">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_787e9cc36bd44abfaccf1b114ee02923" />
+	</cim:ConnectivityNode>
+
+	<cim:ACLineSegment rdf:ID="_31d3e97e6b834e13a17cf48e7661eb92">
+		<cim:IdentifiedObject.name>Most kablowy</cim:IdentifiedObject.name>
+		<cim:ConductingEquipment.BaseVoltage rdf:resource="#BV_6" />
+		<cim:Equipment.EquipmentContainer rdf:resource="#_1b8ad4e6dcb14e9080cdc4e6007b586c" />
+	</cim:ACLineSegment>
+
+	<cim:Terminal rdf:ID="_df8cc591843c4697aeb865e34a56a2b0">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_31d3e97e6b834e13a17cf48e7661eb92" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_c41443bb45a842b2b54cad67c7b4a4ca" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_db57dde4a3fd48019e5fe40eff55ecaf">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_31d3e97e6b834e13a17cf48e7661eb92" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_3e2fe30a2c1441b4a00549c72967cda1" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_3e2fe30a2c1441b4a00549c72967cda1">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_5e9b718c1e744b388a81c20be8422337" />
+	</cim:ConnectivityNode>
+
+	<cim:VoltageLevel rdf:ID="_b92555c86a7a4c0ba5214955dea4dbb6">
+		<cim:IdentifiedObject.name>20</cim:IdentifiedObject.name>
+		<cim:VoltageLevel.BaseVoltage rdf:resource="#BV_20" />
+		<cim:VoltageLevel.Substation rdf:resource="#_b18a753b4dda47358f5edb06d4e04928" />
+	</cim:VoltageLevel>
+
+	<cim:LoadBreakSwitch rdf:ID="_454afcb4f2514e1592472185358b4b97">
+		<cim:IdentifiedObject.aliasName>Rozłącznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Rozłącznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_f7b0f0727c434d61b417c6a3d70290e0" />
+	</cim:LoadBreakSwitch>
+
+	<cim:Discrete rdf:ID="_2819d070238f419591c248bd5eff9d0f">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_454afcb4f2514e1592472185358b4b97" />
+	</cim:Discrete>
+
+	<cim:GroundDisconnector rdf:ID="_41f2d4a7dc964195ba13666b893ebf4c">
+		<cim:IdentifiedObject.aliasName>Uziemnik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Uziemnik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_f7b0f0727c434d61b417c6a3d70290e0" />
+	</cim:GroundDisconnector>
+
+	<cim:Discrete rdf:ID="_5d1f2734b2584b2fa04681ad1b8b57e0">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_41f2d4a7dc964195ba13666b893ebf4c" />
+	</cim:Discrete>
+
+	<cim:BusbarSection rdf:ID="_175e0333fda04a3c94f4a826d19ff94b">
+		<cim:IdentifiedObject.name>1</cim:IdentifiedObject.name>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_b92555c86a7a4c0ba5214955dea4dbb6" />
+	</cim:BusbarSection>
+
+	<cim:Terminal rdf:ID="_d70028efbac04cbf9c0309e54a54cb4e">
+		<cim:IdentifiedObject.name>T</cim:IdentifiedObject.name>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_175e0333fda04a3c94f4a826d19ff94b" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_5b2b4eaf6cad454e9440e4d68c65e2ea" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_cee679cefc53460d86402f0cc82e1949">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_454afcb4f2514e1592472185358b4b97" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_5b2b4eaf6cad454e9440e4d68c65e2ea" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_5b2b4eaf6cad454e9440e4d68c65e2ea">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_b92555c86a7a4c0ba5214955dea4dbb6" />
+	</cim:ConnectivityNode>
+
+	<cim:Terminal rdf:ID="_53c3a25d07594b5e98953096600e098b">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_41f2d4a7dc964195ba13666b893ebf4c" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_9ccaff0155b34bc39e6ae23912c75eae" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_de3598df0fc343ac835d75a74290389d">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_454afcb4f2514e1592472185358b4b97" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_9ccaff0155b34bc39e6ae23912c75eae" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_9ccaff0155b34bc39e6ae23912c75eae">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_b92555c86a7a4c0ba5214955dea4dbb6" />
+	</cim:ConnectivityNode>
+
+	<cim:LoadBreakSwitch rdf:ID="_f81699c2e0cf4e72b4e3b3959147dae3">
+		<cim:IdentifiedObject.aliasName>Rozłącznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Rozłącznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_6e0ae3c9077b4025af25dad9bf6b8fef" />
+	</cim:LoadBreakSwitch>
+
+	<cim:Discrete rdf:ID="_b1749422d9934c68a60c7cc0362f58e7">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_f81699c2e0cf4e72b4e3b3959147dae3" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_a622c73f55a0464f974a8776d5461b3f">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_f81699c2e0cf4e72b4e3b3959147dae3" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_5b2b4eaf6cad454e9440e4d68c65e2ea" />
+	</cim:Terminal>
+
+	<cim:Fuse rdf:ID="_26c0ab5434c74d10861a0eb07270da2f">
+		<cim:IdentifiedObject.aliasName>Bezpiecznik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Bezpiecznik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_6e0ae3c9077b4025af25dad9bf6b8fef" />
+	</cim:Fuse>
+
+	<cim:Discrete rdf:ID="_36d55fca714944b4a8310501f5f9ad65">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_26c0ab5434c74d10861a0eb07270da2f" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_39a3849c712c4bdba19af6eb176b5040">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_26c0ab5434c74d10861a0eb07270da2f" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_9f418da0ffb449e08a7fe5f70f8c0fc9" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_d4298dbf41644f2bbe7753b3008fab12">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_f81699c2e0cf4e72b4e3b3959147dae3" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_9f418da0ffb449e08a7fe5f70f8c0fc9" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_9f418da0ffb449e08a7fe5f70f8c0fc9">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_b92555c86a7a4c0ba5214955dea4dbb6" />
+	</cim:ConnectivityNode>
+
+	<cim:GroundDisconnector rdf:ID="_3320100fed734b7a9f5d5e3b5dc50438">
+		<cim:IdentifiedObject.aliasName>Uziemnik</cim:IdentifiedObject.aliasName>
+		<cim:IdentifiedObject.name>Uziemnik</cim:IdentifiedObject.name>
+		<cim:Switch.normalOpen>false</cim:Switch.normalOpen>
+		<cim:Equipment.EquipmentContainer rdf:resource="#_6e0ae3c9077b4025af25dad9bf6b8fef" />
+	</cim:GroundDisconnector>
+
+	<cim:Discrete rdf:ID="_da51637b55f145429493a8b8d2c88cf3">
+		<cim:IdentifiedObject.name>Pos</cim:IdentifiedObject.name>
+		<cim:Measurement.measurementType>SwitchPosition</cim:Measurement.measurementType>
+		<cim:Measurement.PowerSystemResource rdf:resource="#_3320100fed734b7a9f5d5e3b5dc50438" />
+	</cim:Discrete>
+
+	<cim:Terminal rdf:ID="_c9a1ed85ea04442babbdeac9c0c2fb3f">
+		<cim:IdentifiedObject.name>T1</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>1</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_3320100fed734b7a9f5d5e3b5dc50438" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_987b6c36b35b4262a6237a7c1bdd31a9" />
+	</cim:Terminal>
+
+	<cim:Terminal rdf:ID="_fbc8cbe4a815415eab136fe2cd5d89ec">
+		<cim:IdentifiedObject.name>T2</cim:IdentifiedObject.name>
+		<cim:Terminal.sequenceNumber>2</cim:Terminal.sequenceNumber>
+		<cim:Terminal.ConductingEquipment rdf:resource="#_26c0ab5434c74d10861a0eb07270da2f" />
+		<cim:Terminal.ConnectivityNode rdf:resource="#_987b6c36b35b4262a6237a7c1bdd31a9" />
+	</cim:Terminal>
+
+	<cim:ConnectivityNode rdf:ID="_987b6c36b35b4262a6237a7c1bdd31a9">
+		<cim:ConnectivityNode.ConnectivityNodeContainer rdf:resource="#_b92555c86a7a4c0ba5214955dea4dbb6" />
+	</cim:ConnectivityNode>
+
+</rdf:RDF>
