@@ -9,106 +9,131 @@ library(xml2)
 print("Hello")
 
 
-# Input <- read_lines("D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_23A10h.xml", skip_empty_rows = FALSE)
-# 
-# ### Dane wejsciowe sa zjebane - w niektorych obiektach sa powtorzone elementy z roznymi ID - trzeba zmienic nazwe elementu obiektu 
-# 
-# PsrList_ALL <- which(grepl("PowerSystemResource.PsrLists", Input))
-# Equipment_EquipmentContainer_ALL <- which(grepl("Equipment.EquipmentContainer", Input))
-# DiscreteValue_Discrete_ALL <- which(grepl("DiscreteValue.Discrete", Input))
-# 
-# skok <- 0
-# for(x in c(1:(length(DiscreteValue_Discrete_ALL)-2))){
-#   if((DiscreteValue_Discrete_ALL[x]+1) == DiscreteValue_Discrete_ALL[x+1]){
-#     if(((DiscreteValue_Discrete_ALL[x]+1) == DiscreteValue_Discrete_ALL[x+1]) & DiscreteValue_Discrete_ALL[x+1] == (DiscreteValue_Discrete_ALL[x+2]-1)){
-#       # print(c("1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c("3 linia: ",Input[PsrList_ALL[x+2]]))
-#       Input[DiscreteValue_Discrete_ALL[x+1]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x+1]],"DiscreteValue.Discrete", "DiscreteValue.Discrete2")
-#       Input[DiscreteValue_Discrete_ALL[x+2]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x+2]],"DiscreteValue.Discrete", "DiscreteValue.Discrete3")
-#       # print(c(PsrList_ALL[x], "1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c(PsrList_ALL[x+1], "2 linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c(PsrList_ALL[x+2], "3 linia: ",Input[PsrList_ALL[x+2]]))
-#       skok <- 1
-#     }else{
-#       if(skok == 1){
-#         skok <- 0
-#         next
-#       }
-#       # print(c("1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
-#       Input[DiscreteValue_Discrete_ALL[x+1]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x+1]],"DiscreteValue.Discrete", "DiscreteValue.Discrete2")
-#       # print(c("2 mod linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c(PsrList_ALL[x], " linia: ",Input[PsrList_ALL[x]]))
-#       # print(c(PsrList_ALL[x+1], " linia: ",Input[PsrList_ALL[x+1]]))
-#     }
-#   }
-# }
-# 
-# print("--- Zmiana DiscreteValue.Discrete ---")
-# 
-# skok <- 0
-# for(x in c(1:(length(PsrList_ALL)-2))){
-#   if((PsrList_ALL[x]+1) == PsrList_ALL[x+1]){
-#     if(((PsrList_ALL[x]+1) == PsrList_ALL[x+1]) & PsrList_ALL[x+1] == (PsrList_ALL[x+2]-1)){
-#       # print(c("1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c("3 linia: ",Input[PsrList_ALL[x+2]]))
-#       Input[PsrList_ALL[x+1]] <- str_replace_all(Input[PsrList_ALL[x+1]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists2")
-#       Input[PsrList_ALL[x+2]] <- str_replace_all(Input[PsrList_ALL[x+2]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists3")
-#       # print(c(PsrList_ALL[x], "1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c(PsrList_ALL[x+1], "2 linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c(PsrList_ALL[x+2], "3 linia: ",Input[PsrList_ALL[x+2]]))
-#       skok <- 1
-#     }else{
-#       if(skok == 1){
-#         skok <- 0
-#         next
-#       }
-#       # print(c("1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
-#       Input[PsrList_ALL[x+1]] <- str_replace_all(Input[PsrList_ALL[x+1]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists2")
-#       # print(c("2 mod linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c(PsrList_ALL[x], " linia: ",Input[PsrList_ALL[x]]))
-#       # print(c(PsrList_ALL[x+1], " linia: ",Input[PsrList_ALL[x+1]]))
-#     }
-#   }
-# }
-# 
-# print("--- Zmiana PowerSystemResource.PsrLists ---")
-# 
-# skok <- 0
-# for(x in c(1:(length(Equipment_EquipmentContainer_ALL)-2))){
-#   if((Equipment_EquipmentContainer_ALL[x]+1) == Equipment_EquipmentContainer_ALL[x+1]){
-#     if(((Equipment_EquipmentContainer_ALL[x]+1) == Equipment_EquipmentContainer_ALL[x+1]) & Equipment_EquipmentContainer_ALL[x+1] == (Equipment_EquipmentContainer_ALL[x+2]-1)){
-#       # print(c("1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c("3 linia: ",Input[PsrList_ALL[x+2]]))
-#       Input[Equipment_EquipmentContainer_ALL[x+1]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x+1]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer2")
-#       Input[Equipment_EquipmentContainer_ALL[x+2]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x+2]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer3")
-#       # print(c(PsrList_ALL[x], "1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c(PsrList_ALL[x+1], "2 linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c(PsrList_ALL[x+2], "3 linia: ",Input[PsrList_ALL[x+2]]))
-#       skok <- 1
-#     }else{
-#       if(skok == 1){
-#         skok <- 0
-#         next
-#       }
-#       # print(c("1 linia: ",Input[PsrList_ALL[x]]))
-#       # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
-#       Input[Equipment_EquipmentContainer_ALL[x+1]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x+1]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer2")
-#       # print(c("2 mod linia: ",Input[PsrList_ALL[x+1]]))
-#       # print(c(PsrList_ALL[x], " linia: ",Input[PsrList_ALL[x]]))
-#       # print(c(PsrList_ALL[x+1], " linia: ",Input[PsrList_ALL[x+1]]))
-#     }
-#   }
-# }
-# 
-# print("--- Zmiana Equipment.EquipmentContainer ---")
-# 
-# 
-# write.table(Input, "D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_23A10h_Moddest.xml", fileEncoding="UTF-8", row.names = FALSE, col.names = FALSE, quote = FALSE)
+Input <- read_lines("D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_23A10h.xml", skip_empty_rows = FALSE)
+
+### Dane wejsciowe sa zjebane - w niektorych obiektach sa powtorzone elementy z roznymi ID - trzeba zmienic nazwe elementu obiektu
+
+PsrList_ALL <- which(grepl("PowerSystemResource.PsrLists", Input))
+Equipment_EquipmentContainer_ALL <- which(grepl("Equipment.EquipmentContainer", Input))
+DiscreteValue_Discrete_ALL <- which(grepl("DiscreteValue.Discrete", Input))
+
+
+if(length(DiscreteValue_Discrete_ALL) == 1){
+  Input[DiscreteValue_Discrete_ALL] <- str_replace_all(Input[DiscreteValue_Discrete_ALL],"DiscreteValue.Discrete", "DiscreteValue.Discrete2")
+}
+if(length(PsrList_ALL) == 1){
+  Input[PsrList_ALL] <- str_replace_all(Input[PsrList_ALL],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists2")
+}
+if(length(Equipment_EquipmentContainer_ALL) == 1){
+  Input[Equipment_EquipmentContainer_ALL] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer2")
+}
+
+
+skok <- 0
+if(length(DiscreteValue_Discrete_ALL) > 1){
+for(x in c(2:(length(DiscreteValue_Discrete_ALL)-1))){
+  if((DiscreteValue_Discrete_ALL[x-1]+1) == DiscreteValue_Discrete_ALL[x]){
+    if(((DiscreteValue_Discrete_ALL[x-1]+1) == DiscreteValue_Discrete_ALL[x]) & DiscreteValue_Discrete_ALL[x] == (DiscreteValue_Discrete_ALL[x+1]-1)){
+      # print(c("1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c("3 linia: ",Input[PsrList_ALL[x+2]]))
+      Input[DiscreteValue_Discrete_ALL[x]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x]],"DiscreteValue.Discrete", "DiscreteValue.Discrete2")
+      Input[DiscreteValue_Discrete_ALL[x+1]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x+1]],"DiscreteValue.Discrete", "DiscreteValue.Discrete3")
+      # print(c(PsrList_ALL[x], "1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c(PsrList_ALL[x+1], "2 linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c(PsrList_ALL[x+2], "3 linia: ",Input[PsrList_ALL[x+2]]))
+      skok <- 1
+    }else{
+      if(skok == 1){
+        skok <- 0
+        next
+      }
+      # print(c("1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
+      Input[DiscreteValue_Discrete_ALL[x]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x]],"DiscreteValue.Discrete", "DiscreteValue.Discrete2")
+      # print(c("2 mod linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c(PsrList_ALL[x], " linia: ",Input[PsrList_ALL[x]]))
+      # print(c(PsrList_ALL[x+1], " linia: ",Input[PsrList_ALL[x+1]]))
+    }
+  }
+}
+  if((DiscreteValue_Discrete_ALL[x]+1) == DiscreteValue_Discrete_ALL[x+1]){
+    Input[DiscreteValue_Discrete_ALL[x+1]] <- str_replace_all(Input[DiscreteValue_Discrete_ALL[x+1]],"DiscreteValue.Discrete", "DiscreteValue.Discrete2")
+  }
+}
+print("--- Zmiana DiscreteValue.Discrete ---")
+
+skok <- 0
+if(length(PsrList_ALL) > 1){
+for(x in c(2:(length(PsrList_ALL)-1))){
+  if((PsrList_ALL[x-1]+1) == PsrList_ALL[x]){
+    if(((PsrList_ALL[x-1]+1) == PsrList_ALL[x]) & PsrList_ALL[x] == (PsrList_ALL[x+1]-1)){
+      # print(c("1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c("3 linia: ",Input[PsrList_ALL[x+2]]))
+      Input[PsrList_ALL[x]] <- str_replace_all(Input[PsrList_ALL[x]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists2")
+      Input[PsrList_ALL[x+1]] <- str_replace_all(Input[PsrList_ALL[x+1]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists3")
+      # print(c(PsrList_ALL[x], "1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c(PsrList_ALL[x+1], "2 linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c(PsrList_ALL[x+2], "3 linia: ",Input[PsrList_ALL[x+2]]))
+      skok <- 1
+    }else{
+      if(skok == 1){
+        skok <- 0
+        next
+      }
+      # print(c("1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
+      Input[PsrList_ALL[x]] <- str_replace_all(Input[PsrList_ALL[x]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists2")
+      # print(c("2 mod linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c(PsrList_ALL[x], " linia: ",Input[PsrList_ALL[x]]))
+      # print(c(PsrList_ALL[x+1], " linia: ",Input[PsrList_ALL[x+1]]))
+    }
+  }
+}
+  if((PsrList_ALL[x]+1) == PsrList_ALL[x+1]){
+    Input[PsrList_ALL[x+1]] <- str_replace_all(Input[PsrList_ALL[x+1]],"PowerSystemResource.PsrLists", "PowerSystemResource.PsrLists2")
+  }
+}
+
+print("--- Zmiana PowerSystemResource.PsrLists ---")
+
+skok <- 0
+if(length(Equipment_EquipmentContainer_ALL) > 1){
+for(x in c(2:(length(Equipment_EquipmentContainer_ALL)-1))){
+  if((Equipment_EquipmentContainer_ALL[x-1]+1) == Equipment_EquipmentContainer_ALL[x]){
+    if(((Equipment_EquipmentContainer_ALL[x-1]+1) == Equipment_EquipmentContainer_ALL[x]) & Equipment_EquipmentContainer_ALL[x] == (Equipment_EquipmentContainer_ALL[x+1]-1)){
+      # print(c("1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c("3 linia: ",Input[PsrList_ALL[x+2]]))
+      Input[Equipment_EquipmentContainer_ALL[x]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer2")
+      Input[Equipment_EquipmentContainer_ALL[x+1]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x+1]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer3")
+      # print(c(PsrList_ALL[x], "1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c(PsrList_ALL[x+1], "2 linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c(PsrList_ALL[x+2], "3 linia: ",Input[PsrList_ALL[x+2]]))
+      skok <- 1
+    }else{
+      if(skok == 1){
+        skok <- 0
+        next
+      }
+      # print(c("1 linia: ",Input[PsrList_ALL[x]]))
+      # print(c("2 linia: ",Input[PsrList_ALL[x+1]]))
+      Input[Equipment_EquipmentContainer_ALL[x]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer2")
+      # print(c("2 mod linia: ",Input[PsrList_ALL[x+1]]))
+      # print(c(PsrList_ALL[x], " linia: ",Input[PsrList_ALL[x]]))
+      # print(c(PsrList_ALL[x+1], " linia: ",Input[PsrList_ALL[x+1]]))
+    }
+  }
+}
+  if((Equipment_EquipmentContainer_ALL[x]+1) == Equipment_EquipmentContainer_ALL[x+1]){
+    Input[Equipment_EquipmentContainer_ALL[x+1]] <- str_replace_all(Input[Equipment_EquipmentContainer_ALL[x+1]],"Equipment.EquipmentContainer", "Equipment.EquipmentContainer2")
+  }
+}
+print("--- Zmiana Equipment.EquipmentContainer ---")
+
+
+write.table(Input, "D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_23A10h_Moddest.xml", fileEncoding="UTF-8", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 
 # write(Input, "D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_23A10h_Moddest.xml")
@@ -140,6 +165,7 @@ print("--- as_list(XML_List_ID) ---")
 
 XML_Tabela_Okrojona <- XML_Tabela[, -(1:6)]
 print("--- XML_Tabela okrojona ---")
+
 
 
 ### 2 - Wyciagniecie nazw obiektow z = xmlToList()
@@ -223,9 +249,9 @@ for (y in c(2:length(XML_Tabela_Okrojona))) {
 print("--- Uzupe³nianie XML_Tablica - puste miejsca ---")
 
 
-# write_excel_csv(XML_Tabela_Okrojona, "D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_ALL_Output.csv")
 
-# print("--- Zapis do Excel_CSV ---")
+write_excel_csv(XML_Tabela_Okrojona, "D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_ALL_Output.csv")
+
 
 
 ### -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -309,6 +335,13 @@ print("--- Uzupe³nianie XML_Tablica - puste miejsca ---")
 # 
 # tekst_dataframe <- as.data.frame(tekst)
 # kup <- as.factor(tekst)
+
+
+# print("--- Zapis do Excel_CSV ---")
+# peke <- function(x, kolumna, XML_Listowa){
+#   return(as.character(xml_attrs(xml_child(xml_child(XML_Lista_ID, x), which(grepl(kolumna, names(XML_Listowa$RDF[[x]])))))))
+# }
+# peke(x, kolumna, XML_Lista_ID ,XML_Listowa)
 
 
 
