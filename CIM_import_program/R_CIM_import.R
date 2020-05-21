@@ -240,7 +240,7 @@ for (y in c(2:length(XML_Tabela_Okrojona))) {
     print(str_c("Kolumna: ", y, " / ", length(XML_Tabela_Okrojona), " = Pustych miejsc: ", length(kappa1)))
     kolumna <- colnames(XML_Tabela_Okrojona[y])
     for (x in kappa1) {
-      print(x)
+      # print(x)
       XML_Tabela_Okrojona[x,y] <- xml_attrs(xml_child(xml_child(XML_Lista_ID, x), which(grepl(kolumna, names(XML_Listowa$RDF[[x]])))))  # <- dosyc wolne
     }
   }
