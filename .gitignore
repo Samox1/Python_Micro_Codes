@@ -115,3 +115,5 @@ dmypy.json
 .idea/workspace.xml
 *.xml
 CIM_import_program/CIM_MIKRONIKA.xlsx
+CIM_import_program/export-cim-1-try.txt
+CIM_import_program/export-cim.txt
