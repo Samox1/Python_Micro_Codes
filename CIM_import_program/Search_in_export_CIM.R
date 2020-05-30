@@ -569,9 +569,9 @@ for(i in nazwy[,1]) {
 
 obiekty <- nazwy[,1]
 # obiekty <- obiekty[-str_detect(obiekty, i)]
-exclude <- c("cim:PositionPoint", "cim:Location", "cim:Substation", "cim:VoltageLevel" )
+exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel" )
 obiekty_zred <- obiekty[! obiekty %in% exclude]
-
+obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
 
 ### Dzialajaca petla szukajaca - szuka na poziomie lvl-2 ID - czyli znalezionych na lvl-1 "cim:IdentifiedObject.name"
 
@@ -610,13 +610,34 @@ for(i in obiekty_zred) {
   gdzie <- which(array(grepl(BDJ21989_ID,as.matrix(get(i))),dim(get(i))),T)
   
   if(length(gdzie)>0){
+    print("")
     print(i)
     print(gdzie) 
     unikat <- unique(gdzie[,1])
     print(unikat)
     print(get(i)[unikat,])
-    kolumienka <- which(colnames(get(i)) == "cim:IdentifiedObject.name")
-    ID <- (get(i)[unikat,kolumienka])
+    # kolumienka <- which(colnames(get(i)) == "cim:IdentifiedObject.name")
+    IDs <- (get(i)[unikat,])
+    
+    for (x in IDs[,-1]) {
+      obiekt_teraz <- as.character(IDs[1])
+      if(x != ""){
+        print("")
+        print(c("LEVEL=2: ", x))
+        
+        for (k in obiekty[! obiekty %in% obiekt_teraz]) {
+          gdzie2 <- which(array(grepl(paste( "#" , x ,sep = ""), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
+          if(length(gdzie2) > 0){
+            print(k)
+            print(gdzie2)
+            unikat2 <- unique(gdzie2[,1])
+            IDs <- get(k)[unikat2,]
+            print(IDs)
+          }
+        }
+      }
+    }
+
     
     # for(li in obiekty_zred[-str_detect(obiekty, i)]) {
     #   # str_detect(colnames(get(li)), "cim:IdentifiedObject.name")
@@ -631,6 +652,122 @@ for(i in obiekty_zred) {
 }
 
 
+rekurenkcja <- function(IDs, obiekty_zred, lvl, widzialem){
+  
+  for (x in IDs[,-1]) {
+    obiekt_teraz <- as.character(IDs[1])
+    if(obiekt_teraz == "cim:Substation"){
+      print("---------- UPS -------------")
+      print(obiekt_teraz)
+      print(IDs)
+      return(IDs)
+    }
+    if(x != ""){
+      print("")
+      print(c("LEVEL=", lvl,":", x))
+      print(c("Szukamy:",paste( "#" , x ,sep = "")))
+      print(c("Szukamy:",paste(str_remove(x,"#"))))
+      
+      for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
+        # print(c("Hello: ", k))
+        # print(c("Szukamy:",paste( "#" , x ,sep = ""), "w ", k))
+        gdzie2 <- which(array(grepl( paste("#" , x ,sep = ""), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
+        
+        # Trzeba omijac te rzeczy ktore juz byly
+        
+        
+        if(length(gdzie2) > 0){
+          print(k)
+          print(gdzie2)
+          unikat2 <- unique(gdzie2[,1])
+          IDs <- get(k)[unikat2,]
+          print(IDs)
+          for (q in c(1:length(unikat2))) {
+            print("kappa")
+            widzialem <- rbind(widzialem,IDs)
+            return(rekurenkcja(IDs[q,], obiekty_zred, lvl+1))
+          }
+          # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+        }
+        
+        # print(c("Szukamy:",paste(str_remove(x,"#"))))
+        gdzie3 <- which(array(grepl( paste(str_remove(x,"#"), sep = "" ), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
+        
+        if(length(gdzie3) > 0){
+          print(k)
+          print(gdzie3)
+          unikat3 <- unique(gdzie3[,1])
+          IDs <- get(k)[unikat3,]
+          print(IDs)
+          for (t in c(1:length(unikat2))) {
+            print("kappa")
+            widzialem <- rbind(widzialem,IDs)
+            return(rekurenkcja(IDs[t,], obiekty_zred, lvl+1))
+          }
+          # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+        }
+      }
+    }
+  }
+  
+}
+
+
+
+### --- Test z REKURENCJA --- ###
+
+widzialem <- data.frame()
+
+for(i in obiekty_zred_Sub) {
+  # print(i)
+  gdzie <- which(array(grepl(BDJ21989_ID,as.matrix(get(i))),dim(get(i))),T)
+  
+  if(length(gdzie)>0){
+    print("")
+    print(i)
+    print(gdzie)
+    unikat <- unique(gdzie[,1])
+    print(unikat)
+    print(get(i)[unikat,])
+    # kolumienka <- which(colnames(get(i)) == "cim:IdentifiedObject.name")
+    IDs <- (get(i)[unikat,])
+    lvl = 2
+    
+    # for (x in IDs[,-1]) {
+    #   obiekt_teraz <- as.character(IDs[1])
+    #   if(x != ""){
+    #     print("")
+    #     print(c("LEVEL=2: ", x))
+    #     
+    #     for (k in obiekty[! obiekty %in% obiekt_teraz]) {
+    #       gdzie2 <- which(array(grepl(paste( "#" , x ,sep = ""), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
+    #       if(length(gdzie2) > 0){
+    #         print(k)
+    #         print(gdzie2)
+    #         unikat2 <- unique(gdzie2[,1])
+    #         IDs <- get(k)[unikat2,]
+    #         print(IDs)
+    #       }
+    #     }
+    #   }
+    # }
+    
+    widzialem <- rbind(widzialem,IDs)
+    
+    rekurenkcja(IDs, obiekty_zred, lvl, widzialem)
+    
+    
+    # for(li in obiekty_zred[-str_detect(obiekty, i)]) {
+    #   # str_detect(colnames(get(li)), "cim:IdentifiedObject.name")
+    #   # str_detect(colnames(get(li)), "cim:IdentifiedObject.name")
+    #   print(li)
+    #   # gdzie2 <- which(array(grepl(paste(paste0(".",ID,"."),paste0(".",ID),paste0(ID,"."), sep = "|"), as.matrix(get(li)), fixed = F),dim(get(li))),T)
+    #   unikat2 <- unique(gdzie2[,1])
+    #   print(gdzie2)
+    # }
+  }
+  # print(which(array(grepl(BDJ21989_ID,as.matrix(get(i))),dim(get(i))),T))
+}
 
 
 
