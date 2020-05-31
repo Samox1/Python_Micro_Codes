@@ -484,49 +484,49 @@ library(chorddiag)
 library(visNetwork)
 
 Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
-Asocjacje <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/asocjacje_kr.txt", sep = ',', header = TRUE, blank.lines.skip = TRUE, fill = TRUE)
-
-kappa <- (paste(Asocjacje$obiekt1, "=", Asocjacje$sk³adnik_z_ob1))
-kappa <- cbind(kappa, paste(Asocjacje$obiekt2, "=", Asocjacje$sk³adnik_z_ob2))
-wszystkie <- unique(as.vector(kappa))
-kappa <- data.frame(kappa)
-
-### Simple network
-simpleNetwork(kappa, height="100px", width="100px",        
-                   Source = 1,                 # column number of source
-                   Target = 2,                 # column number of target
-                   linkDistance = 10,          # distance between node. Increase this value to have more space between nodes
-                   charge = -5000,                # numeric value indicating either the strength of the node repulsion (negative value) or attraction (positive value)
-                   fontSize = 14,               # size of the node names
-                   fontFamily = "serif",       # font og node names
-                   linkColour = "#666",        # colour of edges, MUST be a common colour for the whole graph
-                   nodeColour = "#69b3a2",     # colour of nodes, MUST be a common colour for the whole graph
-                   opacity = 0.9,              # opacity of nodes. 0=transparent. 1=no transparency
-                   zoom = T                    # Can you zoom on the figure?
-)
-
-
-unikalne <- unique(Asocjacje$wart1)
-paths <- data.frame(stringsAsFactors = FALSE)
-### Paths
-for (x in c(1:length(unikalne))) {
-  print(unikalne[x])
-  wystapienia <- which(Asocjacje$wart1 == unikalne[x])
-  print(wystapienia)
-  
-  paths <- rbind(paths, c(unikalne[x], paste(wystapienia, collapse = ",")),stringsAsFactors = FALSE)
-  
-  for (y in c(1:length(wystapienia))) {
-    # print(c(wystapienia[y], Asocjacje$sk³adnik_z_ob1[wystapienia[y]], "<->", Asocjacje$sk³adnik_z_ob2[wystapienia[y]]))
-    print(paste(as.character(Asocjacje[wystapienia[y],1:2]), "=", as.character(Asocjacje[wystapienia[y],3:4])))
-    kelo <- (paste(as.character(Asocjacje[wystapienia[y],1:2]), "=", as.character(Asocjacje[wystapienia[y],3:4])))
-    paths <- rbind(paths, kelo, stringsAsFactors = FALSE)
-  }
-  
-  cat('\n')
-  # paths <- rbind(paths,which(Asocjacje$wart1 == Asocjacje$wart1[x]))
-}
-
+# Asocjacje <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/asocjacje_kr.txt", sep = ',', header = TRUE, blank.lines.skip = TRUE, fill = TRUE)
+# 
+# kappa <- (paste(Asocjacje$obiekt1, "=", Asocjacje$sk³adnik_z_ob1))
+# kappa <- cbind(kappa, paste(Asocjacje$obiekt2, "=", Asocjacje$sk³adnik_z_ob2))
+# wszystkie <- unique(as.vector(kappa))
+# kappa <- data.frame(kappa)
+# 
+# ### Simple network
+# simpleNetwork(kappa, height="100px", width="100px",        
+#                    Source = 1,                 # column number of source
+#                    Target = 2,                 # column number of target
+#                    linkDistance = 10,          # distance between node. Increase this value to have more space between nodes
+#                    charge = -5000,                # numeric value indicating either the strength of the node repulsion (negative value) or attraction (positive value)
+#                    fontSize = 14,               # size of the node names
+#                    fontFamily = "serif",       # font og node names
+#                    linkColour = "#666",        # colour of edges, MUST be a common colour for the whole graph
+#                    nodeColour = "#69b3a2",     # colour of nodes, MUST be a common colour for the whole graph
+#                    opacity = 0.9,              # opacity of nodes. 0=transparent. 1=no transparency
+#                    zoom = T                    # Can you zoom on the figure?
+# )
+# 
+# 
+# unikalne <- unique(Asocjacje$wart1)
+# paths <- data.frame(stringsAsFactors = FALSE)
+# ### Paths
+# for (x in c(1:length(unikalne))) {
+#   print(unikalne[x])
+#   wystapienia <- which(Asocjacje$wart1 == unikalne[x])
+#   print(wystapienia)
+#   
+#   paths <- rbind(paths, c(unikalne[x], paste(wystapienia, collapse = ",")),stringsAsFactors = FALSE)
+#   
+#   for (y in c(1:length(wystapienia))) {
+#     # print(c(wystapienia[y], Asocjacje$sk³adnik_z_ob1[wystapienia[y]], "<->", Asocjacje$sk³adnik_z_ob2[wystapienia[y]]))
+#     print(paste(as.character(Asocjacje[wystapienia[y],1:2]), "=", as.character(Asocjacje[wystapienia[y],3:4])))
+#     kelo <- (paste(as.character(Asocjacje[wystapienia[y],1:2]), "=", as.character(Asocjacje[wystapienia[y],3:4])))
+#     paths <- rbind(paths, kelo, stringsAsFactors = FALSE)
+#   }
+#   
+#   cat('\n')
+#   # paths <- rbind(paths,which(Asocjacje$wart1 == Asocjacje$wart1[x]))
+# }
+# 
 
 
 
@@ -575,7 +575,7 @@ for(i in nazwy[,1]) {
 
 obiekty <- nazwy[,1]
 # obiekty <- obiekty[-str_detect(obiekty, i)]
-exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel" )
+exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel", "cim:Discrete", "cim:DiscreteValue", "cim:Bay", "cim:SubGeographicalRegion")
 obiekty_zred <- obiekty[! obiekty %in% exclude]
 obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
 
@@ -771,6 +771,7 @@ colnames(Stacja_Start) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "
 
 widzialem <- data.frame(Stacja_Start, fix.empty.names = F)
 colnames(widzialem) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+widzialem <- widzialem[-1,]
 # widzialem <- rbind.fill(widzialem, (Stacja_Start))
 # 
 # Test <- `cim:Terminal`[32,]
@@ -782,131 +783,271 @@ do_przejrzenia <- data.frame(Stacja_Start, fix.empty.names = F)
 colnames(do_przejrzenia) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
 # do_prze <- do_przejrzenia[-1,]
 # length(do_prze[,1])
+# do_przejrzenia <- do_przejrzenia[-1,]
+print(do_przejrzenia)
+IDs <<- do_przejrzenia
+# do_przejrzenia <- do_przejrzenia[-1,]
+# elko <- 1
+stacja <- T
 
-for(i in obiekty_zred_Sub) {
-  # print(i)
-  gdzie <- which(array(grepl(BDJ21989_ID,as.matrix(get(i))),dim(get(i))),T)
+while ( length(do_przejrzenia[,1]) > 0 ) {
   
-  if(length(gdzie)>0){
-    print("")
-    print(i)
-    print(gdzie)
-    unikat <- unique(gdzie[,1])
-    print(unikat)
-    print(get(i)[unikat,])
-    # kolumienka <- which(colnames(get(i)) == "cim:IdentifiedObject.name")
-    IDs <- (get(i)[unikat,])
-    lvl = 2
-    # print(do_przejrzenia)
-    colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
-    # do_przejrzenia <<- IDs
-    do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs)
+  print(c("--- WHILE ------ Dlugosc :: do_przejrzenia :: ", length(do_przejrzenia[,1])))
+  
+  print(do_przejrzenia)
+  IDs <<- do_przejrzenia[1,]
+  do_przejrzenia <<- do_przejrzenia[-1,]
+  
+  # if(length(which(IDs[2] %in% widzialem[,2])) > 0){
+  if(IDs[2] %in% widzialem[,2]){
+    print("--- KURWA WIDZIALEM ---")
+    print(IDs[2])
+    # print(widzialem)
+    # return(1)
+    next
     
-    print(do_przejrzenia)
-    print(c("--------- Dlugosc :: do_przejrzenia :: ", length(do_przejrzenia[,1])))
-    while ( length(do_przejrzenia[,1]) > 0 ) {
-      
-      print(c("--- WHILE ------ Dlugosc :: do_przejrzenia :: ", length(do_przejrzenia[,1])))
+  }else{
     
-      print(do_przejrzenia)
-    IDs <<- do_przejrzenia[1,]
-    do_przejrzenia <<- do_przejrzenia[-1,]
-
-    if(length(which(IDs[2] %in% widzialem[,2])) > 0){
-      if(IDs[2] %in% widzialem[,2]){
-        print("--- KURWA WIDZIALEM ---")
-        print(IDs[2])
-        # print(widzialem)
-        # return(1)
-
-      }else{
-
-
-      obiekt_teraz <<- as.character(IDs[1])
+    
+    obiekt_teraz <<- as.character(IDs[1])
+    print(obiekt_teraz)
+    if(obiekt_teraz == "cim:Substation"){
+      stacja <- !stacja
+    }
+    
+    
+    if(stacja==T && obiekt_teraz == "cim:Substation"){
+      print("---------- UPS -------------")
       print(obiekt_teraz)
+      print(IDs)
 
-      if(obiekt_teraz == "cim:Substation"){
-          print("---------- UPS -------------")
-          print(obiekt_teraz)
-          print(IDs)
-          # break
-      }else{
-
-
-        colnames(IDs) <<- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
-        widzialem <<- rbind.fill(widzialem, IDs)
-
-        print(c("Wrzucone IDs do widzianych:"))
-        print(IDs)
-        print(c("Wypisanie widzianych:", length(widzialem[,2])))
-
-      # for (x in IDs) {
-      for (x in IDs[,-1]) {
+      # break
+    }else{
+    
+    
+    colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+    widzialem <<- rbind.fill(widzialem, IDs)
+    
+    print(c("Wrzucone IDs do widzianych:"))
+    print(IDs)
+    print(c("Wypisanie widzianych:", length(widzialem[,2])))
+    
+    # for (x in IDs) {
+    for (x in IDs[,-1]) {
+      
+      print(x)
+      
+      if(x != "" && str_length(x)>7){
+        cat("")
+        print(c("LEVEL=",":", x))
+        print(c("Szukamy:",paste( "#" , x ,sep = "")))
+        print(c("Szukamy:",paste(str_remove(x,"#"))))
         
-        print(x)
-
-        if(x != ""){
-          cat("")
-          print(c("LEVEL=", lvl,":", x))
-          print(c("Szukamy:",paste( "#" , x ,sep = "")))
-          print(c("Szukamy:",paste(str_remove(x,"#"))))
-
-          for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
-            # print(c("Hello: ", k))
-            # print(c("Szukamy:",paste( "#" , x ,sep = ""), "w ", k))
-            gdzie2 <<- which(array(grepl( paste0( "#" , x), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
-
-            # Trzeba omijac te rzeczy ktore juz byly
-
-            if(length(gdzie2) > 0){
-              print(c("Szukamy:",paste( "#" , x ,sep = "")))
-              print(k)
-              # print(gdzie2)
-              print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
-              unikat2 <<- unique(gdzie2[,1])
-              IDs <<- get(k)[unikat2,]
-              # assign(paste0("IDs_",lvl), get(k)[unikat2,])
-              # print(IDs)
-              for (q in c(1:length(IDs[,1]))) {
-                print("kappa")
-                # widzialem <- rbind.fill(IDs)
-                # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
+        for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
+          # print(c("Hello: ", k))
+          # print(c("Szukamy:",paste( "#" , x ,sep = ""), "w ", k))
+          if(str_detect(x, "#")){
+            gdzie2 <<- which(array(grepl( paste0("\\<", x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
+            teraz <- paste0("\\<", x, "\\>")
+          }else{
+            gdzie2 <<- which(array(grepl( paste0("\\<", "#" , x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
+            teraz <- paste0("\\<", "#" , x, "\\>")
+          }
+          
+          
+          # Trzeba omijac te rzeczy ktore juz byly
+          
+          if(length(gdzie2) > 0){
+            print(c("Szukamy:",teraz))
+            print(k)
+            # print(gdzie2)
+            print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
+            unikat2 <<- unique(gdzie2[,1])
+            IDs <<- get(k)[unikat2,]
+            colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+            # assign(paste0("IDs_",lvl), get(k)[unikat2,])
+            # print(IDs)
+            for (q in c(1:length(IDs[,1]))) {
+              print(teraz)
+              # widzialem <- rbind.fill(IDs)
+              # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
+              if(IDs[q,2] %in% do_przejrzenia[,2])
+              { 
+                print("Bylo juz")
+              }else{
                 do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
               }
-              # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+              
             }
-
-            # print(c("Szukamy:",paste(str_remove(x,"#"))))
-            gdzie3 <<- which(array(grepl( paste0( str_remove(x,"#")), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
-
-            if(length(gdzie3) > 0){
-              print(c("Szukamy:",paste(str_remove(x,"#"))))
-              print(k)
-              # print(gdzie3)
-              print(c("Ile znaleziono obiektow:" , length(gdzie3[,1])))
-              unikat3 <<- unique(gdzie3[,1])
-              IDs <<- get(k)[unikat3,]
-              # assign(paste0("IDs_",lvl), get(k)[unikat3,])
-              # print(IDs)
-              for (t in c(1:length(IDs[,1]))) {
-                print("kappa")
-                # widzialem <- rbind.fill(IDs)
-                # return(rekurenkcja(get(paste0("IDs_",lvl))[t,], obiekty_zred, lvl+1))
-                do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
+            # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+          }
+          
+          # print(c("Szukamy:",paste(str_remove(x,"#"))))
+          gdzie3 <<- which(array(grepl( paste0("\\<", str_remove(x,"#"), "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
+          teraz <- paste0("\\<", str_remove(x,"#"), "\\>")
+          
+          if(length(gdzie3) > 0){
+            print(c("Szukamy:", teraz))
+            print(k)
+            # print(gdzie3)
+            print(c("Ile znaleziono obiektow:" , length(gdzie3[,1])))
+            unikat3 <<- unique(gdzie3[,1])
+            IDs <<- get(k)[unikat3,]
+            colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+            # assign(paste0("IDs_",lvl), get(k)[unikat3,])
+            # print(IDs)
+            for (t in c(1:length(IDs[,1]))) {
+              print(teraz)
+              # widzialem <- rbind.fill(IDs)
+              # return(rekurenkcja(get(paste0("IDs_",lvl))[t,], obiekty_zred, lvl+1))
+              if(IDs[t,2] %in% do_przejrzenia[,2])
+              {
+                print("Bylo juz")
+              }else{
+                do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[t,])
               }
-              # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+              
             }
+            # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
           }
         }
       }
-      }
-      }
     }
   }
-
   }
+  # }
 }
 
+
+
+
+
+
+### Petla z interakcja
+
+# for(i in obiekty_zred_Sub) {
+#   # print(i)
+#   gdzie <- which(array(grepl(BDJ21989_ID,as.matrix(get(i))),dim(get(i))),T)
+#   
+#   if(length(gdzie)>0){
+#     print("")
+#     print(i)
+#     print(gdzie)
+#     unikat <- unique(gdzie[,1])
+#     print(unikat)
+#     print(get(i)[unikat,])
+#     # kolumienka <- which(colnames(get(i)) == "cim:IdentifiedObject.name")
+#     IDs <<- (get(i)[unikat,])
+#     lvl = 2
+#     # print(do_przejrzenia)
+#     colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+#     # do_przejrzenia <<- IDs
+#     do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs)
+#     
+#     print(do_przejrzenia)
+#     print(c("--------- Dlugosc :: do_przejrzenia :: ", length(do_przejrzenia[,1])))
+#     while ( length(do_przejrzenia[,1]) > 0 ) {
+#       
+#       print(c("--- WHILE ------ Dlugosc :: do_przejrzenia :: ", length(do_przejrzenia[,1])))
+#     
+#       print(do_przejrzenia)
+#     IDs <<- do_przejrzenia[1,]
+#     # do_przejrzenia <<- do_przejrzenia[-1,]
+# 
+#     if(length(which(IDs[2] %in% widzialem[,2])) > 0){
+#       if(IDs[2] %in% widzialem[,2]){
+#         print("--- KURWA WIDZIALEM ---")
+#         print(IDs[2])
+#         # print(widzialem)
+#         # return(1)
+# 
+#       }else{
+# 
+# 
+#       obiekt_teraz <<- as.character(IDs[1])
+#       print(obiekt_teraz)
+# 
+#       if(obiekt_teraz == "cim:Substation"){
+#           print("---------- UPS -------------")
+#           print(obiekt_teraz)
+#           print(IDs)
+#           # break
+#       }else{
+# 
+# 
+#         colnames(IDs) <<- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+#         widzialem <<- rbind.fill(widzialem, IDs)
+# 
+#         print(c("Wrzucone IDs do widzianych:"))
+#         print(IDs)
+#         print(c("Wypisanie widzianych:", length(widzialem[,2])))
+# 
+#       # for (x in IDs) {
+#       for (x in IDs[,-1]) {
+#         
+#         print(x)
+# 
+#         if(x != ""){
+#           cat("")
+#           print(c("LEVEL=", lvl,":", x))
+#           print(c("Szukamy:",paste( "#" , x ,sep = "")))
+#           print(c("Szukamy:",paste(str_remove(x,"#"))))
+# 
+#           for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
+#             # print(c("Hello: ", k))
+#             # print(c("Szukamy:",paste( "#" , x ,sep = ""), "w ", k))
+#             gdzie2 <<- which(array(grepl( paste0( "#" , x), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
+# 
+#             # Trzeba omijac te rzeczy ktore juz byly
+# 
+#             if(length(gdzie2) > 0){
+#               print(c("Szukamy:",paste( "#" , x ,sep = "")))
+#               print(k)
+#               # print(gdzie2)
+#               print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
+#               unikat2 <<- unique(gdzie2[,1])
+#               IDs <<- get(k)[unikat2,]
+#               # assign(paste0("IDs_",lvl), get(k)[unikat2,])
+#               # print(IDs)
+#               for (q in c(1:length(IDs[,1]))) {
+#                 print("kappa")
+#                 # widzialem <- rbind.fill(IDs)
+#                 # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
+#                 do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
+#               }
+#               # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+#             }
+# 
+#             # print(c("Szukamy:",paste(str_remove(x,"#"))))
+#             gdzie3 <<- which(array(grepl( paste0( str_remove(x,"#")), as.matrix(get(k)), fixed = TRUE),dim(get(k))),T)
+# 
+#             if(length(gdzie3) > 0){
+#               print(c("Szukamy:",paste(str_remove(x,"#"))))
+#               print(k)
+#               # print(gdzie3)
+#               print(c("Ile znaleziono obiektow:" , length(gdzie3[,1])))
+#               unikat3 <<- unique(gdzie3[,1])
+#               IDs <<- get(k)[unikat3,]
+#               # assign(paste0("IDs_",lvl), get(k)[unikat3,])
+#               # print(IDs)
+#               for (t in c(1:length(IDs[,1]))) {
+#                 print("kappa")
+#                 # widzialem <- rbind.fill(IDs)
+#                 # return(rekurenkcja(get(paste0("IDs_",lvl))[t,], obiekty_zred, lvl+1))
+#                 do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
+#               }
+#               # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+#             }
+#           }
+#         }
+#       }
+#       }
+#       }
+#     }
+#   }
+# 
+#   }
+# }
 
 
 
