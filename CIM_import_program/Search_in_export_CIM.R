@@ -553,12 +553,23 @@ Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
 
 # GPZ_Bedzin_ID <- Stacje[which(Stacje[,3] == ""),2]
 
-
+szukaj <- "BDJ21989"
+print(szukaj)
 # Znalezienie wszystkich przypadkow dla nazwy = BDJ21989
+
 for(i in nazwy[,1]) {
   # print(i)
-  print(i)
-  print(which(array(grepl('BDJ21989|BDJ21989.|.BDJ21989.',as.matrix(get(i))),dim(get(i))),T))
+  gdzie <- which(array(grepl(str_remove(szukaj, "#"),as.matrix(get(i)), fixed = T),dim(get(i))),T)
+  if(length(gdzie) > 0){
+    print(i)
+    print(gdzie)
+    # print(which(array(grepl(paste0("\\<",szukaj,"\\>"),as.matrix(get(i)), fixed = TRUE),dim(get(i))),T))
+    
+    print(get(i)[unique(gdzie[,1]),])
+    
+  }
+}
+  
   
   # for (x in get(i)[,1:length(get(i))]) {
   #   # print(x)
@@ -568,16 +579,12 @@ for(i in nazwy[,1]) {
   # print(which(i == ))
   # assign((paste(nazwy[i,1])), data.frame(Dane[gdzie[2:length(gdzie)],]))
   # assign((paste(nazwy[i,1])), setNames(get((paste(nazwy[i,1]))), nazwy[i,]))
-}
+# }
 
 # print(which(array(grepl('BDJ21989|BDJ21989.|.BDJ21989.' ,as.matrix(Stacje)),dim(Stacje)),T))
 # print(which(array(grepl('BDJ21989|BDJ21989.|.BDJ21989.',as.matrix(`cim:PowerTransformer`)),dim(`cim:PowerTransformer`)),T))
 
-obiekty <- nazwy[,1]
-# obiekty <- obiekty[-str_detect(obiekty, i)]
-exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel", "cim:Discrete", "cim:DiscreteValue", "cim:Bay", "cim:SubGeographicalRegion")
-obiekty_zred <- obiekty[! obiekty %in% exclude]
-obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
+
 
 ### Dzialajaca petla szukajaca - szuka na poziomie lvl-2 ID - czyli znalezionych na lvl-1 "cim:IdentifiedObject.name"
 
@@ -764,6 +771,12 @@ obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
 # 
 
 
+obiekty <- nazwy[,1]
+# obiekty <- obiekty[-str_detect(obiekty, i)]
+exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel", "cim:Discrete", "cim:DiscreteValue", "cim:Bay", "cim:SubGeographicalRegion")
+obiekty_zred <- obiekty[! obiekty %in% exclude]
+obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
+
 
 ### --- Test z REKURENCJA --- ###
 Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
@@ -816,10 +829,10 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
     }
     
     
-    if(stacja==T && obiekt_teraz == "cim:Substation"){
+    if(stacja==T && obiekt_teraz == "cim:Substation"){          # <--- Naprawiæ wywalanie pêtli !!!!
       print("---------- UPS -------------")
       print(obiekt_teraz)
-      print(IDs)
+      print(IDs)  
 
       # break
     }else{
@@ -833,7 +846,7 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
     print(c("Wypisanie widzianych:", length(widzialem[,2])))
     
     # for (x in IDs) {
-    for (x in IDs[,-1]) {
+    for (x in IDs[,-(c(1))]) {
       
       print(x)
       
@@ -846,45 +859,45 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
         for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
           # print(c("Hello: ", k))
           # print(c("Szukamy:",paste( "#" , x ,sep = ""), "w ", k))
-          if(str_detect(x, "#")){
-            gdzie2 <<- which(array(grepl( paste0("\\<", x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
-            teraz <- paste0("\\<", x, "\\>")
-          }else{
-            gdzie2 <<- which(array(grepl( paste0("\\<", "#" , x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
-            teraz <- paste0("\\<", "#" , x, "\\>")
-          }
+          # if(str_detect(x, "#")){
+          #   gdzie2 <<- which(array(grepl( paste0("\\<", x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
+          #   teraz <- paste0("\\<", x, "\\>")
+          # }else{
+          #   gdzie2 <<- which(array(grepl( paste0("\\<", "#" , x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
+          #   teraz <- paste0("\\<", "#" , x, "\\>")
+          # }
           
           
           # Trzeba omijac te rzeczy ktore juz byly
           
-          if(length(gdzie2) > 0){
-            print(c("Szukamy:",teraz))
-            print(k)
-            # print(gdzie2)
-            print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
-            unikat2 <<- unique(gdzie2[,1])
-            IDs <<- get(k)[unikat2,]
-            colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
-            # assign(paste0("IDs_",lvl), get(k)[unikat2,])
-            # print(IDs)
-            for (q in c(1:length(IDs[,1]))) {
-              print(teraz)
-              # widzialem <- rbind.fill(IDs)
-              # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
-              if(IDs[q,2] %in% do_przejrzenia[,2])
-              { 
-                print("Bylo juz")
-              }else{
-                do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
-              }
-              
-            }
-            # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
-          }
+          # if(length(gdzie2) > 0){
+          #   print(c("Szukamy:",teraz))
+          #   print(k)
+          #   # print(gdzie2)
+          #   print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
+          #   unikat2 <<- unique(gdzie2[,1])
+          #   IDs <<- get(k)[unikat2,]
+          #   colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+          #   # assign(paste0("IDs_",lvl), get(k)[unikat2,])
+          #   # print(IDs)
+          #   for (q in c(1:length(IDs[,1]))) {
+          #     print(teraz)
+          #     # widzialem <- rbind.fill(IDs)
+          #     # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
+          #     if(IDs[q,2] %in% do_przejrzenia[,2])
+          #     { 
+          #       print("Bylo juz")
+          #     }else{
+          #       do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
+          #     }
+          #     
+          #   }
+          #   # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+          # }
           
           # print(c("Szukamy:",paste(str_remove(x,"#"))))
-          gdzie3 <<- which(array(grepl( paste0("\\<", str_remove(x,"#"), "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
-          teraz <- paste0("\\<", str_remove(x,"#"), "\\>")
+          gdzie3 <<- which(array(grepl( paste0( str_remove(x,"#")), as.matrix(get(k)), fixed = T),dim(get(k))),T)
+          teraz <- paste0( str_remove(x,"#"))
           
           if(length(gdzie3) > 0){
             print(c("Szukamy:", teraz))
