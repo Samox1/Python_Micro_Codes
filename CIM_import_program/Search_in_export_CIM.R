@@ -1,24 +1,24 @@
 rm(list=ls())
-
-library(ggraph)
-library(igraph)
-library(edgebundleR)
-library(tidyverse)
-library(dplyr)
-library(data.table)
-library(RColorBrewer)
-library(networkD3)
-
-library(viridis)
-library(patchwork)
-library(hrbrthemes)
-library(circlize)
-library(chorddiag)  
+# 
+# library(ggraph)
+# library(igraph)
+# library(edgebundleR)
+# library(tidyverse)
+# library(dplyr)
+# library(data.table)
+# library(RColorBrewer)
+# library(networkD3)
+# 
+# library(viridis)
+# library(patchwork)
+# library(hrbrthemes)
+# library(circlize)
+# library(chorddiag)  
 # devtools::install_github("mattflor/chorddiag")
 
 
 
-Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
+# Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
 # Dane2 <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/MIKRONIKA_23A10h_Moddest.xml", header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
 
 ### Podsumowanie ilosci znakow w kazdej kolumnie - w celach testowych
@@ -483,7 +483,7 @@ library(circlize)
 library(chorddiag) 
 library(visNetwork)
 
-Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
+# Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
 # Asocjacje <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/asocjacje_kr.txt", sep = ',', header = TRUE, blank.lines.skip = TRUE, fill = TRUE)
 # 
 # kappa <- (paste(Asocjacje$obiekt1, "=", Asocjacje$sk³adnik_z_ob1))
@@ -553,24 +553,33 @@ Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
 
 # GPZ_Bedzin_ID <- Stacje[which(Stacje[,3] == ""),2]
 
-szukaj <- "BDJ21989"
-print(szukaj)
-# Znalezienie wszystkich przypadkow dla nazwy = BDJ21989
+### ------------------------------------------------------------------------------------------ ###
+### --- SZUKANIE - DZIALA - MOZNA WRZUCAC COKOLWIEK I LADNIE ZNAJDZIE I WYSWIETLI WSZYSTKO --- ###
+### ------------------------------------------------------------------------------------------ ###
 
-for(i in nazwy[,1]) {
-  # print(i)
-  gdzie <- which(array(grepl(str_remove(szukaj, "#"),as.matrix(get(i)), fixed = T),dim(get(i))),T)
-  if(length(gdzie) > 0){
-    print(i)
-    print(gdzie)
-    # print(which(array(grepl(paste0("\\<",szukaj,"\\>"),as.matrix(get(i)), fixed = TRUE),dim(get(i))),T))
-    
-    print(get(i)[unique(gdzie[,1]),])
-    
-  }
-}
+# szukaj <- "#_2e15e3ee64624e20b40cf70e02292d7a"
+# print(szukaj)
+# # Znalezienie wszystkich przypadkow dla nazwy = BDJ21989
+# 
+# for(i in nazwy[,1]) {
+#   # print(i)
+#   gdzie <- which(array(grepl(str_remove(szukaj, "#"),as.matrix(get(i)[,1:3]), fixed = T),dim(get(i)[,1:3])),T)
+#   if(length(gdzie) > 0){
+#     print(i)
+#     print(gdzie)
+#     # print(which(array(grepl(paste0("\\<",szukaj,"\\>"),as.matrix(get(i)), fixed = TRUE),dim(get(i))),T))
+#     
+#     print(get(i)[unique(gdzie[,1]),])
+#     
+#   }
+# }
+
+### ------------------------------------------------------------------------------------------ ###
+### ------------------------------------------------------------------------------------------ ###
+### ------------------------------------------------------------------------------------------ ###
   
-  
+
+
   # for (x in get(i)[,1:length(get(i))]) {
   #   # print(x)
   #   # print(c(i, which(x==BDJ21989_ID)))
@@ -773,7 +782,7 @@ for(i in nazwy[,1]) {
 
 obiekty <- nazwy[,1]
 # obiekty <- obiekty[-str_detect(obiekty, i)]
-exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel", "cim:Discrete", "cim:DiscreteValue", "cim:Bay", "cim:SubGeographicalRegion")
+exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel", "cim:Discrete", "cim:DiscreteValue", "cim:SubGeographicalRegion")
 obiekty_zred <- obiekty[! obiekty %in% exclude]
 obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
 
@@ -801,7 +810,10 @@ print(do_przejrzenia)
 IDs <<- do_przejrzenia
 # do_przejrzenia <- do_przejrzenia[-1,]
 # elko <- 1
-stacja <- T
+stacja <- 1
+
+zakazane <- c("#_dbd85671a32f41d0be567b9ee5bbd979", "#_fe72415910bf4d1d8edc4573c2b2ea2a", "#_f92a3aab45b14626bcb8a3450f6dcb7f", "#_8e7d7d4a02cd40b494c0a3fd4d9a2e9d")
+
 
 while ( length(do_przejrzenia[,1]) > 0 ) {
   
@@ -825,11 +837,11 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
     obiekt_teraz <<- as.character(IDs[1])
     print(obiekt_teraz)
     if(obiekt_teraz == "cim:Substation"){
-      stacja <- !stacja
+      stacja <- stacja + 1
     }
     
     
-    if(stacja==T && obiekt_teraz == "cim:Substation"){          # <--- Naprawiæ wywalanie pêtli !!!!
+    if(stacja==10 && obiekt_teraz == "cim:Substation"){          # <--- Naprawiæ wywalanie pêtli !!!!
       print("---------- UPS -------------")
       print(obiekt_teraz)
       print(IDs)  
@@ -850,53 +862,54 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
       
       print(x)
       
-      if(x != "" && str_length(x)>7){
+      if(x != "" && str_length(x)>7 && !(x %in% zakazane)){
         cat("")
         print(c("LEVEL=",":", x))
-        print(c("Szukamy:",paste( "#" , x ,sep = "")))
-        print(c("Szukamy:",paste(str_remove(x,"#"))))
+        # print(c("Szukamy:",paste( "#" , x ,sep = "")))
+        # print(c("Szukamy:",paste(str_remove(x,"#"))))
         
-        for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
+        # for (k in obiekty_zred[! obiekty_zred %in% obiekt_teraz]) {
+        for (k in obiekty_zred) {
           # print(c("Hello: ", k))
           # print(c("Szukamy:",paste( "#" , x ,sep = ""), "w ", k))
-          # if(str_detect(x, "#")){
-          #   gdzie2 <<- which(array(grepl( paste0("\\<", x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
-          #   teraz <- paste0("\\<", x, "\\>")
-          # }else{
-          #   gdzie2 <<- which(array(grepl( paste0("\\<", "#" , x, "\\>"), as.matrix(get(k)), fixed = F),dim(get(k))),T)
-          #   teraz <- paste0("\\<", "#" , x, "\\>")
-          # }
-          
-          
+          if(str_detect(x, "#")){
+            gdzie2 <<- which(array(grepl( x, as.matrix(get(k)[,-2]), fixed = T),dim(get(k)[,-2])),T)
+            teraz <- paste0( x)
+          }else{
+            gdzie2 <<- which(array(grepl( paste0("#" , x), as.matrix(get(k)[,-2]), fixed = T),dim(get(k)[,-2])),T)
+            teraz <- paste0("#" , x )
+          }
+
+
           # Trzeba omijac te rzeczy ktore juz byly
-          
-          # if(length(gdzie2) > 0){
-          #   print(c("Szukamy:",teraz))
-          #   print(k)
-          #   # print(gdzie2)
-          #   print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
-          #   unikat2 <<- unique(gdzie2[,1])
-          #   IDs <<- get(k)[unikat2,]
-          #   colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
-          #   # assign(paste0("IDs_",lvl), get(k)[unikat2,])
-          #   # print(IDs)
-          #   for (q in c(1:length(IDs[,1]))) {
-          #     print(teraz)
-          #     # widzialem <- rbind.fill(IDs)
-          #     # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
-          #     if(IDs[q,2] %in% do_przejrzenia[,2])
-          #     { 
-          #       print("Bylo juz")
-          #     }else{
-          #       do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
-          #     }
-          #     
-          #   }
-          #   # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
-          # }
+
+          if(length(gdzie2) > 0){
+            print(c("Szukamy:",teraz))
+            print(k)
+            # print(gdzie2)
+            print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
+            unikat2 <<- unique(gdzie2[,1])
+            IDs <<- get(k)[unikat2,]
+            colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
+            # assign(paste0("IDs_",lvl), get(k)[unikat2,])
+            # print(IDs)
+            for (q in c(1:length(IDs[,1]))) {
+              print(teraz)
+              # widzialem <- rbind.fill(IDs)
+              # return(rekurenkcja(get(paste0("IDs_",lvl))[q,], obiekty_zred, lvl+1))
+              if(IDs[q,2] %in% do_przejrzenia[,2])
+              {
+                print("Bylo juz")
+              }else{
+                do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
+              }
+
+            }
+            # return(rekurenkcja(IDs, obiekty_zred, lvl+1))
+          }
           
           # print(c("Szukamy:",paste(str_remove(x,"#"))))
-          gdzie3 <<- which(array(grepl( paste0( str_remove(x,"#")), as.matrix(get(k)), fixed = T),dim(get(k))),T)
+          gdzie3 <<- which(array(grepl( str_remove(x,"#"), as.matrix(get(k)[,1:2]), fixed = T),dim(get(k)[,1:2])),T)
           teraz <- paste0( str_remove(x,"#"))
           
           if(length(gdzie3) > 0){
@@ -931,7 +944,9 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
   # }
 }
 
-
+Nazwy_Polskie <- nazwy[,1]
+Po_polsku <- c("DiscreteValue", "AnalogValue", "Pole-Lacznik-Szafka", "Stacja", "Tranformator", "SubGeographicalRegion", "GeographicalRegion", "Poziom-Znamionowe", "Koniec-Transformatora", "Terminal-Polaczenie", "Linia-AC", "Wezel-Polaczenie", "Poziom-Napiecia", "Wylacznik-Breaker", "")
+Nazwy_Polskie <- cbind(Nazwy_Polskie, Po_polsku)
 
 
 
