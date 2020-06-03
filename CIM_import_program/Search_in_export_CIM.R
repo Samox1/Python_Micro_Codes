@@ -461,27 +461,27 @@ rm(list=ls())
 
 ### -------------------------------------------------------------------------------------------------------------------- ###
 
-rm(list=ls())
-
-library(ggraph)
-library(igraph)
-library(edgebundleR)
-library(tidyverse)
-library(plyr)
-library(dplyr)
-library(data.table)
-library(RColorBrewer)
-library(networkD3)
-library(data.table)
-library(gtools)
-
-
-library(viridis)
-library(patchwork)
-library(hrbrthemes)
-library(circlize)
-library(chorddiag) 
-library(visNetwork)
+# rm(list=ls())
+# 
+# library(ggraph)
+# library(igraph)
+# library(edgebundleR)
+# library(tidyverse)
+# library(plyr)
+# library(dplyr)
+# library(data.table)
+# library(RColorBrewer)
+# library(networkD3)
+# library(data.table)
+# library(gtools)
+# 
+# 
+# library(viridis)
+# library(patchwork)
+# library(hrbrthemes)
+# library(circlize)
+# library(chorddiag) 
+# library(visNetwork)
 
 # Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
 # Asocjacje <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/asocjacje_kr.txt", sep = ',', header = TRUE, blank.lines.skip = TRUE, fill = TRUE)
@@ -533,23 +533,23 @@ library(visNetwork)
 
 ### --- Drzewko - sciezka - aby sprawdzic gdzie co idzie --- ###
 
-Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
-
-nazwy <- data.frame(Dane[1:36,])
-# d1 <- data.frame(Dane[which(Dane$V1==nazwy[1,1])])
-
-for(i in c(1:length(nazwy[,1]))) {
-  gdzie <- which(Dane$V1==nazwy[i,1])
-  assign((paste(nazwy[i,1])), data.frame(Dane[gdzie[2:length(gdzie)],]))
-  assign((paste(nazwy[i,1])), setNames(get((paste(nazwy[i,1]))), nazwy[i,]))
-}
-
-Stacje <- `cim:Substation`
-
-
-# ID Stacji = BDJ21989
-BDJ21989_ID <- Stacje[which(Stacje[,3] == "BDJ21989"),2]
-Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
+# Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
+# 
+# nazwy <- data.frame(Dane[1:36,])
+# # d1 <- data.frame(Dane[which(Dane$V1==nazwy[1,1])])
+# 
+# for(i in c(1:length(nazwy[,1]))) {
+#   gdzie <- which(Dane$V1==nazwy[i,1])
+#   assign((paste(nazwy[i,1])), data.frame(Dane[gdzie[2:length(gdzie)],]))
+#   assign((paste(nazwy[i,1])), setNames(get((paste(nazwy[i,1]))), nazwy[i,]))
+# }
+# 
+# Stacje <- `cim:Substation`
+# 
+# 
+# # ID Stacji = BDJ21989
+# BDJ21989_ID <- Stacje[which(Stacje[,3] == "BDJ21989"),2]
+# Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
 
 # GPZ_Bedzin_ID <- Stacje[which(Stacje[,3] == ""),2]
 
@@ -780,6 +780,50 @@ Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
 # 
 
 
+rm(list=ls())
+
+library(ggraph)
+library(igraph)
+library(edgebundleR)
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(RColorBrewer)
+library(networkD3)
+library(data.table)
+library(gtools)
+
+
+library(viridis)
+library(patchwork)
+library(hrbrthemes)
+library(circlize)
+library(chorddiag) 
+library(visNetwork)
+
+
+#### ----- WERSJA ROZWOJOWA - Tak wiem jest 775 linii za daleko xD --- ### 
+
+Dane <- fread("D:/Programming/Python_Micro_Codes/CIM_import_program/export-cim.txt", sep = '\t', header = FALSE, blank.lines.skip = TRUE, fill = TRUE)
+
+nazwy <- data.frame(Dane[1:36,])
+# d1 <- data.frame(Dane[which(Dane$V1==nazwy[1,1])])
+
+for(i in c(1:length(nazwy[,1]))) {
+  gdzie <- which(Dane$V1==nazwy[i,1])
+  assign((paste(nazwy[i,1])), data.frame(Dane[gdzie[2:length(gdzie)],]))
+  assign((paste(nazwy[i,1])), setNames(get((paste(nazwy[i,1]))), nazwy[i,]))
+}
+
+Stacje <- `cim:Substation`
+
+
+# ID Stacji = BDJ21989
+BDJ21989_ID <- Stacje[which(Stacje[,3] == "BDJ21989"),2]
+Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
+
+
 obiekty <- nazwy[,1]
 # obiekty <- obiekty[-str_detect(obiekty, i)]
 exclude <- c("cim:PositionPoint", "cim:Location", "cim:VoltageLevel", "cim:Discrete", "cim:DiscreteValue", "cim:SubGeographicalRegion")
@@ -788,12 +832,23 @@ obiekty_zred_Sub <- obiekty[! obiekty %in% c(exclude, "cim:Substation")]
 
 
 ### --- Test z REKURENCJA --- ###
+Kapela <- c(Stacja_Start[,1], Stacja_Start[,2], colnames(Stacja_Start)[3], Stacja_Start[,3], Stacja_Start[,1], Stacja_Start[,2], colnames(Stacja_Start)[3])
+names(Kapela) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
+Test_Polaczenia <- data.frame()
+Test_Polaczenia <- rbind(Kapela)
+# Test_Polaczenia <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
+Polaczenia <- data.frame(Test_Polaczenia)
+Polaczenia <- Polaczenia[-1,]
+# colnames(Polaczenia) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
+
 Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
 colnames(Stacja_Start) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
 
 widzialem <- data.frame(Stacja_Start, fix.empty.names = F)
 colnames(widzialem) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
 widzialem <- widzialem[-1,]
+
+
 # widzialem <- rbind.fill(widzialem, (Stacja_Start))
 # 
 # Test <- `cim:Terminal`[32,]
@@ -857,8 +912,10 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
     print(IDs)
     print(c("Wypisanie widzianych:", length(widzialem[,2])))
     
+    Wiersz_teraz <- IDs
+    
     # for (x in IDs) {
-    for (x in IDs[,-(c(1))]) {
+    for (x in Wiersz_teraz[,-(c(1))]) {
       
       print(x)
       
@@ -888,8 +945,9 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
             print(k)
             # print(gdzie2)
             print(c("Ile znaleziono obiektow:" ,length(gdzie2[,1])))
-            unikat2 <<- unique(gdzie2[,1])
-            IDs <<- get(k)[unikat2,]
+            # unikat2 <<- unique(gdzie2)
+            unikat2 <<- gdzie2
+            IDs <<- get(k)[unikat2[,1],]
             colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
             # assign(paste0("IDs_",lvl), get(k)[unikat2,])
             # print(IDs)
@@ -902,6 +960,15 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
                 print("Bylo juz")
               }else{
                 do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[q,])
+                
+                if(Wiersz_teraz[,2] != IDs[q,2]){
+                
+                  Test_Polaczenia <- c(Wiersz_teraz[,1], Wiersz_teraz[,2], colnames(get(as.character(Wiersz_teraz[1])))[which(Wiersz_teraz==x)], x, IDs[q,1], IDs[q,2], colnames(get(k))[gdzie2[q,2]])
+                  names(Test_Polaczenia) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
+                  Test_Polaczenia <- rbind(Test_Polaczenia)
+                
+                  Polaczenia <<- rbind.fill(Polaczenia, as.data.frame(Test_Polaczenia))
+                }
               }
 
             }
@@ -917,8 +984,9 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
             print(k)
             # print(gdzie3)
             print(c("Ile znaleziono obiektow:" , length(gdzie3[,1])))
-            unikat3 <<- unique(gdzie3[,1])
-            IDs <<- get(k)[unikat3,]
+            # unikat3 <<- unique(gdzie3[,1])
+            unikat3 <<- gdzie3
+            IDs <<- get(k)[unikat3[,1],]
             colnames(IDs) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
             # assign(paste0("IDs_",lvl), get(k)[unikat3,])
             # print(IDs)
@@ -931,6 +999,16 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
                 print("Bylo juz")
               }else{
                 do_przejrzenia <<- rbind.fill(do_przejrzenia, IDs[t,])
+                
+                if(Wiersz_teraz[,2] != IDs[t,2]){
+                  
+                  Test_Polaczenia <- c(Wiersz_teraz[,1], Wiersz_teraz[,2], colnames(get(as.character(Wiersz_teraz[1])))[which(Wiersz_teraz==x)], x, IDs[t,1], IDs[t,2], colnames(get(k))[gdzie3[t,2]])
+                  names(Test_Polaczenia) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
+                  Test_Polaczenia <- rbind(Test_Polaczenia)
+                
+                  Polaczenia <<- rbind.fill(Polaczenia, as.data.frame(Test_Polaczenia))
+                }
+                
               }
               
             }
@@ -944,9 +1022,34 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
   # }
 }
 
-Nazwy_Polskie <- nazwy[,1]
-Po_polsku <- c("DiscreteValue", "AnalogValue", "Pole-Lacznik-Szafka", "Stacja", "Tranformator", "SubGeographicalRegion", "GeographicalRegion", "Poziom-Znamionowe", "Koniec-Transformatora", "Terminal-Polaczenie", "Linia-AC", "Wezel-Polaczenie", "Poziom-Napiecia", "Wylacznik-Breaker", "")
-Nazwy_Polskie <- cbind(Nazwy_Polskie, Po_polsku)
+
+### Przygotowanie danych do wizualizacji
+
+# names(Test_Polaczenia) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
+Polaczenia_Network <- unite(Polaczenia, From_1, c(Object_Type_From, rdf_ID_From), remove=FALSE, sep = " = ", )
+Polaczenia_Network <- unite(Polaczenia_Network, To_2, c(Object_Type_To, rdf_ID_To), remove=FALSE, sep = " = ", )
+
+### Simple network
+simpleNetwork(Polaczenia_Network, height="100px", width="100px",
+                   Source = 1,                 # column number of source
+                   Target = 6,                 # column number of target
+                   linkDistance = 10,          # distance between node. Increase this value to have more space between nodes
+                   charge = -5000,                # numeric value indicating either the strength of the node repulsion (negative value) or attraction (positive value)
+                   fontSize = 14,               # size of the node names
+                   fontFamily = "serif",       # font og node names
+                   linkColour = "#666",        # colour of edges, MUST be a common colour for the whole graph
+                   nodeColour = "#69b3a2",     # colour of nodes, MUST be a common colour for the whole graph
+                   opacity = 0.9,              # opacity of nodes. 0=transparent. 1=no transparency
+                   zoom = T                    # Can you zoom on the figure?
+)
+
+### ---> Zrobic jeszcze "visNetwork" dla oznaczania czym sa polaczone poszczegolne rzeczy
+
+
+
+# Nazwy_Polskie <- nazwy[,1]
+# Po_polsku <- c("DiscreteValue", "AnalogValue", "Pole-Lacznik-Szafka", "Stacja", "Tranformator", "SubGeographicalRegion", "GeographicalRegion", "Poziom-Znamionowe", "Koniec-Transformatora", "Terminal-Polaczenie", "Linia-AC", "Wezel-Polaczenie", "Poziom-Napiecia", "Wylacznik-Breaker", "")
+# Nazwy_Polskie <- cbind(Nazwy_Polskie, Po_polsku)
 
 
 
