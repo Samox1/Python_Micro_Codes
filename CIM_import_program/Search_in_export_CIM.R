@@ -1026,8 +1026,8 @@ while ( length(do_przejrzenia[,1]) > 0 ) {
 ### Przygotowanie danych do wizualizacji
 
 # names(Test_Polaczenia) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
-Polaczenia_Network <- unite(Polaczenia, From_1, c(Object_Type_From, rdf_ID_From), remove=FALSE, sep = " = ", )
-Polaczenia_Network <- unite(Polaczenia_Network, To_2, c(Object_Type_To, rdf_ID_To), remove=FALSE, sep = " = ", )
+Polaczenia_Network <- unite(Polaczenia, From_1, c(Object_Type_From, rdf_ID_From), remove=FALSE, sep = " = ")
+Polaczenia_Network <- unite(Polaczenia_Network, To_2, c(Object_Type_To, rdf_ID_To), remove=FALSE, sep = " = ")
 
 ### Simple network
 simpleNetwork(Polaczenia_Network, height="100px", width="100px",
@@ -1043,7 +1043,30 @@ simpleNetwork(Polaczenia_Network, height="100px", width="100px",
                    zoom = T                    # Can you zoom on the figure?
 )
 
+###
 ### ---> Zrobic jeszcze "visNetwork" dla oznaczania czym sa polaczone poszczegolne rzeczy
+###
+
+fromvis <- match(Polaczenia_Network$rdf_ID_From, widzialem$rdf_ID)
+tovis <- match(Polaczenia_Network$rdf_ID_To, widzialem$rdf_ID)
+
+widzialem <- unite(widzialem, Label_1, c(Object_Type, rdf_ID), remove=FALSE, sep = " = " )
+
+nodes <- data.frame(id = 1:length(widzialem$rdf_ID),
+                    label = widzialem$Label_1,                              # add labels on nodes
+                    group = widzialem$Object_Type,                         # add groups on nodes
+                    value = 1:length(widzialem$rdf_ID))                    # size adding value
+
+
+edges <- data.frame(from = fromvis, to = tovis,
+                    label = Polaczenia_Network$Value_Link,                 # add labels on edges
+                    length = c(1000),                                       # length
+                    arrows = c("to", "from"))                              # arrows
+
+
+visNetwork(nodes, edges, width = "100%") %>% visLegend() %>% visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) # %>% visHierarchicalLayout()
+Network <- visNetwork(nodes, edges, width = "100%") %>% visLegend() %>% visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) # %>% visHierarchicalLayout()
+visSave(Network, file = "D:/Programming/Python_Micro_Codes/CIM_import_program/network.html")
 
 
 
