@@ -822,6 +822,7 @@ Stacje <- `cim:Substation`
 # ID Stacji = BDJ21989
 BDJ21989_ID <- Stacje[which(Stacje[,3] == "BDJ21989"),2]
 Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
+Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ20914"),]
 
 
 obiekty <- nazwy[,1]
@@ -841,7 +842,7 @@ Polaczenia <- data.frame(Test_Polaczenia)
 Polaczenia <- Polaczenia[-1,]
 # colnames(Polaczenia) <- c("Object_Type_From","rdf_ID_From","Object_Element_From","Value_Link","Object_Type_To", "rdf_ID_To", "Object_Element_To")
 
-Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
+# Stacja_Start <- Stacje[which(Stacje[,3] == "BDJ21989"),]
 colnames(Stacja_Start) <- c("Object_Type","rdf_ID","V3","V4","V5", "V6", "V7", "V8", "V9", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18")
 
 widzialem <- data.frame(Stacja_Start, fix.empty.names = F)
