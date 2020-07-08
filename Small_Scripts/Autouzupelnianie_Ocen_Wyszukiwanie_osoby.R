@@ -14,14 +14,20 @@ library(data.table)
 Wszystkie_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/Wszystkie_Oceny_Poprawka.csv", sep = ';', header = TRUE, encoding = "UTF-8")
 colnames(Wszystkie_Oceny) <- c("nr", "Nazwisko","Imię","Dzień tygodnia","1","30","20","Planck","Ciepło","3","11","10","Hall")
 
-Poniedzialek_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ poniedziałek 11_ oceny.csv", sep = ',', header = TRUE, encoding = "UTF-8")
-Sroda_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ środa 14_ oceny.csv", sep = ',', header = TRUE, encoding = "UTF-8")
-Piatek_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ piątek 14_ oceny.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Poniedzialek_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ poniedziałek 11_ oceny_zejsciowki.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Sroda_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ środa 14_ oceny_zejsciowki.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Piatek_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ piątek 14_ oceny_zejsciowki.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Poniedzialek_Oceny[is.na(Poniedzialek_Oceny)] <- 0
+Sroda_Oceny[is.na(Sroda_Oceny)] <- 0
+Piatek_Oceny[is.na(Piatek_Oceny)] <- 0
 
-Poniedzialek_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ_poniedziałek_11_Sprawozdania.csv", sep = ',', header = TRUE, encoding = "UTF-8")
-Sroda_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ_środa_14_Sprawozdania.csv", sep = ',', header = TRUE, encoding = "UTF-8")
-# Piatek_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ piątek 14_ oceny.csv", sep = ',', header = TRUE, encoding = "UTF-8")
 
+# Poniedzialek_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ_poniedziałek_11_Sprawozdania.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+# Sroda_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ_środa_14_Sprawozdania.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+# Piatek_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ piątek 14_ oceny_Sprawozdania.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Poniedzialek_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ poniedziałek 11_ oceny_sprawka.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Sroda_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ środa 14_ oceny_sprawka.csv", sep = ',', header = TRUE, encoding = "UTF-8")
+Piatek_Sprawozdania_Oceny <- read.table("D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/WIBHIŚ piątek 14_ oceny_sprawka.csv", sep = ',', header = TRUE, encoding = "UTF-8")
 
 
 
@@ -35,7 +41,7 @@ Piatek_Oceny$Kombajn <- paste(Piatek_Oceny$Nazwisko, Piatek_Oceny$X.U.FEFF.Imię
 
 Poniedzialek_Sprawozdania_Oceny$Kombajn <- paste(Poniedzialek_Sprawozdania_Oceny$Nazwisko, Poniedzialek_Sprawozdania_Oceny$X.U.FEFF.Imię, sep=" ")
 Sroda_Sprawozdania_Oceny$Kombajn <- paste(Sroda_Sprawozdania_Oceny$Nazwisko, Sroda_Sprawozdania_Oceny$X.U.FEFF.Imię, sep=" ")
-# Piatek_Sprawozdania_Oceny$Kombajn <- paste(Piatek_Sprawozdania_Oceny$Nazwisko, Piatek_Sprawozdania_Oceny$X.U.FEFF.Imię, sep=" ")
+Piatek_Sprawozdania_Oceny$Kombajn <- paste(Piatek_Sprawozdania_Oceny$Nazwisko, Piatek_Sprawozdania_Oceny$X.U.FEFF.Imię, sep=" ")
 
 
 ### --- Petla dla PONIEDZIALKU --- 
@@ -87,6 +93,7 @@ print(length(which(Wszystkie_Oceny$Zejsciowka_11 > 0)))
 for (x in c(1:length(Poniedzialek_Sprawozdania_Oceny[,1]))) {
   # print(x)
   
+  # Poniedzialek_Sprawozdania_Oceny$Opinia[x] <- str_remove(Poniedzialek_Sprawozdania_Oceny$Opinia[x], pattern = "=")
   kappa <- str_split(Poniedzialek_Sprawozdania_Oceny$Opinia[x], " - ")
   Poniedzialek_Sprawozdania_Oceny$Punkty[x] <- as.double(kappa[[1]][1])
   
@@ -100,29 +107,29 @@ for (x in c(1:length(Poniedzialek_Sprawozdania_Oceny[,1]))) {
 
 for (x in c(1:length(Sroda_Sprawozdania_Oceny[,1]))) {
   # print(x)
-  
+
   kappa <- str_split(Sroda_Sprawozdania_Oceny$Opinia[x], " - ")
   Sroda_Sprawozdania_Oceny$Punkty[x] <- as.double(kappa[[1]][1])
-  
+
   print( which(Sroda_Sprawozdania_Oceny$Kombajn[x]==Wszystkie_Oceny$Kombajn) )
   Wszystkie_Oceny$Sprawozdania_11[which(Sroda_Sprawozdania_Oceny$Kombajn[x]==Wszystkie_Oceny$Kombajn)] <- Sroda_Sprawozdania_Oceny$Punkty[x]
-  
+
 }
 
 
 
 ### - Przepisanie punktow za Sprawozdanie z komentarza - PIATEK - ###
 
-# for (x in c(1:length(Piatek_Sprawozdania_Oceny[,1]))) {
-#   # print(x)
-#   
-#   kappa <- str_split(Piatek_Sprawozdania_Oceny$Opinia[x], " - ")
-#   Piatek_Sprawozdania_Oceny$Punkty[x] <- as.double(kappa[[1]][1])
-#   
-#   print( which(Piatek_Sprawozdania_Oceny$Kombajn[x]==Wszystkie_Oceny$Kombajn) )
-#   Wszystkie_Oceny$Sprawozdania_11[which(Piatek_Sprawozdania_Oceny$Kombajn[x]==Wszystkie_Oceny$Kombajn)] <- Piatek_Sprawozdania_Oceny$Punkty[x]
-#   
-# }
+for (x in c(1:length(Piatek_Sprawozdania_Oceny[,1]))) {
+  # print(x)
+
+  kappa <- str_split(Piatek_Sprawozdania_Oceny$Opinia[x], " - ")
+  Piatek_Sprawozdania_Oceny$Punkty[x] <- as.double(kappa[[1]][1])
+
+  print( which(Piatek_Sprawozdania_Oceny$Kombajn[x]==Wszystkie_Oceny$Kombajn) )
+  Wszystkie_Oceny$Sprawozdania_11[which(Piatek_Sprawozdania_Oceny$Kombajn[x]==Wszystkie_Oceny$Kombajn)] <- Piatek_Sprawozdania_Oceny$Punkty[x]
+
+}
 
 
 
@@ -133,9 +140,18 @@ print(c("Ocena = 2.0 == ", length(which(Wszystkie_Oceny$Sprawozdania_11==2))))
 print(c("Ocena = 3.0 == ", length(which(Wszystkie_Oceny$Sprawozdania_11==3))))
 print(c("Ocena = 3.5 == ", length(which(Wszystkie_Oceny$Sprawozdania_11==3.5))))
 print(c("Ocena = 4.0 == ", length(which(Wszystkie_Oceny$Sprawozdania_11==4))))
+print(c("Ocena = 4.5 == ", length(which(Wszystkie_Oceny$Sprawozdania_11==4.5))))
 
+Wszystkie_Oceny[is.na(Wszystkie_Oceny)] <- 0
+Wszystkie_Oceny$Sprawozdania_11[45] <- 4.0    ### Kozlowski Jakub - Ocena ze Spr = 4.0
 
+Wszystkie_Oceny$Ocena_Koncowa_11 <- (Wszystkie_Oceny$Zejsciowka_11 - 1) * 0.3 + Wszystkie_Oceny$Sprawozdania_11 * 0.7
 
+Wszystkie_Oceny$Ocena_Koncowa_11_Poprawione <- Wszystkie_Oceny$Ocena_Koncowa_11
+Wszystkie_Oceny$Ocena_Koncowa_11_Poprawione[which(Wszystkie_Oceny$Ocena_Koncowa_11 < 2)] <- 2
+Wszystkie_Oceny$Ocena_Koncowa_11_Poprawione[which(Wszystkie_Oceny$Sprawozdania_11 < 3)] <- 2
+
+write_excel_csv(Wszystkie_Oceny, "D:/Programming/Python_Micro_Codes/Small_Scripts/Ocenki/ADONE_Wszystkie_Oceny_.csv", delim = ";")
 
 
 ### - Sprawdzenie czy sa takie same osoby - ###

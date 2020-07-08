@@ -1,0 +1,47 @@
+﻿"Imię","Nazwisko","Adres e-mail","Sprawozdanie - Laboratorium nr 11 (15.06.2020)","Punkty","Opinia"
+"Adam","Antosiewicz","adam.antosiewicz.stud@pw.edu.pl","","","="""""
+"Aleksandra","Sienicka","aleksandra.sienicka2.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie - Jak najbardziej dobrze wykonane, jest to co potrzebne, schludnie zaprezentowane i zaznaczone najważniejsze wyniki. Brakuje mi zestawienia wyników tak, żeby można było je porównać patrząc w jedno miejsce (np. we wnioskach), czasem w wynikach liczba miejsc po przecinku wyniku nie zgadza się z niepewnością, a wnioski można było ciut rozszerzyć."""
+"Alicja","Fabisiak","alicja.fabisiak2.stud@pw.edu.pl","","","="""""
+"Anna","Szarpak","anna.szarpak.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Wszystko zostało zawarte i nie widzę jakiś drastycznych błędów."""
+"Dominika","Andrzejczyk","dominika.andrzejczyk.stud@pw.edu.pl","","","="""""
+"Edyta","Bartman","edyta.bartman.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie> Jak najbardziej poprawne, jest co trzeba. Zabrakło lepszych wniosków i innych kosmetycznych rzeczy."""
+"Jakub","Kozłowski","jakub.kozlowski9.stud@pw.edu.pl","","","=""2 - Taką ocenę stawiam póki co. 
+Sprawozdanie poprawne i wszystko zostało zawarte, fajnie że udało się przeliczyć dane z symulacji (za to plus, bo nie wymagałem tego). 
+Niestety wyniki nie wyglądają na prawidłowe - przynajmniej dla danych z laboratorium - proszę to sprawdzić raz jeszcze. Dodatkowo przydałoby się przy wnioskach odpowiednie zestawienie współczynników absoprcji (z odpowiednim zapisem)."""
+"Jakub","Cieślik","jakub.cieslik2.stud@pw.edu.pl","","","="""""
+"Julia","Stoma","julia.stoma.stud@pw.edu.pl","","","=""4.5 - Taką ocenę wystawiam za sprawozdanie. Wszystko odpowiednio opisane, schludnie zaprezentowane i dobre porównanie wyników (z niepewnościami).
+Jedna rzecz - w kilku sprawozdaniach widzę ""absorbancja"" - fajnie że próbujecie używać różnych słów, ale to określa wartość bez jednostki, a współczynnik absorpcji ma 1/mm. Niby to samo, a jednak przy absorbancji trzeba powiedzieć coś o elemencie absorbującym (np. grubości), gdzie przy wsp. absorpcji mówimy o danej substancji. Np. aluminium ma wsp. absorpcji 0,017 [1/mm], a płytka X (z innego materiału) ma absorbancję np. 10, no to absorbancja nic nam nie mówi o substancji."""
+"Julia","Ługowska","julia.lugowska.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za to sprawozdanie. Jak najbardziej poprawne sprawozdanie - zostało zawarte wszystko co potrzebne, schludnie zaprezentowane, dobre podsumowanie i odpowiedni zapis wyników. Szkoda, że nie było dopasowanych prostych na wykresach ln(N) oraz wykresu z danych z symulacji (dla Al i Cu) - plik tekstowy z kilkoma pomiarami był zawarty w plikach."""
+"Justyna","Baranowska","justyna.baranowska2.stud@pw.edu.pl","","","=""3 - Taką ocenę stawiam za sprawozdanie. Zawarte jest wszystko.
+Coś się zepsuło chyba przy exporcie do PDF'a, bo brakuje tabeli jednej, jest ciut chaotycznie, brakuje niepewności dla wyników wsp. absorpcji, a wnioski są mocno okrojone + po terminie."""
+"Kacper","Bogusz","kacper.bogusz.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Dobre sprawozdanie ze wszystkim co potrzebne.
+Termin + Kilku rzeczy zabrakło - pusty paragraf 4.2, za dużo rzeczy w tabelach, wzory pisane odręcznie trochę nie współgrają."""
+"Khulan","Enebish","khulan.enebish.stud@pw.edu.pl","","","="""""
+"Maciej","Belczewski","maciej.belczewski.stud@pw.edu.pl","","","="""""
+"Maciej","Dzik","maciej.dzik.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie - Jak najbardziej dobrze wykonane, jest to co potrzebne. Trochę chaotyczne tabele, przy porównaniu współczynnika absorpcji brakuje odpowiedniego zapisu z niepewnościami a wnioski można było ciut rozszerzyć."""
+"Marek","Przybyszewski","marek.przybyszewski.stud@pw.edu.pl","","","="""""
+"Mariusz","Banasiak","mariusz.banasiak2.stud@pw.edu.pl","","","="""""
+"Martyna","Czoboda","martyna.czoboda.stud@pw.edu.pl","","","="""""
+"Mateusz","Chodkiewicz","mateusz.chodkiewicz.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Jak najbardziej poprawne sprawozdanie, schludne, ze wszystkim co potrzebne, choć zabrakło mi kilku rzeczy na wyższą ocenę."""
+"Michał","Florysiak","michal.florysiak.stud@pw.edu.pl","","","="""""
+"Michał","Pierzchała","michal.pierzchala.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie - Jak najbardziej dobrze wykonane, jest to co potrzebne, schludnie zaprezentowane i zaznaczone najważniejsze wyniki. Brakuje mi zestawienia wyników tak, żeby można było je porównać patrząc w jedno miejsce (np. we wnioskach), czasem w wynikach liczba miejsc po przecinku wyniku nie zgadza się z niepewnością, a wnioski można było ciut rozszerzyć."""
+"Monika","Matejuk","monika.matejuk.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Zostało zawarte wszystko, ale mam pewne zastrzeżenia:
+1) Charakterystyka licznika - wykonywana była ""na pusto""
+2) Jeśli mamy punkty dla symulacji (miedź i Al) to nie za bardzo można pokazać to jako histogramy - to są punkty XY a nie rozkład prawdopodobieństwa
+3) Duże zaokrąglenie dla Ołowiu
+4) Brak niepewności przy zestawieniu wyników współczynnika absorpcji we wnioskach.
+"""
+"Natalia","Kobza","natalia.kobza.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Do opracowania wyników wszystko jest wzorowo,.
+1) Charakterystyka liczby zliczeń względem napięcia - chodziło o odpowiedź detektora na promieniowanie bez użycia żadnych płytek, które ograniczają promieniowanie.... 
+2) Histogram - dokładnie to samo. W tym przypadku obserwujemy odpowiedź czujnika na promieniowanie i patrzymy jak wygląda rozrzut zliczeń, bez ograniczania promieniowania....
+3) Obliczenia, wyniki i wykresy - jak najbardziej na plus, schludnie i odpowiedni zapis z niepewnościami.
+4) Wnioski - Bardzo dobre podsumowanie wyników i omówienie niepewności. Niestety zdanie ""Ołów przepuszcza większą liczbę zliczeń niż miedź"" czy opis mówiący o wykładniczej zależności Wsp. Absorpcji są nie do przyjęcia... Wsp. Absorpcji nie może zmieniać wartości - wyliczono jedną wartość jako nachylenie prostej i ten opis niemalże zniszczył całe sprawozdanie w moich oczach... 
+Poza tymi błędami sprawozdanie wzorowe."""
+"Natalia","Lisicka","natalia.lisicka.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie - wszystko co powinno być jest."""
+"Natalia","Aleksiejuk","natalia.aleksiejuk.stud@pw.edu.pl","","","=""3.5 - Taką ocenę stawiam za sprawozdanie. Jest zawarte wszystko, natomiast jest trochę rzeczy do poprawy.
+Jeśli są chęci na wyższą ocenę proszę o wiadomość."""
+"Natalia","Sobolewska","natalia.sobolewska.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Mocne 4 - Wszystko zawarte, schludnie zaprezentowane  - brakuje mi kilku rzeczy, a ""Charakterystyki liczby zliczeń względem napięcia na detektorze"" jest prowadzona bez żadnych absorbentów, tak samo histogram."""
+"Oskar","Sędek","oskar.sedek.stud@pw.edu.pl","","","="""""
+"Piotr","Biront","piotr.biront.stud@pw.edu.pl","","","=""4 - Taką ocenę stawiam za sprawozdanie. Zawarte zostało wszystko o co prosiłem. Zabrakło mi kilku rzeczy + po terminie."""
+"Przemysław","Bogdewicz","przemyslaw.bogdewicz.stud@pw.edu.pl","","","=""4.5 - Taką ocenę stawiam za sprawozdanie. Jest zawarte wszystko co miało być, schludnie i dobrze opisane, wkradły się czasem błędy kosmetyczne, np. 𝑎=−7,793(0.0034) (wsp. a dla pierwiastków), czy jest ciut za dużo rzeczy w tabelach (pomocnicze kolumny czy wiersze można sobie darować), błąd przy dopasowaniu prostej ln(N) dla Ołowiu (chyba pierwszy punkt gdzieś poleciał), ale jako pierwsze sprawozdanie w terminie jest bardzo dobrze."""
+"Sylwia","Stypułkowska","sylwia.stypulkowska.stud@pw.edu.pl","","","=""4,5 - Taką ocenę wystawiam za sprawozdanie. Bardzo dobre sprawozdanie, niemalze wzorowe, jest wszystko schludnie podane i bardzo dobre zestawienie wyników w tabeli (z odpowiednim zapisem niepewności) oraz odpowiednie wnioski. Powinno być więcej takich sprawozdań."""
