@@ -189,3 +189,28 @@ print(which(is.na(Wynik), arr.ind = TRUE))
 # print(Dane[which(Dane$PPE_NO==Stacje[3])])
 # length(Dane$ENERGIA)
 
+
+
+### -----------------------------------------------------------------------------------------------------------------------------------------
+
+rm(list=ls())
+
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(data.table)
+library(easycsv)
+library(lubridate)
+
+Export <- fread("D:/Programming/Python_Micro_Codes/Reorgenizer_for_timeseries_raport_files/export-ami.csv", sep = ';', header = TRUE, blank.lines.skip = TRUE, fill = FALSE, quote = "")
+colnames(Export) <- str_remove_all(colnames(Export), "\"")
+
+Ujemne <- which(Export < (-10000), arr.ind = TRUE)
+length(Ujemne[,1])
+
+Braki <- lapply(Export, function(x) (which(x < (-10000))))
+
+
+
+
+
