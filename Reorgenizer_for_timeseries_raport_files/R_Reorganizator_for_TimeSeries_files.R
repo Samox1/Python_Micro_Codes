@@ -33,7 +33,7 @@ if(length(NA_pozycje) == 0){
 Dane$GODZ <- ymd_hms(Dane$GODZ)
 Zmiana_Godziny <- which(Dane$FLAGA_EXTR==1)
 if(length(Zmiana_Godziny) != 0){
-  Dane$GODZ[Zmiana_Godziny] <- Dane$GODZ[Zmiana_Godziny] + minutes(60)
+  Dane$GODZ[Zmiana_Godziny] <- Dane$GODZ[Zmiana_Godziny] + seconds(15)
 }
 
 Dane <- arrange(Dane, GODZ)
@@ -139,10 +139,11 @@ indeks <- 10
 
 ### Problem z 28713 - Zmiana godziny, podwojne fragmenty czasowe 3:15:00 z flaga i bez flagi
 
-for (godzinki in c(28700:length(Daty))) {
+for (godzinki in c(1:length(Daty))) {
   for (stacyjki in c(1:length(Stacje))) {
     for (markery in c(1:length(Energia))) {
       
+      ### Dziala
       Po_Godzinie <- Dane[Dane$GODZ==Daty[godzinki],]
       # print(Po_Godzinie)
       Po_Stacjach <- Po_Godzinie[which(Po_Godzinie$PPE_NO==Stacje[stacyjki]),]
@@ -150,11 +151,15 @@ for (godzinki in c(28700:length(Daty))) {
       Po_Markerach <- Po_Stacjach[which(Po_Stacjach$ENERGIA==Energia[markery]),]
       # print(Po_Markerach)
       WARTOSC <- Po_Markerach$WARTOSC
-      print(Po_Markerach)
-      print(godzinki)
+      # print(Po_Markerach)
+      # print(godzinki)
       
+      ### Slow
       # print(Dane$WARTOSC[which(Dane$PPE_NO==Stacje[stacyjki] & Dane$GODZ==godzinki & Dane$ENERGIA==Energia[markery])])
-      # WARTOSC <- Dane$WARTOSC[which(Dane$PPE_NO==Stacje[stacyjki] & Dane$GODZ==as_date(godzinki) & Dane$ENERGIA==Energia[markery])]
+      # WARTOSC <- Dane$WARTOSC[which(Dane$PPE_NO==Stacje[stacyjki] & Dane$GODZ==Daty[godzinki] & Dane$ENERGIA==Energia[markery])]
+      
+      
+      # WARTOSC <- Dane %>% filter(PPE_NO==Stacje[stacyjki] & GODZ==Daty[godzinki] & ENERGIA==Energia[markery]) %>% select(WARTOSC)
       
       if(length(WARTOSC) == 0){
         WARTOSC = NA
@@ -177,7 +182,7 @@ View(Wynik)
 print(which(is.na(Wynik), arr.ind = TRUE))
 
 
-
+# Wynik <- lapply(Dane, )
 
 # View(Dane[which(Dane$PPE_NO==Stacje[1])])
 # print(Dane[which(Dane$PPE_NO==Stacje[2])])
