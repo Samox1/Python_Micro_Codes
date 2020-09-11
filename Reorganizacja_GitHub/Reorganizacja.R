@@ -2,6 +2,15 @@
 ### Szymon Baczyñski
 ### Start - 10.07.2020
 
+### ********************************************************************************************
+### BRO 
+### --> Robisz kopie z kazdego dnia w folderze "D:/Programming/DOKTORAT/KOPIA_DANE_Z_LABU" --> 
+### --> Wyrzucasz Historie z glownego folderu "A_Dane_z_LABORATORIUM" --> 
+### --> Wlaczasz skrypt i masz HISTORIE
+### BRO
+### ********************************************************************************************
+
+
 rm(list=ls())
 
 library(tidyverse)
@@ -140,80 +149,82 @@ pelna_sciezka <- list.files(path = kopia_folder, full.names = TRUE , recursive =
 ### --- Kopiowanie plikow v5F0PS do odpowiedniego folderu --- ###
 ### Folder dla v5F0PS = "D:\Programming\DOKTORAT\A_Dane_z_LABORATORIUM\0_A_Historia-Probek\v5K0PS-Pierwsza_probka_z_wrzesnia_2019"
 
-v5F0PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K0PS-Pierwsza_probka_z_wrzesnia_2019"
+dir.create("D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek")
+
+dir.create(v5F0PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K0PS-Pierwsza_probka_z_wrzesnia_2019")
 file.copy(pelna_sciezka[v5F0PS_id], to = v5F0PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F1PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F1PP"
+dir.create(v5F1PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F1PP")
 file.copy(pelna_sciezka[v5F1PP_id], to = v5F1PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F2PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F2PP"
+dir.create(v5F2PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F2PP")
 file.copy(pelna_sciezka[v5F2PP_id], to = v5F2PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F3PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F3PS"
+dir.create(v5F3PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F3PS")
 file.copy(pelna_sciezka[v5F3PS_id], to = v5F3PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F4PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F4PP"
+dir.create(v5F4PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F4PP")
 file.copy(pelna_sciezka[v5F4PP_id], to = v5F4PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F5PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F5PP"
+dir.create(v5F5PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F5PP")
 file.copy(pelna_sciezka[v5F5PP_id], to = v5F5PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F6PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F6PP"
+dir.create(v5F6PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F6PP")
 file.copy(pelna_sciezka[v5F6PP_id], to = v5F6PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v8D1PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v8D1PP"
+dir.create(v8D1PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v8D1PP")
 file.copy(pelna_sciezka[v8D1PP_id], to = v8D1PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5K_T1_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K_T1_PS"
+dir.create(v5K_T1_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K_T1_PS")
 file.copy(pelna_sciezka[v5K_T1_PS_id], to = v5K_T1_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5K_T2_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K_T2_PS"
+dir.create(v5K_T2_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K_T2_PS")
 file.copy(pelna_sciezka[v5K_T2_PS_id], to = v5K_T2_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F_T3_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F_T3_PS"
+dir.create(v5F_T3_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F_T3_PS")
 file.copy(pelna_sciezka[v5F_T3_PS_id], to = v5F_T3_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5F_T4_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F_T4_PS"
+dir.create(v5F_T4_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5F_T4_PS")
 file.copy(pelna_sciezka[v5F_T4_PS_id], to = v5F_T4_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-v5K_T7x_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K_T7x_PS"
+dir.create(v5K_T7x_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/v5K_T7x_PS")
 file.copy(pelna_sciezka[v5K_T7x_PS_id], to = v5K_T7x_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-KLC_v1_F1_PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F1_PP"
+dir.create(KLC_v1_F1_PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F1_PP")
 file.copy(pelna_sciezka[KLC_v1_F1_PP_id], to = KLC_v1_F1_PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-KLC_v1_F2_PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F2_PP"
+dir.create(KLC_v1_F2_PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F2_PP")
 file.copy(pelna_sciezka[KLC_v1_F2_PP_id], to = KLC_v1_F2_PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-KLC_v1_F3_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F3_PS"
+dir.create(KLC_v1_F3_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F3_PS")
 file.copy(pelna_sciezka[KLC_v1_F3_PS_id], to = KLC_v1_F3_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-KLC_v1_F4_PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F4_PP"
+dir.create(KLC_v1_F4_PP_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F4_PP")
 file.copy(pelna_sciezka[KLC_v1_F4_PP_id], to = KLC_v1_F4_PP_Folder, overwrite = FALSE, copy.date = TRUE)
 
-KLC_v1_F5_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F5_PS"
+dir.create(KLC_v1_F5_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F5_PS")
 file.copy(pelna_sciezka[KLC_v1_F5_PS_id], to = KLC_v1_F5_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-KLC_v1_F6_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F6_PS"
+dir.create(KLC_v1_F6_PS_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/KLC_v1_F6_PS")
 file.copy(pelna_sciezka[KLC_v1_F6_PS_id], to = KLC_v1_F6_PS_Folder, overwrite = FALSE, copy.date = TRUE)
 
-FW1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/FW1"
+dir.create(FW1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/FW1")
 file.copy(pelna_sciezka[FW1_id], to = FW1_Folder, overwrite = FALSE, copy.date = TRUE)
 
-LC_PDMS_zPlazma_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_PDMS_zPlazma"
+dir.create(LC_PDMS_zPlazma_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_PDMS_zPlazma")
 file.copy(pelna_sciezka[LC_PDMS_zPlazma_id], to = LC_PDMS_zPlazma_Folder, overwrite = FALSE, copy.date = TRUE)
 
-LC_PDMS_bezPlazmy_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_PDMS_bezPlazmy"
+dir.create(LC_PDMS_bezPlazmy_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_PDMS_bezPlazmy")
 file.copy(pelna_sciezka[LC_PDMS_bezPlazmy_id], to = LC_PDMS_bezPlazmy_Folder, overwrite = FALSE, copy.date = TRUE)
 
-LC_Cell_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_Cell_1"
+dir.create(LC_Cell_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_Cell_1")
 file.copy(pelna_sciezka[LC_Cell_1_id], to = LC_Cell_1_Folder, overwrite = FALSE, copy.date = TRUE)
 
 
-LC_GLASS_Test_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_aGLASS_Test_1"
+dir.create(LC_GLASS_Test_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_aGLASS_Test_1")
 file.copy(pelna_sciezka[LC_GLASS_Test_1_id], to = LC_GLASS_Test_1_Folder, overwrite = FALSE, copy.date = TRUE)
 
-LC_PDMS_Test_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_aPDMS_Test_1"
+dir.create(LC_PDMS_Test_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_aPDMS_Test_1")
 file.copy(pelna_sciezka[LC_PDMS_Test_1_id], to = LC_PDMS_Test_1_Folder, overwrite = FALSE, copy.date = TRUE)
 
 
