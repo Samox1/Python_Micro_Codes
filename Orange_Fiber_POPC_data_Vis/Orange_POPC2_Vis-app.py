@@ -10,7 +10,22 @@ from scrapy import Selector
 import requests
 
 
+def _max_width_():
+    max_width_str = f"max-width: 2000px;"
+    st.markdown(
+        f"""
+    <style>
+    .reportview-container .main .block-container{{
+        {max_width_str}
+    }}
+    </style>    
+    """,
+        unsafe_allow_html=True,
+    )
+
 ### 1 - Import Data from Orange website
+
+_max_width_()
 
 @st.cache
 def Import_Data_Orange_Fiber():
