@@ -16,7 +16,7 @@ sel = Selector(text = orange_fiber_site)
 css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) li a'
 plik = sel.css(css_test).xpath('@href').extract()
 print(plik)                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
-print(str('*** How many files are there on Orange website = ' + len(plik)))
+print(str('*** How many files are there on Orange website = ' + str(len(plik))))
 # columns=['Nazwa obszaru', 'Identyfikator budynku', 'Województwo', 'Powiat', 'Gmina', 'Kod TERC', 'Miejscowość', 'SIMC', 'Ulica', 'Kod ULIC', 'Nr ', 'Szerokość', 'Długość', 'SFH/MFH', 'Dostępna prędkość [Mb]', 'Liczba lokali']
 dane_z_orange = pd.DataFrame(columns=['Nazwa obszaru', 'Identyfikator budynku', 'Województwo', 'Powiat', 'Gmina', 'Kod TERC', 'Miejscowość', 'SIMC', 'Ulica', 'Kod ULIC', 'Nr ', 'Szerokość', 'Długość', 'SFH/MFH', 'Dostępna prędkość [Mb]', 'Liczba lokali'])
 for i in range(1,len(plik)):

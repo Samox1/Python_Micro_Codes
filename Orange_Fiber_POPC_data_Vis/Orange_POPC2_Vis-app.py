@@ -8,6 +8,7 @@ import numpy
 import folium
 from scrapy import Selector
 import requests
+import datetime
 
 
 def _max_width_():
@@ -25,10 +26,12 @@ def _max_width_():
 
 ### 1 - Import Data from Orange website
 
-_max_width_()
+#_max_width_()
+
+date_now = datetime.date.today()
 
 @st.cache
-def Import_Data_Orange_Fiber():
+def Import_Data_Orange_Fiber(date_now):
     orange_server = 'https://www.hurt-orange.pl'
     orange_url = 'https://www.hurt-orange.pl/operatorzy-krajowi/popc-nabor-i-i-ii'
     orange_fiber_site = requests.get(orange_url).content
@@ -39,7 +42,8 @@ def Import_Data_Orange_Fiber():
     #print(plik)                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
     ile = len(plik)
     #print(ile)
-    print('Extract files names from Orange website')
+    print('--- Date now = ' + str(date_now) + ' ---')
+    print('*** Extract files names from Orange website ***')
 
     # columns=['Nazwa obszaru', 'Identyfikator budynku', 'Województwo', 'Powiat', 'Gmina', 'Kod TERC', 'Miejscowość', 'SIMC', 'Ulica', 'Kod ULIC', 'Nr ', 'Szerokość', 'Długość', 'SFH/MFH', 'Dostępna prędkość [Mb]', 'Liczba lokali']
 
@@ -49,6 +53,7 @@ def Import_Data_Orange_Fiber():
             link_pobierania = orange_server + plik[i]
             print(str(i) + ': ' + link_pobierania)
             tymczasowa_tablica = pd.read_excel(link_pobierania, header=[2,]).iloc[2:, 0:]
+            ### Dodac kolumne z Data Ostatniego Zapisania pliku Excel
             dane_z_orange = dane_z_orange.append(tymczasowa_tablica, ignore_index=True, sort=False)
 
     ### 1.2 Step = Take data and make sure if coordinates are numeric values
@@ -61,21 +66,23 @@ def Import_Data_Orange_Fiber():
     Gminy_ALL.sort()
     Gminy_ALL = list(Gminy_ALL)
     jaktorow_position = Gminy_ALL.index('JAKTORÓW')
+    print('*** End of Extract Data ***')
 
-    return dane_z_orange, Gminy_ALL, jaktorow_position
+    return dane_z_orange, Gminy_ALL, jaktorow_position, ile
 
-print('*** End of Extract Data ***')
-dane_z_orange, Gminy_ALL, jaktorow_position = Import_Data_Orange_Fiber()
+
+dane_z_orange, Gminy_ALL, jaktorow_position, ile = Import_Data_Orange_Fiber(date_now)
 
 ### 3.1 - Make Streamlit app
 
-st.write(""" # Wizualizacja danych Orange POPC2 - Fiber To The Home
+st.title("""Wizualizacja danych Orange POPC2 - Fiber To The Home
 Mapa punktów, które zostały lub będą podłączone do sieci światłowodowej """)
+st.text(" Plików na stronie = " + str(ile) + '          Ostatnia aktualizacja: ' + str(date_now))
 
 st.sidebar.markdown(""" [Strona Orange, z której pochodzą dane (POPC2)] (https://www.hurt-orange.pl/operatorzy-krajowi/popc-nabor-i-i-ii/) """)
 st.sidebar.header('Wybierz gminę:')
 Gmina = st.sidebar.selectbox('Gmina: ', Gminy_ALL, index=jaktorow_position)
-st.text('\n\n\nMade by SamoX')
+st.sidebar.text('\n\n\nMade by SamoX')
 
 # st.sidebar.slider('Do momentu w czasie', ['29-11-2020', '2-12-2020'])
 
@@ -83,9 +90,9 @@ jaktorow_geo = [52.079488, 20.551613]
 jaktorow_pkp_geo = [52.086587629803624, 20.55210270975992]
 dane_z_orange_jaktorow = dane_z_orange[dane_z_orange["Gmina"].str.contains(Gmina)]
 
-m = folium.Map(location=jaktorow_geo, tiles='OpenStreetMap', zoom_start=14)
+m = folium.Map(location=jaktorow_geo, tiles='OpenStreetMap', zoom_start=13)
 popup_text_liczba = 'Gmina: ' + Gmina + '\n' + 'Liczba podłączeń = ' + str(len(dane_z_orange_jaktorow))
-folium.Marker([jaktorow_pkp_geo[0], jaktorow_pkp_geo[1]], popup=popup_text_liczba, icon=folium.Icon(color='red', icon='info-sign')).add_to(m)
+folium.Marker([jaktorow_pkp_geo[0], jaktorow_pkp_geo[1]], popup=popup_text_liczba, icon=folium.Icon(color='blue', icon='info-sign')).add_to(m)
 
 # I can add marker one by one on the map
 for i in range(0, len(dane_z_orange_jaktorow)):
