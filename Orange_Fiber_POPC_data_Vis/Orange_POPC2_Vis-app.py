@@ -24,24 +24,46 @@ def _max_width_():
         unsafe_allow_html=True,
     )
 
-### 1 - Import Data from Orange website
-
 #_max_width_()
 
-date_now = datetime.date.today()
+
+### 1 - Import Data from Orange website
+
+
+
+date_now = datetime.date.today()            ### Wez godzine i rozbij funkcje na 2 --- 1) sprawdza co godzine czy pojaiwlo sie wiecej plikow | 2) jesli jest wiecej plikow to pobierz i przemiel pliki
+minute_now = datetime.datetime.now().minute
+hour_now = datetime.datetime.now().hour
+
 
 @st.cache
-def Import_Data_Orange_Fiber(date_now):
-    orange_server = 'https://www.hurt-orange.pl'
+def Check_Data_on_Orange_Website(time):
+    #orange_server = 'https://www.hurt-orange.pl'
     orange_url = 'https://www.hurt-orange.pl/operatorzy-krajowi/popc-nabor-i-i-ii'
     orange_fiber_site = requests.get(orange_url).content
-    sel = Selector(text = orange_fiber_site)
+    sel = Selector(text=orange_fiber_site)
     # css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) > li:nth-child(29) > a:nth-child(2)'
     css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) li a'
     plik = sel.css(css_test).xpath('@href').extract()
-    #print(plik)                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
+    # print(plik)                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
     ile = len(plik)
-    #print(ile)
+    # print(ile)
+    print('--- Date now (Check_Data_on_Orange_Website) = ' + str(datetime.datetime.now()) + ' ---')
+    return plik, ile
+
+
+@st.cache
+def Import_Data_Orange_Fiber(plik, ile):
+    orange_server = 'https://www.hurt-orange.pl'
+    #orange_url = 'https://www.hurt-orange.pl/operatorzy-krajowi/popc-nabor-i-i-ii'
+    #orange_fiber_site = requests.get(orange_url).content
+    #sel = Selector(text = orange_fiber_site)
+    ## css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) > li:nth-child(29) > a:nth-child(2)'
+    #css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) li a'
+    #plik = sel.css(css_test).xpath('@href').extract()
+    ##print(plik)                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
+    #ile = len(plik)
+    ##print(ile)
     print('--- Date now = ' + str(date_now) + ' ---')
     print('*** Extract files names from Orange website ***')
 
@@ -67,17 +89,20 @@ def Import_Data_Orange_Fiber(date_now):
     Gminy_ALL = list(Gminy_ALL)
     jaktorow_position = Gminy_ALL.index('JAKTORÓW')
     print('*** End of Extract Data ***')
+    t1 = datetime.datetime.now()
+    time_update = t1.strftime("%d/%m/%Y, godzina: %H:%M")
 
-    return dane_z_orange, Gminy_ALL, jaktorow_position, ile
+    return dane_z_orange, Gminy_ALL, jaktorow_position, ile, time_update
 
-
-dane_z_orange, Gminy_ALL, jaktorow_position, ile = Import_Data_Orange_Fiber(date_now)
+plik, ile = Check_Data_on_Orange_Website(hour_now)
+dane_z_orange, Gminy_ALL, jaktorow_position, ile, time_update = Import_Data_Orange_Fiber(plik, ile)
 
 ### 3.1 - Make Streamlit app
 
 st.title("""Wizualizacja danych Orange POPC2 - Fiber To The Home
 Mapa punktów, które zostały lub będą podłączone do sieci światłowodowej """)
-st.text(" Plików na stronie = " + str(ile) + '          Ostatnia aktualizacja: ' + str(date_now))
+st.text(" Plików na stronie = " + str(ile) + '          Ostatnia aktualizacja: ' + str(time_update))
+
 
 st.sidebar.markdown(""" [Strona Orange, z której pochodzą dane (POPC2)] (https://www.hurt-orange.pl/operatorzy-krajowi/popc-nabor-i-i-ii/) """)
 st.sidebar.header('Wybierz gminę:')
@@ -86,12 +111,21 @@ st.sidebar.text('\n\n\nMade by SamoX')
 
 # st.sidebar.slider('Do momentu w czasie', ['29-11-2020', '2-12-2020'])
 
-jaktorow_geo = [52.079488, 20.551613]
-jaktorow_pkp_geo = [52.086587629803624, 20.55210270975992]
+
 dane_z_orange_jaktorow = dane_z_orange[dane_z_orange["Gmina"].str.contains(Gmina)]
+ile_punktow = len(dane_z_orange_jaktorow)
+
+st.text(" Gmina: " + Gmina + "  |  Podłączonych lokalizacji: " + str(ile_punktow))
+
+if (Gmina == "JAKTORÓW"):
+    jaktorow_geo = [52.079488, 20.551613]
+    jaktorow_pkp_geo = [52.086587629803624, 20.55210270975992]
+else:
+    jaktorow_geo = [((dane_z_orange_jaktorow['Szerokość'].max() + dane_z_orange_jaktorow['Szerokość'].min())/2.0), ((dane_z_orange_jaktorow['Długość'].max() + dane_z_orange_jaktorow['Długość'].min())/2.0)]
+    jaktorow_pkp_geo = [((dane_z_orange_jaktorow['Szerokość'].max() + dane_z_orange_jaktorow['Szerokość'].min())/2.0), ((dane_z_orange_jaktorow['Długość'].max() + dane_z_orange_jaktorow['Długość'].min())/2.0)]
 
 m = folium.Map(location=jaktorow_geo, tiles='OpenStreetMap', zoom_start=13)
-popup_text_liczba = 'Gmina: ' + Gmina + '\n' + 'Liczba podłączeń = ' + str(len(dane_z_orange_jaktorow))
+popup_text_liczba = 'Gmina: ' + Gmina + '\n' + 'Liczba podłączeń = ' + str(ile_punktow)
 folium.Marker([jaktorow_pkp_geo[0], jaktorow_pkp_geo[1]], popup=popup_text_liczba, icon=folium.Icon(color='blue', icon='info-sign')).add_to(m)
 
 # I can add marker one by one on the map
