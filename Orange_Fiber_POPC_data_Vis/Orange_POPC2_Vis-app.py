@@ -105,7 +105,7 @@ store = pd.HDFStore('store.h5')
 
 # files_old_web = pd.DataFrame(columns=['names'])
 files_old_web = store['files_old_web']
-plik, how_many_files = Check_Data_on_Orange_Website(minute_now)
+plik, how_many_files = Check_Data_on_Orange_Website(hour_now)
 
 if (plik.equals(files_old_web)):
     #print('*** files_new == files_old_web ***')
@@ -141,7 +141,7 @@ st.sidebar.text('\n\n\nMade by SamoX')
 with st.spinner("Searching for Gmina: " + Gmina):
     dane_z_orange_jaktorow = dane_z_orange[dane_z_orange["Gmina"].str.contains(Gmina)].copy()
 ile_punktow = len(dane_z_orange_jaktorow)
-st.text(" Gmina: " + Gmina + "  |  Podłączonych lokalizacji: " + str(ile_punktow))
+st.text(" Gmina: " + Gmina + "  |  Podłączonych lokalizacji: " + str(ile_punktow) + "  |  Wszystkich: " + str(len(dane_z_orange)))
 
 ### --- Z TEGO TRZEBA ZROBIC FUNKCJE - FILTR przed MAPA --- ###
 dane_z_orange_jaktorow = dane_z_orange_jaktorow[dane_z_orange_jaktorow["Szerokość"].notna()]
