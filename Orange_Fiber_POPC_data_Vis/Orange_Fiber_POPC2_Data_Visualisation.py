@@ -14,21 +14,54 @@ orange_fiber_site = requests.get(orange_url).content
 sel = Selector(text = orange_fiber_site)
 # css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) > li:nth-child(29) > a:nth-child(2)'
 css_test = 'div.tm_pb_attachments_extra:nth-child(4) > div:nth-child(2) > ul:nth-child(2) li a'
-plik = sel.css(css_test).xpath('@href').extract()
-print(plik)                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
+plik = list(sel.css(css_test).xpath('@href').extract())
+print(type(plik))                                                                 # Wszystkie linki do plikow na stronie Oragne z adresami do swiatlowodu
 print(str('*** How many files are there on Orange website = ' + str(len(plik))))
 # columns=['Nazwa obszaru', 'Identyfikator budynku', 'Województwo', 'Powiat', 'Gmina', 'Kod TERC', 'Miejscowość', 'SIMC', 'Ulica', 'Kod ULIC', 'Nr ', 'Szerokość', 'Długość', 'SFH/MFH', 'Dostępna prędkość [Mb]', 'Liczba lokali']
 dane_z_orange = pd.DataFrame(columns=['Nazwa obszaru', 'Identyfikator budynku', 'Województwo', 'Powiat', 'Gmina', 'Kod TERC', 'Miejscowość', 'SIMC', 'Ulica', 'Kod ULIC', 'Nr ', 'Szerokość', 'Długość', 'SFH/MFH', 'Dostępna prędkość [Mb]', 'Liczba lokali'])
+
+plik_new = []
+plik_new = plik.copy()
+plik_new.append('NOWY_PLIK.xlsx')
+print(list(set(plik_new) - set(plik)))
+
+plikiii = pd.DataFrame(plik)
+for i in plikiii.values:
+    print(i)
+
 for i in range(1,len(plik)):
     if (plik[i] != '/wp-content/uploads/2020/11/lista-obszarow-i-miejscowosci-objetych-planami-realizacji-orange-w-ramach-ii-konkursu-popc.xlsx' and plik[i] != '/wp-content/uploads/2020/09/lista-punktow-adresowych-ii-konkurs-popc-1.xlsx'):
         link_pobierania = orange_server + plik[i]
         print(link_pobierania)
         tymczasowa_tablica = pd.read_excel(link_pobierania, header=[2,]).iloc[2:, 0:]
+        #print(tymczasowa_tablica)
+        tymczasowa_tablica = tymczasowa_tablica[tymczasowa_tablica["Szerokość"].notna()]
+        tymczasowa_tablica = tymczasowa_tablica[tymczasowa_tablica["Długość"].notna()]
+        tymczasowa_tablica[["Szerokość", "Długość"]] = tymczasowa_tablica[["Szerokość", "Długość"]].apply(pd.to_numeric, errors='coerce')
+
+        tymczasowa_tablica = tymczasowa_tablica[(tymczasowa_tablica["Szerokość"] > 0.0) & (tymczasowa_tablica["Szerokość"] < 55.0)]
+        tymczasowa_tablica = tymczasowa_tablica[(tymczasowa_tablica["Długość"] > 0.0) & (tymczasowa_tablica["Długość"] < 55.0)]
+
+        if ((tymczasowa_tablica['Szerokość'].min() < 48.0) & (tymczasowa_tablica['Długość'].max() > 25.0)):
+            change_col_szer = tymczasowa_tablica['Szerokość'].copy()
+            change_col_dlug = tymczasowa_tablica['Długość'].copy()
+            tymczasowa_tablica['Szerokość'] = change_col_dlug
+            tymczasowa_tablica['Długość'] = change_col_szer
+
+        print(str(i) + ': Szerokość MAX = ' + str(tymczasowa_tablica['Szerokość'].max()))
+        print(str(i) + ': Szerokość MIN = ' + str(tymczasowa_tablica['Szerokość'].min()))
+        print(str(i) + ': Długość MAX = ' + str(tymczasowa_tablica['Długość'].max()))
+        print(str(i) + ': Długość MIN = ' + str(tymczasowa_tablica['Długość'].min()))
+
         dane_z_orange = dane_z_orange.append(tymczasowa_tablica, ignore_index=True, sort=False)
+
 ### 2 Step = Take data and make sure if coordinates are numeric values
 dane_z_orange = dane_z_orange[['Nazwa obszaru', 'Identyfikator budynku', 'Województwo', 'Powiat', 'Gmina', 'Kod TERC', 'Miejscowość', 'SIMC', 'Ulica', 'Kod ULIC', 'Nr ', 'Szerokość', 'Długość', 'SFH/MFH', 'Dostępna prędkość [Mb]', 'Liczba lokali']]
-dane_z_orange[["Szerokość", "Długość"]] = dane_z_orange[["Szerokość", "Długość"]].apply(pd.to_numeric, errors='coerce')
-
+# dane_z_orange[["Szerokość", "Długość"]] = dane_z_orange[["Szerokość", "Długość"]].apply(pd.to_numeric, errors='coerce')
+print(': Szerokość MAX = ' + str(dane_z_orange['Szerokość'].max()))
+print(': Szerokość MIN = ' + str(dane_z_orange['Szerokość'].min()))
+print(': Długość MAX = ' + str(dane_z_orange['Długość'].max()))
+print(': Długość MIN = ' + str(dane_z_orange['Długość'].min()))
 
 # dane_z_orange = dane_z_orange[dane_z_orange["Szerokość"].notna()]
 # dane_z_orange = dane_z_orange[dane_z_orange["Długość"].notna()]
@@ -39,11 +72,14 @@ dane_z_orange[["Szerokość", "Długość"]] = dane_z_orange[["Szerokość", "D�
 
 ### 3 Step = Visualization coordinates on map
 
-gmina = 'JAKTORÓW'
+gmina = 'WARSZAWA'
+dane_z_orange['Gmina'] = dane_z_orange['Gmina'].str.upper()
 dane_z_orange_jaktorow = dane_z_orange[dane_z_orange["Gmina"].str.contains(gmina)]
 dane_z_orange_jaktorow = dane_z_orange_jaktorow[dane_z_orange_jaktorow["Szerokość"].notna()]
 dane_z_orange_jaktorow = dane_z_orange_jaktorow[dane_z_orange_jaktorow["Długość"].notna()]
 
+print(len(set(dane_z_orange_jaktorow['Identyfikator budynku'])))
+print(len())
 
 # Make an empty map with specific start
 jaktorow_geo = [52.079488, 20.551613]
