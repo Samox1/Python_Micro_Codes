@@ -1,0 +1,21 @@
+# Zadanie 0:
+# a) Stwórz macierz rozmiaru "1000x1001". 
+#    Przypisz nazwę "Y" do pierwszej kolumny. Przypisz nazwy od "x_1" do "x_1000" do następnych kolumn.
+
+
+dane <- matrix(0,nrow = 1000,ncol = 1001)
+colnames(dane)<-c("Y",names(dane)[-1][-1002] <- paste0("x_",1:1000))
+
+
+# b) Wstaw losowe wartości z wektora od 1 do 100 w kolumnę "Y". set.seed = (555).
+set.seed(555)
+dane[,"Y"] <- sample(1:100)
+
+# c) Wstaw do kolumn od "x_1" do "x_1000" wartości zgodne z nastepujacym schematem 
+#    "x_i = Y + wartość losowa z rozkładu normalnego". set.seed = (555).
+# 
+
+set.seed(555)
+
+for (i in 2:1001)
+{dane[,i]<- rnorm(10)+dane[,"Y"]}

@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1602316717723.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3804491234",
+    "id" : "C5290600",
+    "lastKnownWriteTime" : 1601823113,
+    "last_content_update" : 1601823113,
+    "path" : "~/Virtual_machine/TED_20_21/dzienne/TEDd/Zadania_1.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "2,2",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

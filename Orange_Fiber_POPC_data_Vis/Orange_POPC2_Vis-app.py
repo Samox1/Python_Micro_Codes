@@ -44,16 +44,28 @@ def Check_Data_on_Orange_Website(time):
 @st.cache
 def Import_Data_Orange_Fiber(data_from_website, files_on_orange_website_new, files_on_orange_website_old):
 
-    with st.spinner("Importing Data from Orange Website - give me a second - there are " + str(len(files_on_orange_website_new) - len(files_on_orange_website_old)) + ' new files'):
+    files_diff_2 = files_on_orange_website_new[~files_on_orange_website_new.apply(tuple, 1).isin(files_on_orange_website_old.apply(tuple, 1))]
+    print(files_diff_2)
+
+    with st.spinner("Importing Data from Orange Website - give me a second - there are " + str(len(files_diff_2)) + ' new files:'):
+    #len(files_on_orange_website_new) - len(files_on_orange_website_old)
 
         orange_server = 'https://www.hurt-orange.pl'
         print('*** Extract files names from Orange website ***')
 
-        files_diff_2 = files_on_orange_website_new[~files_on_orange_website_new.apply(tuple, 1).isin(files_on_orange_website_old.apply(tuple, 1))]
+        for xxx in files_diff_2.values:
+            print("Kupa: " + xxx)
+
+        #files_diff_2 = files_on_orange_website_new[~files_on_orange_website_new.apply(tuple, 1).isin(files_on_orange_website_old.apply(tuple, 1))]
         #print(files_diff_2)
+        #files_exclude = ('/wp-content/uploads/2020/11/lista-obszarow-i-miejscowosci-objetych-planami-realizacji-orange-w-ramach-ii-konkursu-popc.xlsx',
+        #                 '/wp-content/uploads/2020/09/lista-punktow-adresowych-ii-konkurs-popc-1.xlsx',
+        #                 '/wp-content/uploads/2020/12/lista-punktow-adresowych-gotowych-sprzedazowo-popc-nabor-ii-1.xlsx')
+
+        files_exclude = ('/wp-content/uploads/2020/12/lista-punktow-adresowych-gotowych-sprzedazowo-popc-nabor-ii-1.xlsx')
 
         for i_files in files_diff_2.values:
-            if (i_files != '/wp-content/uploads/2020/11/lista-obszarow-i-miejscowosci-objetych-planami-realizacji-orange-w-ramach-ii-konkursu-popc.xlsx' and i_files != '/wp-content/uploads/2020/09/lista-punktow-adresowych-ii-konkurs-popc-1.xlsx'):
+            if i_files not in files_exclude:
                 link_download = orange_server + i_files
 
                 print('X: ' + link_download[0])
@@ -149,6 +161,7 @@ store.close()
 del store
 
 
+
 ### --- Make Streamlit app --- ###
 
 st.title("""Wizualizacja danych Orange POPC2 - Fiber To The Home""")
@@ -193,6 +206,7 @@ with st.spinner("Adding markers to the map - please wait a second"):
 
     folium_static(m)
     st.write(data_orange_gmina[['Gmina', 'Miejscowość', 'Ulica', 'Nr ', 'Szerokość', 'Długość', 'Dostępna prędkość [Mb]']].sort_values(['Miejscowość', 'Ulica', 'Nr ']))
+
 
 del m
 del Gminy_ALL

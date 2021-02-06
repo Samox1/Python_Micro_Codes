@@ -1,0 +1,9 @@
+B <- matrix(1,1000,1001)
+dim(B)
+colnames(B) <- c("Y",paste("x",1:1000,sep = "_"))
+set.seed(555)
+B[,"Y"]<- sample(x = 1:100,size = 1000,replace = T)
+for(i in 2:1001){
+  B[,i] <-   B[,"Y"]+rnorm(1)
+}
+B

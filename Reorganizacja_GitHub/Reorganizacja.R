@@ -114,9 +114,71 @@ LC_PDMS_Test_1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "LC_PDMS")
 LC_PDMS_Test_1_id <- str_which(Nazwy_z_datami, "LC_PDMS")
 
 
+Wanna_Test_4 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "Wanna_Test-4")])
+Wanna_Test_4_id <- str_which(Nazwy_z_datami, "Wanna_Test-4")
+
+
+# Nowe probki - Listopad 2020
+SU8K <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8K")])
+SU8K_id <- str_which(Nazwy_z_datami, "SU8K")
+
+SU8P1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8P1")])
+SU8P1_id <- str_which(Nazwy_z_datami, "SU8P1")
+
+SU8P2 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8P2")])
+SU8P2_id <- str_which(Nazwy_z_datami, "SU8P2")
+
+SU8PKS <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8PKS")])
+SU8PKS_id <- str_which(Nazwy_z_datami, "SU8PKS")
+
+SU8N1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8N1")])
+SU8N1_id <- str_which(Nazwy_z_datami, "SU8N1")
+
+SU8OE1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8OE1")])
+SU8OE1_id <- str_which(Nazwy_z_datami, "SU8OE1")
+
+SU8OE2 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "SU8OE2")])
+SU8OE2_id <- str_which(Nazwy_z_datami, "SU8OE2")
+
+
+Wanienka_WFD1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFD1")])
+Wanienka_WFD1_id <- str_which(Nazwy_z_datami, "WFD1")
+
+Wanienka_WFD2 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFD2")])
+Wanienka_WFD2_id <- str_which(Nazwy_z_datami, "WFD2")
+
+Wanienka_WFK1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFK1")])
+Wanienka_WFK1_id <- str_which(Nazwy_z_datami, "WFK1")
+
+Wanienka_WFO1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFO1")])
+Wanienka_WFO1_id <- str_which(Nazwy_z_datami, "WFO1")
+
+Wanienka_WFO2 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFO2")])
+Wanienka_WFO2_id <- str_which(Nazwy_z_datami, "WFO2")
+
+Wanienka_WFP1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFP1")])
+Wanienka_WFP1_id <- str_which(Nazwy_z_datami, "WFP1")
+
+Wanienka_WFP2 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFP2")])
+Wanienka_WFP2_id <- str_which(Nazwy_z_datami, "WFP2")
+
+Wanienka_WFP3 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFP3")])
+Wanienka_WFP3_id <- str_which(Nazwy_z_datami, "WFP3")
+
+Wanienka_WFP4 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFP4")])
+Wanienka_WFP4_id <- str_which(Nazwy_z_datami, "WFP4")
+
+Wanienka_WFX1 <- data.frame(Nazwy_z_datami[str_which(Nazwy_z_datami, "WFX1")])
+Wanienka_WFX1_id <- str_which(Nazwy_z_datami, "WFX1")
+
+
+
 Suma_plikow <- length(v5F0PS[,1]) + length(v5F1PP[,1]) + length(v5F2PP[,1]) + length(v5F3PS[,1]) + length(v5F4PP[,1]) + length(v5F5PP[,1]) + length(v5F6PP[,1]) + length(v8D1PP[,1]) + 
   length(v5K_T1_PS[,1]) + length(v5K_T2_PS[,1]) + length(v5F_T3_PS[,1]) + length(v5F_T4_PS[,1]) + length(v5K_T7x_PS[,1]) + length(KLC_v1_F1_PP[,1]) + length(KLC_v1_F2_PP[,1]) +
-  length(KLC_v1_F3_PS[,1]) + length(KLC_v1_F4_PP[,1]) + length(KLC_v1_F5_PS[,1]) + length(KLC_v1_F6_PS[,1]) + length(FW1[,1]) + length(LC_Cell_1[,1]) + length(LC_PDMS_zPlazma[,1]) + length(LC_PDMS_bezPlazmy[,1])
+  length(KLC_v1_F3_PS[,1]) + length(KLC_v1_F4_PP[,1]) + length(KLC_v1_F5_PS[,1]) + length(KLC_v1_F6_PS[,1]) + length(FW1[,1]) + length(LC_Cell_1[,1]) + length(LC_PDMS_zPlazma[,1]) + 
+  length(LC_PDMS_bezPlazmy[,1]) + length(SU8K[,1]) + length(SU8P1[,1]) + length(SU8P2[,1]) + length(SU8PKS[,1]) + length(SU8N1[,1]) + length(SU8OE1[,1]) + length(SU8OE2[,1]) +
+  length(Wanienka_WFD1[,1]) + length(Wanienka_WFD2[,1]) + length(Wanienka_WFK1[,1]) + length(Wanienka_WFO1[,1]) + length(Wanienka_WFO2[,1]) + length(Wanienka_WFP1[,1]) + 
+  length(Wanienka_WFP2[,1]) + length(Wanienka_WFP3[,1]) + length(Wanienka_WFP4[,1]) + length(Wanienka_WFX1[,1])
 
 
 
@@ -227,6 +289,62 @@ file.copy(pelna_sciezka[LC_GLASS_Test_1_id], to = LC_GLASS_Test_1_Folder, overwr
 dir.create(LC_PDMS_Test_1_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/LC_aPDMS_Test_1")
 file.copy(pelna_sciezka[LC_PDMS_Test_1_id], to = LC_PDMS_Test_1_Folder, overwrite = FALSE, copy.date = TRUE)
 
+dir.create(Wanna_Test_4_Wrzesien_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanna_Test_4_Wrzesien_2020")
+file.copy(pelna_sciezka[Wanna_Test_4_id], to = Wanna_Test_4_Wrzesien_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+
+# Nowe probki - Grudzien 2020
+dir.create(SU8K_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8K_Gru_2020")
+file.copy(pelna_sciezka[SU8K_id], to = SU8K_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(SU8P1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8P1_Gru_2020")
+file.copy(pelna_sciezka[SU8P1_id], to = SU8P1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(SU8P2_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8P2_Gru_2020")
+file.copy(pelna_sciezka[SU8P2_id], to = SU8P2_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(SU8PKS_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8PKS_Gru_2020")
+file.copy(pelna_sciezka[SU8PKS_id], to = SU8PKS_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(SU8N1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8N1_Gru_2020")
+file.copy(pelna_sciezka[SU8N1_id], to = SU8N1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(SU8OE1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8OE1_Gru_2020")
+file.copy(pelna_sciezka[SU8OE1_id], to = SU8OE1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(SU8OE2_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/SU8OE2_Gru_2020")
+file.copy(pelna_sciezka[SU8OE2_id], to = SU8OE2_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+
+dir.create(Wanienka_WFD1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFD1_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFD1_id], to = Wanienka_WFD1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFD2_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFD2_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFD2_id], to = Wanienka_WFD2_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFK1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFK1_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFK1_id], to = Wanienka_WFK1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFO1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFO1_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFO1_id], to = Wanienka_WFO1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFO2_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFO2_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFO2_id], to = Wanienka_WFO2_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFP1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFP1_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFP1_id], to = Wanienka_WFP1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFP2_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFP2_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFP2_id], to = Wanienka_WFP2_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFP3_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFP3_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFP3_id], to = Wanienka_WFP3_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFP4_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFP4_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFP4_id], to = Wanienka_WFP4_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
+
+dir.create(Wanienka_WFX1_Gru_2020_Folder <- "D:/Programming/DOKTORAT/A_Dane_z_LABORATORIUM/0_A_Historia-Probek/Wanienka_WFX1_Gru_2020")
+file.copy(pelna_sciezka[Wanienka_WFX1_id], to = Wanienka_WFX1_Gru_2020_Folder, overwrite = FALSE, copy.date = TRUE)
 
 
 
