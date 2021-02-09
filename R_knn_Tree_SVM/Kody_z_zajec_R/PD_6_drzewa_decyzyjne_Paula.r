@@ -111,10 +111,10 @@ SpliNum <- function(Y, x, parentVal, splits, minobs, type) {
     ## w tym miejscu musia³am wy³¹czyæ fragment kodu, poniewa¿ ca³y czas wyrzuca³o mi b³¹d
     ## niestety nie potrafi³am zidentyfikowaæ przyczyny
     
-    # if (any(c(ln, rn) < minobs)) {
-    #   res[i, ] <- 0
-    #   
-    # } else{
+    if (any(c(ln, rn) < minobs)) {  #
+      res[i, ] <- 0                 #
+                                    #
+    } else{                         #
     lVal <- 
       if (type=="Gini") {
         Gini(Prob(Y[partition]))
@@ -141,9 +141,9 @@ SpliNum <- function(Y, x, parentVal, splits, minobs, type) {
     res[i, "ln"] <- ln
     res[i, "rn"] <- rn
     
-    # }
+    }
     
-  }
+  } #
   
   return(res)
   

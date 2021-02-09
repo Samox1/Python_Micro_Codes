@@ -26,7 +26,7 @@ Prob <- function( y ){
   return( res )
 }
 
-prob<-Prob(Binarna$Y_out)
+#prob<-Prob(Binarna$Y_out)
 
 Entropy <- function( prob ){
   res <- prob * log2( prob )
@@ -35,7 +35,7 @@ Entropy <- function( prob ){
   return( res )
 }
 
-Entropy(prob)
+#Entropy(prob)
 
 SplitNum <- function(Y, x, parentVal, splits, minobs){
   n <- length(x)
@@ -45,7 +45,8 @@ SplitNum <- function(Y, x, parentVal, splits, minobs){
     partition <- x <= splits[i]
     ln <- sum(partition)
     rn <- n - ln
-    if(any(c(ln,rn) < minobs)){
+    print(any(c(ln,rn) < minobs))
+    if(any(c(ln,rn) < minobs, na.rm = TRUE)){
       res[i,] <- 0
     }else{
       lVal <- Entropy(Prob(Y[partition]))
@@ -61,7 +62,7 @@ SplitNum <- function(Y, x, parentVal, splits, minobs){
   }
   return(res)
 }
-SplitNum( Y = Binarna$Y_out , x = c(Binarna$Recency,Binarna$Frequency,Binarna$Monetary,Binarna$Time), parentVal = 1, splits = head(sort(unique(c(Binarna$Recency,Binarna$Frequency,Binarna$Monetary,Binarna$Time))),-1), minobs = 2 )
+#SplitNum( Y = Binarna$Y_out , x = c(Binarna$Recency,Binarna$Frequency,Binarna$Monetary,Binarna$Time), parentVal = 1, splits = head(sort(unique(c(Binarna$Recency,Binarna$Frequency,Binarna$Monetary,Binarna$Time))),-1), minobs = 2 )
 
 SplitVar <- function(Y, x, parentVal, minobs){
   s <- unique(x)
@@ -79,7 +80,7 @@ SplitVar <- function(Y, x, parentVal, minobs){
   return( res )
 }
 
-SplitVar( Y = Binarna$Y_out, x = c(Binarna$Recency,Binarna$Frequency,Binarna$Monetary,Binarna$Time), parentVal = 1, minobs = 2 )
+#SplitVar( Y = Binarna$Y_out, x = c(Binarna$Recency,Binarna$Frequency,Binarna$Monetary,Binarna$Time), parentVal = 1, minobs = 2 )
 
 FindBestSplit <- function( Y, Xnames, data, parentVal, minobs ){
   res <- sapply( Xnames, function( i ){
@@ -91,7 +92,7 @@ FindBestSplit <- function( Y, Xnames, data, parentVal, minobs ){
   return( res )
 }
 
-FindBestSplit( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = Binarna, parentVal = 1, minobs = 2 )
+#FindBestSplit( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = Binarna, parentVal = 1, minobs = 2 )
 
 library(data.tree)
 
@@ -127,10 +128,21 @@ BuildTree <- function( node, Y, Xnames, data, depth, minobs ){
   childR$Val <- bestSplit$rVal
   BuildTree( childR, Y, Xnames, childFrame[["FALSE"]], depth, minobs )
 }
+
 Drzewko <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = Binarna, depth = 3, minobs = 1)
 print( Drzewko, "Count", "Class", "Prob", "Leaf" )
 
-rpart( formula = Y_out~., data = Binarna, minsplit = 5, maxdepth = 6, cp = 0 )
+dane <- iris
+dane <- dane[dane$Species!="setosa",]
+dane$Species <- as.character(dane$Species)
+dane$Species[dane$Species=="versicolor"] <- 0
+dane$Species[dane$Species=="virginica"] <- 1
+
+drzeweko <-  Tree( Y = "Species", Xnames = names(dane)[-5], data = dane, depth = 3, minobs = 1)
+
+drzemko <- rpart( formula = Species~., data = dane, minsplit = 1, maxdepth = 3, cp = 0 )
+prp(drzemko, type = 0)
+
 
 PE <- function( p, n, z ){
   return( ( p + (z^2)/(2*n) + z*sqrt( p/n - (p^2)/(n) + (z^2)/(4*n^2) ) ) / ( 1 + z^2/n ) )
