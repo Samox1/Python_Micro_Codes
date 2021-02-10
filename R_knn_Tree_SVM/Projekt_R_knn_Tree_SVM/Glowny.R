@@ -10,6 +10,10 @@ library(kernlab)
 library(e1071)
 library(pROC)
 library(ROCit)
+library(tidyverse)
+library(readxl)
+library(RCurl)
+library(gdata)
 
 source("funkcje.R")
 
@@ -27,6 +31,7 @@ source("funkcje.R")
 
 Transfusion_Bin <- as.data.frame(read.csv(file="http://archive.ics.uci.edu/ml/machine-learning-databases/blood-transfusion/transfusion.data"))
 colnames(Transfusion_Bin) <- c("Recency", "Frequency","Monetary","Time","Y_out")
+print(paste("Jakies wartosci ANY = " , any(is.na(Transfusion_Bin))))
 Transfusion_Bin_Y <- Transfusion_Bin$Y_out
 Transfusion_Bin$Y_out <- factor(Transfusion_Bin$Y_out)
 
@@ -52,8 +57,8 @@ test.data <- Transfusion_Bin[-training.samples, ]
 cat("\n")
 print("### --- Tree - reczne --- ###")
 Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = train.data, depth = 5, minobs = 1)
-# plot(Drzewko_Bin)
-
+plot(Drzewko_Bin)
+Drzewko_Bin_Vis <- ToDataFrameTree(Drzewko_Bin)
 
 # pred_Tree <- predict(Drzewko_Bin, test.data, type="class")
 
@@ -78,13 +83,15 @@ summary(ROCit_Drzewko_Bin_rpart)
 print(ModelOcena( test.data$Y_out, pred_Drzewko_Bin_rpart))
 
 
+
+
 # --- knn - reczne --- #
 cat("\n")
 print("### --- knn - reczne --- ###")
-# knn_model_Bin <- KNNtrain(Transfusion_Bin[-5], Transfusion_Bin_Y, k=3, 0, 1)
-# knn_Bin <- KNNpred(knn_model_Bin, Transfusion_Bin[-5])
+knn_model_Bin <- KNNtrain(Transfusion_Bin[-5], Transfusion_Bin_Y, k=5, 0, 1)
+pred_knn_Bin <- KNNpred(knn_model_Bin, Transfusion_Bin[-5])
 
-# Wynik = cbind(Transfusion_Bin_Y, knn_Bin)
+print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_Bin))
 
 
 # --- knn - caret --- #
@@ -94,6 +101,8 @@ knn_model_Bin_caret <- knn3(Y_out ~ . , data = Transfusion_Bin, k=5)
 pred_knn_model_Bin_caret <- predict(knn_model_Bin_caret, Transfusion_Bin, type="prob")[,2]
 print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_model_Bin_caret))
 ROCit_knn_Bin_caret <- rocit(score=pred_knn_model_Bin_caret, class = Transfusion_Bin$Y_out)
+
+
 
 
 # --- SVM - reczne --- #
@@ -120,6 +129,9 @@ print(ModelOcena_Class(pred_SVM_model_Bin_e1071, Transfusion_Bin$Y_out))
 
 
 
+# ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
+# ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
+# ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
 
 ### -------------------- ###
 ### --- Wieloklasowa --- ###
@@ -128,8 +140,11 @@ print(ModelOcena_Class(pred_SVM_model_Bin_e1071, Transfusion_Bin$Y_out))
 Dermatology_ALL <- as.data.frame(read.csv(file="http://archive.ics.uci.edu/ml/machine-learning-databases/dermatology/dermatology.data", header = FALSE))
 # 35 kolumn - klasy w 35 kolumnie
 # brak 8 sztuk w Age (kolumna 34) - zamiast sa "?"
+# kolumna 34 wciagana jest jako "factor"
 Dermatology <- Dermatology_ALL[!(Dermatology_ALL[,34] == "?"),]
 Dermatology[,34] <- as.numeric(Dermatology[,34])
+Dermatology_Y <- Dermatology$V35
+Dermatology$V35 <- factor(Dermatology$V35)
 
 print(paste("Jakies wartosci ANY = " , any(is.na(Dermatology))))
 
@@ -140,22 +155,21 @@ training.samples <- Dermatology[,"V35"] %>% createDataPartition(p = 0.7, list = 
 train.data  <- Dermatology[training.samples, ]
 test.data <- Dermatology[-training.samples, ]
 
-# --- Drzewko Binarne - reczne --- #
+
+
+# --- Drzewko Wieloklasowe - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
 Drzewko_Class <- Tree( Y = "V35", Xnames = colnames(Dermatology)[-35], data = train.data, depth = 5, minobs = 1)
-plot(Drzewko_Bin)
+plot(Drzewko_Class)
+Drzewko_Class_Vis <- ToDataFrameTree(Drzewko_Class)
 
 
-# pred_Tree <- predict(Drzewko_Bin, test.data, type="class")
-
-
-
-# --- Drzewko Binarne - rpart --- #
+# --- Drzewko Wieloklasowe - rpart --- #
 cat("\n")
 print("### --- Tree - rpart --- ###")
 Drzewko_Class_rpart = rpart( formula = V35 ~. , data = train.data, minsplit = 1, maxdepth = 5, method = "class")
-rpart.plot(Drzewko_Class_rpart, type = 1, extra = 1)
+#rpart.plot(Drzewko_Class_rpart, type = 1, extra = 1)
 
 pred_Drzewko_Class_rpart_class <- predict(Drzewko_Class_rpart, newdata = test.data, type="class")
 pred_Drzewko_Class_rpart <- predict(Drzewko_Class_rpart, newdata = test.data, type="prob")
@@ -171,60 +185,60 @@ print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_
 # --- knn - reczne --- #
 cat("\n")
 print("### --- knn - reczne --- ###")
-# knn_model_Bin <- KNNtrain(train.data[-35], train.data_Y, k=3, 0, 1)
-# knn_Bin <- KNNpred(knn_model_Class, train.data[-35])
+knn_model_Class <- KNNtrain(train.data[-35], train.data$V35, k=3, 0, 1)
+pred_knn_Class <- KNNpred(knn_model_Class, test.data[-35])
 
-# Wynik = cbind(train.data_Y, knn_Bin)
-# print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_Drzewko_Class_rpart_class,35]), " / ", All <- length(test.data$V35), " = ", Traf/All))
+print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_knn_Class$Klasa,35]), " / ", All <- length(test.data$V35), " = ", Traf/All))
 
 
 # --- knn - caret --- #
 cat("\n")
 print("### --- knn - caret --- ###")
-knn_model_Class_caret <- knn3(V35 ~ . , data = train.data, k=2)   # <--- KNN cos nie dziala 
+knn_model_Class_caret <- knn3(formula = V35 ~ . , data = train.data, k = 2)   # <--- KNN cos nie dziala 
 pred_knn_model_Class_caret <- predict(knn_model_Class_caret, test.data, type="class")
-print(pred_knn_model_Class_caret)
+#print(pred_knn_model_Class_caret)
 print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_knn_model_Class_caret,35]), " / ", All <- length(test.data$V35), " = ", Traf/All))
 
 
+
+
+# ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
+# ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
 # ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
 
 ### ---------------- ###
 ### --- REGRESJA --- ###
 ### ---------------- ###
 
-Concrete <- as.data.frame(read.csv(file="http://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls", header = FALSE))
+# url_concrete <- "http://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
+Concrete <- as.data.frame(read_xls("Concrete_Data.xls"))
+colnames(Concrete)<-c("Cement","Zuzel","Popiol","Woda","Superplastyfikator","Krusz_grube","Krusz_drobne","Wiek","Wytrzymalosc")
+print(summary(Concrete))
+
+for (x in 1:(ncol(Concrete)-1)) {
+  Concrete[,x] = norm_minmax(Concrete[,x])
+}
+
+training.samples <- Concrete[,9] %>% createDataPartition(p = 0.7, list = FALSE)
+train.data  <- Concrete[training.samples, ]
+test.data <- Concrete[-training.samples, ]
 
 
-
-# --- Drzewko Binarne - reczne --- #
+# --- Drzewko Regresja - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
-Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = train.data, depth = 5, minobs = 1)
-# plot(Drzewko_Bin)
+Drzewko_Reg <- Tree( Y = "Wytrzymalosc", Xnames = colnames(Concrete)[-9], data = train.data, depth = 10, minobs = 2)
+Drzewko_Reg_Vis <- ToDataFrameTree(Drzewko_Reg)
 
 
-# pred_Tree <- predict(Drzewko_Bin, test.data, type="class")
-
-
-
-# --- Drzewko Binarne - rpart --- #
+# --- Drzewko Regresja - rpart --- #
 cat("\n")
 print("### --- Tree - rpart --- ###")
-Drzewko_Bin_rpart = rpart( formula = Y_out~., data = train.data, minsplit = 1, maxdepth = 5)
-# rpart.plot(Drzewko_Bin_rpart, type = 1, extra = 1)
+Drzewko_Reg_rpart = rpart( formula = Wytrzymalosc ~ . , data = train.data, method = "anova")
+#rpart.plot(Drzewko_Reg_rpart, type = 1, extra = 1)
 
-pred_Drzewko_Bin_rpart_class <- predict(Drzewko_Bin_rpart, newdata = test.data, type="class")
-# print("Tablica z najważniejszymi parametrami jakosciowymi:")
-# Tablica_Drzewko_Bin_rpart <- CM.large(test.data$Y_out, pred_Drzewko_Bin_rpart_class)
-# print(Tablica_Drzewko_Bin_rpart)
-
-pred_Drzewko_Bin_rpart <- predict(Drzewko_Bin_rpart, newdata = test.data, type="prob")[,2]
-ROCit_Drzewko_Bin_rpart <- rocit(score=pred_Drzewko_Bin_rpart, class = test.data$Y_out)
-summary(ROCit_Drzewko_Bin_rpart)
-# plot(ROCit_Drzewko_Bin_rpart)
-
-print(ModelOcena( test.data$Y_out , pred_Drzewko_Bin_rpart))
+pred_Drzewko_Reg_rpart <- as.numeric(predict(Drzewko_Reg_rpart, newdata = test.data))
+print(ModelOcena( test.data$Wytrzymalosc , pred_Drzewko_Reg_rpart))
 
 
 
@@ -232,19 +246,18 @@ print(ModelOcena( test.data$Y_out , pred_Drzewko_Bin_rpart))
 # --- knn - reczne --- #
 cat("\n")
 print("### --- knn - reczne --- ###")
-# knn_model_Bin <- KNNtrain(Transfusion_Bin[-5], Transfusion_Bin_Y, k=3, 0, 1)
-# knn_Bin <- KNNpred(knn_model_Bin, Transfusion_Bin[-5])
+knn_model_Reg <- KNNtrain(train.data[,-9], train.data$Wytrzymalosc, k=3, 0, 1)
+pred_knn_Reg <- KNNpred(knn_model_Reg, test.data[,-9])
 
-# Wynik = cbind(Transfusion_Bin_Y, knn_Bin)
+print(ModelOcena( test.data$Wytrzymalosc , pred_knn_Reg))
 
 
 # --- knn - caret --- #
 cat("\n")
 print("### --- knn - caret --- ###")
-knn_model_Bin_caret <- knn3(Y_out ~ . , data = Transfusion_Bin, k=5)
-pred_knn_model_Bin_caret <- predict(knn_model_Bin_caret, Transfusion_Bin, type="prob")[,2]
-print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_model_Bin_caret))
-ROCit_knn_Bin_caret <- rocit(score=pred_knn_model_Bin_caret, class = Transfusion_Bin$Y_out)
+knn_model_Reg_caret <- knn3(Wytrzymalosc ~ . , data = train.data, k=5)
+pred_knn_model_Reg_caret <- predict(knn_model_Reg_caret, test.data)
+print(ModelOcena(test.data$Wytrzymalosc, pred_knn_model_Reg_caret))
 
 
 

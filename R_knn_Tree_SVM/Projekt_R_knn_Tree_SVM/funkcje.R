@@ -216,6 +216,7 @@ KNNpred <- function(KNNmodel, X){
     else{
       c("odległość Gowera")
     } 
+    
     if(is.numeric(KNNmodel$y)){
       pred <- double(nrow(X_norm))
       for( i in 1:nrow(X_norm) ){
@@ -227,7 +228,34 @@ KNNpred <- function(KNNmodel, X){
       
     }
     else if(is.factor(KNNmodel$y)){
-      pred <- c("klasyfikacja")
+      n <- nrow(X)
+      pred <- as.data.frame(matrix(nrow = nrow(X), ncol = length(unique(KNNmodel$y))+1))
+      for (i in 1:n) {
+        kNaj <- order( odl[,i])
+        kNaj <- kNaj[1:KNNmodel$k]
+        if (length(unique(KNNmodel$y))== 2){
+          names(pred) <- c('P', 'N', 'Klasa')
+          pozytywna <- sum(KNNmodel$y[kNaj] == 1) / KNNmodel$k
+          negatywna <- sum(KNNmodel$y[kNaj] == 0) / KNNmodel$k
+          pred_klasa <- ifelse(pozytywna > 0.5, 'P', 'N')
+          pred[i, 1] <- pozytywna
+          pred[i, 2] <- negatywna
+          pred[i, 3] <- pred_klasa
+        }
+        else if (length(unique(KNNmodel$y)) > 2){
+          etykiety <- sort(unique(KNNmodel$y))
+          names(pred) <- etykiety
+          names(pred)[length(unique(KNNmodel$y))+1] <- 'Klasa'
+          for (j in 1:length(etykiety)){
+            pozytywna <- sum(KNNmodel$y[kNaj] == as.character(etykiety[j])) / KNNmodel$k
+            pred[i, j] <- pozytywna
+          }
+          pred_index <- which.max(pred[i,])
+          pred_klasa <- etykiety[pred_index]
+          pred[i,'Klasa'] <- as.character(pred_klasa)
+        }
+        
+      }
     }
     return(pred)  
   }
