@@ -129,11 +129,12 @@ KNNpred <- function(KNNmodel, X){
   }
 }
 
-KNNmodel <- KNNtrain( X1, y_tar, k = 5, 0,1 )
+
 X <- iris[1:20,1:3]
 X1 <- iris[1:20,2:4]
 y_tar <- rnorm( 20 )
 
+KNNmodel <- KNNtrain( X1, y_tar, k = 5, 0,1 )
 KNNpred(KNNmodel, X)
 
 
