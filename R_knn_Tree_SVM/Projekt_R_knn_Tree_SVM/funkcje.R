@@ -2,7 +2,7 @@
 ### --- Drzewo Decyzyjne --- ###
 ### ------------------------ ###
 
-library(data.tree)
+
 
 Prob <- function( y ){
   res <- unname( table( y ) )
@@ -311,7 +311,6 @@ norm_minmax <- function(x){
   (x- min(x)) /(max(x)-min(x))
 }
 
-library("pROC")
 
 MAE <- function(y_tar, y_hat){
   return(mean(abs(y_tar - y_hat)))
@@ -398,8 +397,6 @@ CM.large <- function(org.class, pred.class) {
   return(c(Accuracy = round(ACC,4), TPR_Sensitivity = round(TPR, 4), FPR_Specificity = round(FPR, 4), TP = TP, TN = TN, row.names = NULL))
 }
 
-
-library(ROCit)
 
 ModelOcena_Class <- function(y_pred, y_source){
   

@@ -8,6 +8,7 @@ library(nnet)
 library(neuralnet)
 library(kernlab)
 library(e1071)
+library(data.tree)
 library(pROC)
 library(ROCit)
 library(tidyverse)
@@ -16,6 +17,8 @@ library(RCurl)
 library(gdata)
 
 source("funkcje.R")
+
+set.seed(125)
 
 ### --------------- ###
 ### --- Binarna --- ###
@@ -59,9 +62,6 @@ print("### --- Tree - reczne --- ###")
 Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = train.data, depth = 5, minobs = 1)
 plot(Drzewko_Bin)
 Drzewko_Bin_Vis <- ToDataFrameTree(Drzewko_Bin)
-
-# pred_Tree <- predict(Drzewko_Bin, test.data, type="class")
-
 
 
 # --- Drzewko Binarne - rpart --- #
@@ -137,16 +137,18 @@ print(ModelOcena_Class(pred_SVM_model_Bin_e1071, Transfusion_Bin$Y_out))
 ### --- Wieloklasowa --- ###
 ### -------------------- ###
 
-Dermatology_ALL <- as.data.frame(read.csv(file="http://archive.ics.uci.edu/ml/machine-learning-databases/dermatology/dermatology.data", header = FALSE))
+Dermatology <- as.data.frame(read.csv(file="http://archive.ics.uci.edu/ml/machine-learning-databases/dermatology/dermatology.data", header = FALSE))
 # 35 kolumn - klasy w 35 kolumnie
 # brak 8 sztuk w Age (kolumna 34) - zamiast sa "?"
 # kolumna 34 wciagana jest jako "factor"
-Dermatology <- Dermatology_ALL[!(Dermatology_ALL[,34] == "?"),]
-Dermatology[,34] <- as.numeric(Dermatology[,34])
-Dermatology_Y <- Dermatology$V35
-Dermatology$V35 <- factor(Dermatology$V35)
 
 print(paste("Jakies wartosci ANY = " , any(is.na(Dermatology))))
+Dermatology_wiek <- as.numeric(Dermatology[!(Dermatology[,34] == "?"),34])
+wiek_mean <- round(mean(Dermatology_wiek),0)
+Dermatology[,34] <- ifelse(Dermatology[,34] == "?", wiek_mean, Dermatology[,34] )
+
+Dermatology_Y <- Dermatology$V35
+Dermatology$V35 <- factor(Dermatology$V35)
 
 
 # -->  przydalaby sie funkcja na losowanie danych treningowych z roznych klas
