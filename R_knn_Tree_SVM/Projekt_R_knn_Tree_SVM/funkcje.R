@@ -235,24 +235,24 @@ KNNpred <- function(KNNmodel, X){
         kNaj <- kNaj[1:KNNmodel$k]
         if (length(unique(KNNmodel$y))== 2){
           names(pred) <- c('P', 'N', 'Klasa')
-          pozytywna <- sum(KNNmodel$y[kNaj] == 1) / KNNmodel$k
-          negatywna <- sum(KNNmodel$y[kNaj] == 0) / KNNmodel$k
-          pred_klasa <- ifelse(pozytywna > 0.5, 'P', 'N')
-          pred[i, 1] <- pozytywna
-          pred[i, 2] <- negatywna
-          pred[i, 3] <- pred_klasa
+          positive <- sum(KNNmodel$y[kNaj] == 1) / KNNmodel$k
+          negative <- sum(KNNmodel$y[kNaj] == 0) / KNNmodel$k
+          predict_class <- ifelse(positive > 0.5, 'P', 'N')
+          pred[i, 1] <- positive
+          pred[i, 2] <- negative
+          pred[i, 3] <- predict_class
         }
         else if (length(unique(KNNmodel$y)) > 2){
           etykiety <- sort(unique(KNNmodel$y))
           names(pred) <- etykiety
           names(pred)[length(unique(KNNmodel$y))+1] <- 'Klasa'
           for (j in 1:length(etykiety)){
-            pozytywna <- sum(KNNmodel$y[kNaj] == as.character(etykiety[j])) / KNNmodel$k
-            pred[i, j] <- pozytywna
+            positive <- sum(KNNmodel$y[kNaj] == as.character(etykiety[j])) / KNNmodel$k
+            pred[i, j] <- positive
           }
           pred_index <- which.max(pred[i,])
-          pred_klasa <- etykiety[pred_index]
-          pred[i,'Klasa'] <- as.character(pred_klasa)
+          predict_class <- etykiety[pred_index]
+          pred[i,'Klasa'] <- as.character(predict_class)
         }
         
       }
@@ -321,7 +321,7 @@ MSE <- function(y_tar, y_hat){
 }
 
 MAPE <- function(y_tar, y_hat){
-  return( mean(abs((y_tar - y_hat)/y_tar) ))
+  return( mean(abs((y_tar - y_hat)/y_tar)*100 ))
 }
 
 AUC_MT <- function(y_tar, y_hat){
@@ -441,7 +441,7 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
   
 
   for (folds_num in 1:k_folds) {
-    #print(folds_num)
+    #print(paste("Folds_Num = ",folds_num))
     
     train <- Dane[-folds_list[[folds_num]],]
     test <- Dane[folds_list[[folds_num]],]
@@ -517,7 +517,7 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
       if (model == "tree") {
         Drzewko_Class_rpart = rpart( formula = V35 ~. , data = train, minsplit = tree_minsplit, maxdepth = tree_maxdepth, method = "class")
         pred_Drzewko_Class_rpart_class <- predict(Drzewko_Class_rpart, newdata = test, type="class")
-        ACC <- append(ACC, "ACC" = (length(test[test$V35 == pred_Drzewko_Class_rpart_class,35]) / length(test$V35)))
+        ACC <- append(ACC, (length(test[test$V35 == pred_Drzewko_Class_rpart_class,35]) / length(test$V35)))
       }
 
       if (model == "knn") {
@@ -525,13 +525,13 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
         if (algorytm == "my") {
           knn_model_Class <- KNNtrain(train[-35], train$V35, k=knn_k, 0, 1)
           pred_knn_Class <- KNNpred(knn_model_Class, test[-35])
-          ACC <- append(ACC, "ACC" =  (length(test[test$V35 == pred_knn_Class$Klasa,35]) / length(test$V35)))
+          ACC <- append(ACC, (length(test[test$V35 == pred_knn_Class$Klasa,35]) / length(test$V35)))
         }
 
         if (algorytm == "R") {
           knn_model_Class_caret <- knn3(formula = V35 ~ . , data = train, k = knn_k)
           pred_knn_model_Class_caret <- predict(knn_model_Class_caret, test, type="class")
-          ACC <- append(ACC, "ACC" =  (length(test[test$V35 == pred_knn_model_Class_caret,35]) / length(test$V35)))
+          ACC <- append(ACC, (length(test[test$V35 == pred_knn_model_Class_caret,35]) / length(test$V35)))
         }
       }
     }
@@ -550,7 +550,7 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
       if (model == "knn") {
 
         if (algorytm == "my") {
-          knn_model_Reg <- KNNtrain(train.data[,-9], train$Wytrzymalosc, k=knn_k, 0, 1)
+          knn_model_Reg <- KNNtrain(train[,-9], train$Wytrzymalosc, k=knn_k, 0, 1)
           pred_knn_Reg <- KNNpred(knn_model_Reg, test[,-9])
           Ocena <- ModelOcena(test$Wytrzymalosc, pred_knn_Reg)
           MAE <- append(MAE, Ocena[1])
@@ -559,7 +559,7 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
         }
 
         if (algorytm == "R") {
-          knn_model_Reg_caret <- knn3(Wytrzymalosc ~ . , data = train, k=knn_k)
+          knn_model_Reg_caret <- knnreg(Wytrzymalosc ~ . , data = train, k=knn_k)
           pred_knn_model_Reg_caret <- predict(knn_model_Reg_caret, test)
           Ocena <- ModelOcena(test$Wytrzymalosc, pred_knn_model_Reg_caret)
           MAE <- append(MAE, Ocena[1])

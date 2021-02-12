@@ -18,7 +18,6 @@ library(ggplot2)
 
 source("funkcje.R")
 
-set.seed(125)
 
 ### --------------- ###
 ### --- Binarna --- ###
@@ -47,21 +46,21 @@ print(length(Transfusion_Bin[,1]))
 print(summary(Transfusion_Bin))
 
 
-training.samples <- Transfusion_Bin$Y_out %>% createDataPartition(p = 0.7, list = FALSE)
-train.data  <- Transfusion_Bin[training.samples, ]
-test.data <- Transfusion_Bin[-training.samples, ]
+# training.samples <- Transfusion_Bin$Y_out %>% createDataPartition(p = 0.7, list = FALSE)
+# train.data  <- Transfusion_Bin[training.samples, ]
+# test.data <- Transfusion_Bin[-training.samples, ]
 
 
 # --- Drzewko Binarne - rpart --- #
 cat("\n")
 print("### --- Tree - rpart --- ###")
-# Drzewko_Bin_rpart = rpart( formula = Y_out~., data = train.data, minsplit = 1, maxdepth = 5)
-# # rpart.plot(Drzewko_Bin_rpart, type = 1, extra = 1)
-# pred_Drzewko_Bin_rpart_class <- predict(Drzewko_Bin_rpart, newdata = test.data, type="class")
-# pred_Drzewko_Bin_rpart <- predict(Drzewko_Bin_rpart, newdata = test.data, type="prob")[,2]
-# ROCit_Drzewko_Bin_rpart <- rocit(score=pred_Drzewko_Bin_rpart, class = test.data$Y_out)
+Drzewko_Bin_rpart = rpart( formula = Y_out~., data = Transfusion_Bin, minsplit = 25, maxdepth = 5)
+rpart.plot(Drzewko_Bin_rpart, type = 1, extra = 1)
+pred_Drzewko_Bin_rpart_class <- predict(Drzewko_Bin_rpart, newdata = Transfusion_Bin, type="class")
+pred_Drzewko_Bin_rpart <- predict(Drzewko_Bin_rpart, newdata = Transfusion_Bin, type="prob")[,2]
+ROCit_Drzewko_Bin_rpart <- rocit(score=pred_Drzewko_Bin_rpart, class = Transfusion_Bin$Y_out)
 # summary(ROCit_Drzewko_Bin_rpart)
-# plot(ROCit_Drzewko_Bin_rpart)
+plot(ROCit_Drzewko_Bin_rpart)
 
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5))
@@ -69,8 +68,6 @@ print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out,
 minsplit_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
 tree_minsplit_range = 1:50
 for (minsplit in tree_minsplit_range) {
-  #print(minsplit)
-  #print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=7))
   minsplit_test <- rbind(minsplit_test, Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
 }
 minsplit_test_Bin <- cbind(tree_minsplit_range, minsplit_test[-1,])
@@ -131,31 +128,39 @@ print("### --- knn - reczne --- ###")
 # pred_knn_Bin <- KNNpred(knn_model_Bin, Transfusion_Bin[-5])
 # print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_Bin))
 
+
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
+
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10))
 
 knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10)
-knn_k_range = 2:25
+knn_k_range = 2:20
 for (k_knn in knn_k_range) {
+  print(paste("k_knn = ",k_knn))
   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = k_knn))
 }
 knn_k_test_Bin_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 knn_k_test_Bin_my <- as.data.frame(knn_k_test_Bin_my)
 knn_k_test_Bin_my <- drop_na(knn_k_test_Bin_my)
-
+### 
 p = ggplot() + geom_line(data = knn_k_test_Bin_my, aes(x = knn_k_range, y = ACC_mean), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - binarny - Algorytm wlasny")
 print(p)
-
+### 
 p = ggplot() + geom_line(data = knn_k_test_Bin_my, aes(x = knn_k_range, y = AUC_mean), color = "blue") + xlab('k (dla knn)') + ylab('AUC') + ggtitle("knn - binarny - Algorytm wlasny")
 print(p)
+
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
+
 
 # --- knn - caret --- #
 cat("\n")
 print("### --- knn - caret --- ###")
-# knn_model_Bin_caret <- knn3(Y_out ~ . , data = Transfusion_Bin, k=5)
-# pred_knn_model_Bin_caret <- predict(knn_model_Bin_caret, Transfusion_Bin, type="prob")[,2]
-# print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_model_Bin_caret))
-# ROCit_knn_Bin_caret <- rocit(score=pred_knn_model_Bin_caret, class = Transfusion_Bin$Y_out)
+knn_model_Bin_caret <- knn3(Y_out ~ . , data = Transfusion_Bin, k=59)
+pred_knn_model_Bin_caret <- predict(knn_model_Bin_caret, Transfusion_Bin, type="prob")[,2]
+print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_model_Bin_caret))
+ROCit_knn_Bin_caret <- rocit(score=pred_knn_model_Bin_caret, class = Transfusion_Bin$Y_out)
+plot(ROCit_knn_Bin_caret)
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10))
 
@@ -168,6 +173,9 @@ knn_k_test_Bin_R <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 knn_k_test_Bin_R <- as.data.frame(knn_k_test_Bin_R)
 knn_k_test_Bin_R <- drop_na(knn_k_test_Bin_R)
+
+# knn_k_test_Bin_R[max(knn_k_test_Bin_R[,"ACC_mean"]),]
+
 
 p = ggplot() + geom_line(data = knn_k_test_Bin_R, aes(x = knn_k_range, y = ACC_mean), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - binarny - Algorytm biblioteki: caret")
 print(p)
@@ -183,6 +191,9 @@ print("### --- SVM - reczne --- ###")
 # SVM_model_Bin <- trainSVM( as.matrix(Transfusion_Bin[-5]), Transfusion_Bin_Y_class, C = 100, lr = 0.001, maxiter = 500 )
 # pred_SVM_model_Bin <- predSVM( as.matrix(Transfusion_Bin[-5]), SVM_model_Bin$Theta, SVM_model_Bin$Theta0)
 # print(ModelOcena_Class(as.vector(pred_SVM_model_Bin),Transfusion_Bin$Y_out))
+
+
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000))
 
@@ -202,14 +213,20 @@ print(p)
 p = ggplot() + geom_line(data = svm_C_test_Bin_my, aes(x = svm_C_range, y = AUC_mean), color = "blue") + xlab('C (koszt)') + ylab('AUC') + ggtitle("SVM - Binarna - Algorytm wlasny")
 print(p)
 
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
+
+
 # --- SVM - e1071 --- #
 cat("\n")
 print("### --- SVM - e1071 --- ###")
-# SVM_model_Bin_e1071 <- svm(Y_out ~ . , data = Transfusion_Bin, probability = TRUE)
-# pred_SVM_model_Bin_e1071 <- predict(SVM_model_Bin_e1071, Transfusion_Bin, probability = TRUE)
-# prob_SVM_model_Bin_e1071 <- attr(pred_SVM_model_Bin_e1071, "probabilities")[,1]
-# print(ModelOcena( Transfusion_Bin$Y_out, prob_SVM_model_Bin_e1071))
-# print(ModelOcena_Class(pred_SVM_model_Bin_e1071, Transfusion_Bin$Y_out))
+SVM_model_Bin_e1071 <- svm(Y_out ~ . , data = Transfusion_Bin, probability = TRUE, cost = 30)
+pred_SVM_model_Bin_e1071 <- predict(SVM_model_Bin_e1071, Transfusion_Bin, probability = TRUE)
+prob_SVM_model_Bin_e1071 <- attr(pred_SVM_model_Bin_e1071, "probabilities")[,1]
+print(ModelOcena( Transfusion_Bin$Y_out, prob_SVM_model_Bin_e1071))
+
+
+ROCit_svm_Bin_e1071 <- rocit(score=prob_SVM_model_Bin_e1071, class = Transfusion_Bin$Y_out)
+plot(ROCit_svm_Bin_e1071)
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="R", svm_cost=100))
 
@@ -280,7 +297,7 @@ for (minsplit in tree_minsplit_range) {
 minsplit_test_Class <- cbind(tree_minsplit_range, minsplit_test[-1,])
 ### WYKRES ###
 minsplit_test_Class <- as.data.frame(minsplit_test_Class)
-p = ggplot() + geom_line(data = minsplit_test_Class, aes(x = tree_minsplit_range, y = ACC), color = "blue") + xlab('Minimum Split') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Wieloklasowa - Algorytm biblioteki: rpart")
+p = ggplot() + geom_line(data = minsplit_test_Class, aes(x = tree_minsplit_range, y = V2), color = "blue") + xlab('Minimum Split') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Wieloklasowa - Algorytm biblioteki: rpart")
 print(p)
 
 
@@ -292,9 +309,12 @@ for (maxdep in tree_maxdepth_range) {
 maxdepth_test_Class <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
 ### WYKRES ###
 maxdepth_test_Class <- as.data.frame(maxdepth_test_Class)
-p = ggplot() + geom_line(data = maxdepth_test_Class, aes(x = tree_maxdepth_range, y = ACC), color = "blue") + xlab('Maximum Depth') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Wieloklasowa - Algorytm biblioteki: rpart")
+p = ggplot() + geom_line(data = maxdepth_test_Class, aes(x = tree_maxdepth_range, y = V2), color = "blue") + xlab('Maximum Depth') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Wieloklasowa - Algorytm biblioteki: rpart")
 print(p)
 
+
+Drzewko_Class_rpart = rpart( formula = V35 ~. , data = Dermatology, method = "class", minsplit = 48, maxdepth = 8)
+rpart.plot(Drzewko_Class_rpart, type = 1, extra = 1)
 
 
 # --- Drzewko Wieloklasowe - reczne --- #
@@ -320,22 +340,28 @@ print("### --- knn - reczne --- ###")
 # pred_knn_Class <- KNNpred(knn_model_Class, test.data[-35])
 # print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_knn_Class$Klasa,35]), " / ", All <- length(test.data$V35), " = ", Traf/All))
 
-print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 5))
 
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
+
+print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 10))
 knn_k_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 10)
-knn_k_range = 2:25
+knn_k_range = 2:20
 for (k_knn in knn_k_range) {
+  print(paste("k_knn = ",k_knn))
   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = k_knn))
 }
 knn_k_test_Class_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 knn_k_test_Class_my <- as.data.frame(knn_k_test_Class_my)
-p = ggplot() + geom_line(data = knn_k_test_Class_my, aes(x = knn_k_range, y = ACC), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - Wieloklasowa - Algorytm wlasny")
+p = ggplot() + geom_line(data = knn_k_test_Class_my, aes(x = knn_k_range, y = V2), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - Wieloklasowa - Algorytm wlasny")
 print(p)
+
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
+
 
 # --- knn - caret --- #
 cat("\n")
-# print("### --- knn - caret --- ###")
+print("### --- knn - caret --- ###")
 # knn_model_Class_caret <- knn3(formula = V35 ~ . , data = train.data, k = 2)   # <--- KNN cos nie dziala 
 # pred_knn_model_Class_caret <- predict(knn_model_Class_caret, test.data, type="class")
 # print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_knn_model_Class_caret,35]), " / ", All <- length(test.data$V35), " = ", Traf/All))
@@ -350,7 +376,7 @@ for (k_knn in knn_k_range) {
 knn_k_test_Class_R <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 knn_k_test_Class_R <- as.data.frame(knn_k_test_Class_R)
-p = ggplot() + geom_line(data = knn_k_test_Class_R, aes(x = knn_k_range, y = ACC), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - Wieloklasowa - Algorytm biblioteki: caret")
+p = ggplot() + geom_line(data = knn_k_test_Class_R, aes(x = knn_k_range, y = V2), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - Wieloklasowa - Algorytm biblioteki: caret")
 print(p)
 
 
@@ -395,18 +421,18 @@ for (minsplit in tree_minsplit_range) {
 minsplit_test_Reg <- cbind(tree_minsplit_range, minsplit_test[-1,])
 ### WYKRES ###
 minsplit_test_Reg <- as.data.frame(minsplit_test_Reg)
-p = ggplot() + geom_line(data = minsplit_test_Reg, aes(x = tree_minsplit_range, y = MAPE_mean), color = "blue") + xlab('Minimum Split') + ylab('MAPE') + ggtitle("Drzewo Decyzyjne - Regresja - Algorytm biblioteki: rpart")
+p = ggplot() + geom_line(data = minsplit_test_Reg, aes(x = tree_minsplit_range, y = MAPE_mean), color = "blue") + xlab('Minimum Split') + ylab('MAPE [%]') + ggtitle("Drzewo Decyzyjne - Regresja - Algorytm biblioteki: rpart")
 print(p)
 
 maxdepth_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
-tree_maxdepth_range = 1:15
+tree_maxdepth_range = 2:15
 for (maxdep in tree_maxdepth_range) {
   maxdepth_test <- rbind(maxdepth_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
 }
 maxdepth_test_Reg <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
 ### WYKRES ###
 maxdepth_test_Reg <- as.data.frame(maxdepth_test_Reg)
-p = ggplot() + geom_line(data = maxdepth_test_Reg, aes(x = tree_maxdepth_range, y = MAPE_mean), color = "blue") + xlab('Maximum Depth') + ylab('MAPE') + ggtitle("Drzewo Decyzyjne - Regresja - Algorytm biblioteki: rpart")
+p = ggplot() + geom_line(data = maxdepth_test_Reg, aes(x = tree_maxdepth_range, y = MAPE_mean), color = "blue") + xlab('Maximum Depth') + ylab('MAPE [%]') + ggtitle("Drzewo Decyzyjne - Regresja - Algorytm biblioteki: rpart")
 print(p)
 
 
@@ -432,28 +458,33 @@ print("### --- knn - reczne --- ###")
 # pred_knn_Reg <- KNNpred(knn_model_Reg, test.data[,-9])
 # print(ModelOcena( test.data$Wytrzymalosc , pred_knn_Reg))
 
-print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 5))
 
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
+
+print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 5))
 knn_k_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 10)
-knn_k_range = 2:25
+knn_k_range = 2:7
 for (k_knn in knn_k_range) {
+  print(paste("k_knn = ",k_knn))
   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = k_knn))
 }
 knn_k_test_Reg_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 knn_k_test_Reg_my <- as.data.frame(knn_k_test_Reg_my)
-p = ggplot() + geom_line(data = knn_k_test_Reg_my, aes(x = knn_k_range, y = MAPE_mean), color = "blue") + xlab('k (dla knn)') + ylab('MAPE') + ggtitle("knn - Regresja - Algorytm wlasny")
+p = ggplot() + geom_line(data = knn_k_test_Reg_my, aes(x = knn_k_range, y = MAPE_mean), color = "blue") + xlab('k (dla knn)') + ylab('MAPE [%]') + ggtitle("knn - Regresja - Algorytm wlasny")
 print(p)
+
+### --- Czesc do odkomentowania!!! --- Dlugie obliczenia! --- ###
 
 
 # --- knn - caret --- #
 cat("\n")
 print("### --- knn - caret --- ###")
-# knn_model_Reg_caret <- knn3(Wytrzymalosc ~ . , data = train.data, k=5)
-# pred_knn_model_Reg_caret <- predict(knn_model_Reg_caret, test.data)
-# print(ModelOcena(test.data$Wytrzymalosc, pred_knn_model_Reg_caret))
+#knn_model_Reg_caret <- knnreg(Wytrzymalosc ~ . , data = train.data, k=10)
+#pred_knn_model_Reg_caret <- predict(knn_model_Reg_caret, test.data)
+#print(ModelOcena(test.data$Wytrzymalosc, pred_knn_model_Reg_caret))
 
-print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="R", knn_k = 5))
+print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="R", knn_k = 10))
 
 knn_k_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="R", knn_k = 10)
 knn_k_range = 2:100
@@ -463,8 +494,38 @@ for (k_knn in knn_k_range) {
 knn_k_test_Reg_R <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 knn_k_test_Reg_R <- as.data.frame(knn_k_test_Reg_R)
-p = ggplot() + geom_line(data = knn_k_test_Reg_R, aes(x = knn_k_range, y = MAPE_mean), color = "blue") + xlab('k (dla knn)') + ylab('MAPE') + ggtitle("knn - Regresja - Algorytm biblioteki: caret")
+p = ggplot() + geom_line(data = knn_k_test_Reg_R, aes(x = knn_k_range, y = MAPE_mean), color = "blue") + xlab('k (dla knn)') + ylab('MAPE [%]') + ggtitle("knn - Regresja - Algorytm biblioteki: caret")
 print(p)
+
+
+
+
+### -------------------- ###
+### --- Podsumowanie --- ###
+### -------------------- ###
+
+print("Podsumowanie najlepszych wynikow roznych modeli:")
+print(".")
+print("Klasyfikacja Binarna:")
+print("Drzewo - Rpart (MinSplit): "); print(minsplit_test_Bin[minsplit_test_Bin$ACC_mean == max(minsplit_test_Bin$ACC_mean),][1,])
+print("Drzewo - Rpart (MaxDepth): "); print(maxdepth_test_Bin[maxdepth_test_Bin$ACC_mean == max(maxdepth_test_Bin$ACC_mean),][1,])
+print("KNN (Wlasny): "); print(knn_k_test_Bin_my[knn_k_test_Bin_my$ACC_mean == max(knn_k_test_Bin_my$ACC_mean),][1,])
+print("KNN (Carpet): "); print(knn_k_test_Bin_R[knn_k_test_Bin_R$ACC_mean == max(knn_k_test_Bin_R$ACC_mean),][1,])
+print("SVM (Wlasny): "); print(svm_C_test_Bin_my[svm_C_test_Bin_my$ACC_mean == max(svm_C_test_Bin_my$ACC_mean),][1,])
+print("SVM (e1071): ");  print(svm_C_test_Bin_R[svm_C_test_Bin_R$ACC_mean == max(svm_C_test_Bin_R$ACC_mean),][1,])
+print(".")
+print("Klasyfikacja Wieloklasowa:")
+print("Drzewo - Rpart (MinSplit): "); print(minsplit_test_Class[minsplit_test_Class[,2] == max(minsplit_test_Class[,2]),])
+print("Drzewo - Rpart (MaxDepth): "); print(maxdepth_test_Class[maxdepth_test_Class[,2] == max(maxdepth_test_Class[,2]),])
+print("KNN (Wlasny): "); print(knn_k_test_Class_my[knn_k_test_Class_my[,2] == max(knn_k_test_Class_my[,2]),])
+print("KNN (Carpet): "); print(knn_k_test_Class_R[knn_k_test_Class_R[,2] == max(knn_k_test_Class_R[,2]),])
+print(".")
+print("Regresja:")
+print("Drzewo - Rpart (MinSplit): "); print(minsplit_test_Reg[minsplit_test_Reg$MAPE_mean == min(minsplit_test_Reg$MAPE_mean),])
+print("Drzewo - Rpart (MaxDepth): "); print(maxdepth_test_Reg[maxdepth_test_Reg$MAPE_mean == min(maxdepth_test_Reg$MAPE_mean),])
+print("KNN (Wlasny): "); print(knn_k_test_Reg_my[knn_k_test_Reg_my$MAPE_mean == min(knn_k_test_Reg_my$MAPE_mean),])
+print("KNN (Carpet): "); print(knn_k_test_Reg_R[knn_k_test_Reg_R$MAPE_mean == min(knn_k_test_Reg_R$MAPE_mean),])
+
 
 
 
