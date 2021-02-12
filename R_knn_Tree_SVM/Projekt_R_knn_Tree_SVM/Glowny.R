@@ -23,6 +23,9 @@ set.seed(125)
 ### --------------- ###
 ### --- Binarna --- ###
 ### --------------- ###
+print("### --------------- ###")
+print("### --- Binarna --- ###")
+print("### --------------- ###")
 
 # Dane: Transfusion.csv
 # Zmienne są następujące:
@@ -60,7 +63,6 @@ print("### --- Tree - rpart --- ###")
 # summary(ROCit_Drzewko_Bin_rpart)
 # plot(ROCit_Drzewko_Bin_rpart)
 
-# print(kupa <- ModelOcena(test.data$Y_out, pred_Drzewko_Bin_rpart))
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5))
 
@@ -71,7 +73,7 @@ for (minsplit in tree_minsplit_range) {
   #print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=7))
   minsplit_test <- rbind(minsplit_test, Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
 }
-minsplit_test_Bin <- cbind(tree_minsplit_range, minsplit_test_Bin[-1,])
+minsplit_test_Bin <- cbind(tree_minsplit_range, minsplit_test[-1,])
 ### WYKRES ###
 
 
@@ -114,14 +116,14 @@ print("### --- knn - reczne --- ###")
 # pred_knn_Bin <- KNNpred(knn_model_Bin, Transfusion_Bin[-5])
 # print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_Bin))
 
-# print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10))
+print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10))
 
-knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10)
-knn_k_range = 2:40
-for (k_knn in knn_k_range) {
-  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = k_knn))
-}
-knn_k_test_Bin_my <- cbind(knn_k_range, knn_k_test[-1,])
+### knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10)
+### knn_k_range = 2:40
+### for (k_knn in knn_k_range) {
+###   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = k_knn))
+### }
+### knn_k_test_Bin_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
 
 
@@ -133,10 +135,10 @@ print("### --- knn - caret --- ###")
 # print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_model_Bin_caret))
 # ROCit_knn_Bin_caret <- rocit(score=pred_knn_model_Bin_caret, class = Transfusion_Bin$Y_out)
 
-# print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10))
+print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10))
 
 knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10)
-knn_k_range = 2:40
+knn_k_range = 2:100
 for (k_knn in knn_k_range) {
   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = k_knn))
 }
@@ -152,7 +154,7 @@ print("### --- SVM - reczne --- ###")
 # pred_SVM_model_Bin <- predSVM( as.matrix(Transfusion_Bin[-5]), SVM_model_Bin$Theta, SVM_model_Bin$Theta0)
 # print(ModelOcena_Class(as.vector(pred_SVM_model_Bin),Transfusion_Bin$Y_out))
 
-# print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000))
+print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000))
 
 svm_C_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000)
 svm_C_range = 20:200
@@ -190,6 +192,9 @@ svm_C_test_Bin_R <- cbind(svm_C_range, svm_C_test[-1,])
 ### -------------------- ###
 ### --- Wieloklasowa --- ###
 ### -------------------- ###
+print("### -------------------- ###")
+print("### --- Wieloklasowa --- ###")
+print("### -------------------- ###")
 
 Dermatology <- as.data.frame(read.csv(file="http://archive.ics.uci.edu/ml/machine-learning-databases/dermatology/dermatology.data", header = FALSE))
 # 35 kolumn - klasy w 35 kolumnie
@@ -221,7 +226,26 @@ print("### --- Tree - rpart --- ###")
 # pred_Drzewko_Class_rpart <- predict(Drzewko_Class_rpart, newdata = test.data, type="prob")
 # print(paste("Trafione klasy = ", Traf <- length(test.data[test.data$V35 == pred_Drzewko_Class_rpart_class,35]), " / ", All <- length(test.data$V35), " = ", Traf/All))
 
-print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=1, tree_maxdepth=7))
+print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5))
+
+minsplit_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
+tree_minsplit_range = 1:50
+for (minsplit in tree_minsplit_range) {
+  minsplit_test <- rbind(minsplit_test, Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
+}
+minsplit_test_Class <- cbind(tree_minsplit_range, minsplit_test[-1,])
+### WYKRES ###
+
+
+maxdepth_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
+tree_maxdepth_range = 1:15
+for (maxdep in tree_maxdepth_range) {
+  maxdepth_test <- rbind(maxdepth_test,Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
+}
+maxdepth_test_Class <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
+### WYKRES ###
+
+
 
 
 # --- Drzewko Wieloklasowe - reczne --- #
@@ -230,7 +254,8 @@ print("### --- Tree - reczne --- ###")
 Drzewko_Class <- Tree( Y = "V35", Xnames = colnames(Dermatology)[-35], data = train.data, depth = 5, minobs = 1)
 plot(Drzewko_Class)
 Drzewko_Class_Vis <- ToDataFrameTree(Drzewko_Class)
-
+print("Drzewo Decyzyjne z najlepszymi parametrami dla Drzewa z biblioteki rpart")
+print(Drzewko_Class_Vis)
 
 
 for (x in 1:(ncol(Dermatology)-1)) {
@@ -248,6 +273,14 @@ print("### --- knn - reczne --- ###")
 
 print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 5))
 
+### knn_k_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 10)
+### knn_k_range = 2:40
+### for (k_knn in knn_k_range) {
+###   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = k_knn))
+### }
+### knn_k_test_Class_my <- cbind(knn_k_range, knn_k_test[-1,])
+### WYKRES ###
+
 
 # --- knn - caret --- #
 cat("\n")
@@ -258,6 +291,14 @@ cat("\n")
 
 print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="R", knn_k = 5))
 
+knn_k_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="R", knn_k = 10)
+knn_k_range = 2:100
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="R", knn_k = k_knn))
+}
+knn_k_test_Class_R <- cbind(knn_k_range, knn_k_test[-1,])
+### WYKRES ###
+
 
 
 # ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
@@ -267,6 +308,9 @@ print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=
 ### ---------------- ###
 ### --- REGRESJA --- ###
 ### ---------------- ###
+print("### ---------------- ###")
+print("### --- Regresja --- ###")
+print("### ---------------- ###")
 
 # url_concrete <- "http://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
 Concrete <- as.data.frame(read_xls("Concrete_Data.xls"))
@@ -290,11 +334,31 @@ print("### --- Tree - rpart --- ###")
 print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=10, tree_maxdepth=20))
 
 
+minsplit_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
+tree_minsplit_range = 1:50
+for (minsplit in tree_minsplit_range) {
+  minsplit_test <- rbind(minsplit_test, Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
+}
+minsplit_test_Reg <- cbind(tree_minsplit_range, minsplit_test[-1,])
+### WYKRES ###
+
+
+maxdepth_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
+tree_maxdepth_range = 1:15
+for (maxdep in tree_maxdepth_range) {
+  maxdepth_test <- rbind(maxdepth_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
+}
+maxdepth_test_Reg <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
+### WYKRES ###
+
+
+
 # --- Drzewko Regresja - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
 Drzewko_Reg <- Tree( Y = "Wytrzymalosc", Xnames = colnames(Concrete)[-9], data = train.data, depth = 10, minobs = 2)
 Drzewko_Reg_Vis <- ToDataFrameTree(Drzewko_Reg)
+print("Drzewo Decyzyjne z najlepszymi parametrami dla Drzewa z biblioteki rpart")
 print(Drzewko_Reg_Vis)
 
 
@@ -313,6 +377,15 @@ print("### --- knn - reczne --- ###")
 
 print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 5))
 
+### knn_k_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 10)
+### knn_k_range = 2:40
+### for (k_knn in knn_k_range) {
+###   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = k_knn))
+### }
+### knn_k_test_Reg_my <- cbind(knn_k_range, knn_k_test[-1,])
+### WYKRES ###
+
+
 
 # --- knn - caret --- #
 cat("\n")
@@ -323,5 +396,11 @@ print("### --- knn - caret --- ###")
 
 print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="R", knn_k = 5))
 
-
+knn_k_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="R", knn_k = 10)
+knn_k_range = 2:100
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="R", knn_k = k_knn))
+}
+knn_k_test_Reg_R <- cbind(knn_k_range, knn_k_test[-1,])
+### WYKRES ###
 
