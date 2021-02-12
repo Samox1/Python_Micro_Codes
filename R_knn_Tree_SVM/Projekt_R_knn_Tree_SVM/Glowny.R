@@ -42,11 +42,6 @@ print("Ilosc danych wejsciowych: ")
 print(length(Transfusion_Bin[,1]))
 print(summary(Transfusion_Bin))
 
-for (x in 1:(ncol(Transfusion_Bin)-1)) {
-  Transfusion_Bin[,x] = norm_minmax(Transfusion_Bin[,x])
-}
-print(summary(Transfusion_Bin))
-
 
 training.samples <- Transfusion_Bin$Y_out %>% createDataPartition(p = 0.7, list = FALSE)
 train.data  <- Transfusion_Bin[training.samples, ]
@@ -66,6 +61,7 @@ print("### --- Tree - rpart --- ###")
 
 # print(kupa <- ModelOcena(test.data$Y_out, pred_Drzewko_Bin_rpart))
 
+
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=1, tree_maxdepth=7))
 
 
@@ -76,6 +72,13 @@ Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","
 plot(Drzewko_Bin)
 Drzewko_Bin_Vis <- ToDataFrameTree(Drzewko_Bin)
 print(Drzewko_Bin_Vis)
+
+
+
+for (x in 1:(ncol(Transfusion_Bin)-1)) {
+  Transfusion_Bin[,x] = norm_minmax(Transfusion_Bin[,x])
+}
+print(summary(Transfusion_Bin))
 
 
 
