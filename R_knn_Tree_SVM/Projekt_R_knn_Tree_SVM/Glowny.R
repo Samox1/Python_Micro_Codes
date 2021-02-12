@@ -13,6 +13,7 @@ library(pROC)
 library(ROCit)
 library(tidyverse)
 library(readxl)
+library(ggplot2)
 
 
 source("funkcje.R")
@@ -68,10 +69,11 @@ tree_minsplit_range = 1:50
 for (minsplit in tree_minsplit_range) {
   #print(minsplit)
   #print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=7))
-  minsplit_test <- rbind(minsplit_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
+  minsplit_test <- rbind(minsplit_test, Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
 }
-minsplit_test <- cbind(tree_minsplit_range, minsplit_test[-1,])
+minsplit_test_Bin <- cbind(tree_minsplit_range, minsplit_test_Bin[-1,])
 ### WYKRES ###
+
 
 maxdepth_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
 tree_maxdepth_range = 1:15
@@ -80,17 +82,17 @@ for (maxdep in tree_maxdepth_range) {
   #print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
   maxdepth_test <- rbind(maxdepth_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
 }
-maxdepth_test <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
+maxdepth_test_Bin <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
 ### WYKRES ###
+
+
 
 # --- Drzewko Binarne - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
 Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = Transfusion_Bin, depth = 5, minobs = 25)
 
-pdf('Drzewko_My_Binarne.pdf')
 plot(Drzewko_Bin)
-dev.off()
 
 Drzewko_Bin_Vis <- ToDataFrameTree(Drzewko_Bin)
 print("Drzewo Decyzyjne z najlepszymi parametrami dla Drzewa z biblioteki rpart")
@@ -112,7 +114,16 @@ print("### --- knn - reczne --- ###")
 # pred_knn_Bin <- KNNpred(knn_model_Bin, Transfusion_Bin[-5])
 # print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_Bin))
 
-print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10))
+# print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10))
+
+knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10)
+knn_k_range = 2:40
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = k_knn))
+}
+knn_k_test_Bin_my <- cbind(knn_k_range, knn_k_test[-1,])
+### WYKRES ###
+
 
 # --- knn - caret --- #
 cat("\n")
@@ -122,7 +133,15 @@ print("### --- knn - caret --- ###")
 # print(ModelOcena(Transfusion_Bin$Y_out, pred_knn_model_Bin_caret))
 # ROCit_knn_Bin_caret <- rocit(score=pred_knn_model_Bin_caret, class = Transfusion_Bin$Y_out)
 
-print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10))
+# print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10))
+
+knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = 10)
+knn_k_range = 2:40
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="R", knn_k = k_knn))
+}
+knn_k_test_Bin_R <- cbind(knn_k_range, knn_k_test[-1,])
+### WYKRES ###
 
 
 # --- SVM - reczne --- #
@@ -133,7 +152,16 @@ print("### --- SVM - reczne --- ###")
 # pred_SVM_model_Bin <- predSVM( as.matrix(Transfusion_Bin[-5]), SVM_model_Bin$Theta, SVM_model_Bin$Theta0)
 # print(ModelOcena_Class(as.vector(pred_SVM_model_Bin),Transfusion_Bin$Y_out))
 
-print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000))
+# print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000))
+
+svm_C_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000)
+svm_C_range = 20:200
+for (C_svm in svm_C_range) {
+  svm_C_test <- rbind(svm_C_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="my", svm_cost=C_svm, svm_lr = 0.001, svm_maxiter = 1000))
+}
+svm_C_test_Bin_my <- cbind(svm_C_range, svm_C_test[-1,])
+### WYKRES ###
+
 
 # --- SVM - e1071 --- #
 cat("\n")
@@ -145,6 +173,14 @@ print("### --- SVM - e1071 --- ###")
 # print(ModelOcena_Class(pred_SVM_model_Bin_e1071, Transfusion_Bin$Y_out))
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="R", svm_cost=100))
+
+svm_C_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="R", svm_cost=100, svm_lr = 0.001, svm_maxiter = 1000)
+svm_C_range = 20:200
+for (C_svm in svm_C_range) {
+  svm_C_test <- rbind(svm_C_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="svm", algorytm="R", svm_cost=C_svm, svm_lr = 0.001, svm_maxiter = 1000))
+}
+svm_C_test_Bin_R <- cbind(svm_C_range, svm_C_test[-1,])
+### WYKRES ###
 
 
 # ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
