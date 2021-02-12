@@ -517,7 +517,7 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
       if (model == "tree") {
         Drzewko_Class_rpart = rpart( formula = V35 ~. , data = train, minsplit = tree_minsplit, maxdepth = tree_maxdepth, method = "class")
         pred_Drzewko_Class_rpart_class <- predict(Drzewko_Class_rpart, newdata = test, type="class")
-        ACC <- append(ACC, (length(test[test$V35 == pred_Drzewko_Class_rpart_class,35]) / length(test$V35)))
+        ACC <- append(ACC, "ACC" = (length(test[test$V35 == pred_Drzewko_Class_rpart_class,35]) / length(test$V35)))
       }
 
       if (model == "knn") {
@@ -525,13 +525,13 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
         if (algorytm == "my") {
           knn_model_Class <- KNNtrain(train[-35], train$V35, k=knn_k, 0, 1)
           pred_knn_Class <- KNNpred(knn_model_Class, test[-35])
-          ACC <- append(ACC, (length(test[test$V35 == pred_knn_Class$Klasa,35]) / length(test$V35)))
+          ACC <- append(ACC, "ACC" =  (length(test[test$V35 == pred_knn_Class$Klasa,35]) / length(test$V35)))
         }
 
         if (algorytm == "R") {
           knn_model_Class_caret <- knn3(formula = V35 ~ . , data = train, k = knn_k)
           pred_knn_model_Class_caret <- predict(knn_model_Class_caret, test, type="class")
-          ACC <- append(ACC, (length(test[test$V35 == pred_knn_model_Class_caret,35]) / length(test$V35)))
+          ACC <- append(ACC, "ACC" =  (length(test[test$V35 == pred_knn_model_Class_caret,35]) / length(test$V35)))
         }
       }
     }

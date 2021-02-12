@@ -75,6 +75,14 @@ for (minsplit in tree_minsplit_range) {
 }
 minsplit_test_Bin <- cbind(tree_minsplit_range, minsplit_test[-1,])
 ### WYKRES ###
+minsplit_test_Bin <- as.data.frame(minsplit_test_Bin)
+minsplit_test_Bin <- drop_na(minsplit_test_Bin)
+
+p = ggplot() + geom_line(data = minsplit_test_Bin, aes(x = tree_minsplit_range, y = ACC_mean), color = "blue") + xlab('Minimum Split') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Binarna - Algorytm biblioteki: rpart")
+print(p)
+
+p = ggplot() + geom_line(data = minsplit_test_Bin, aes(x = tree_minsplit_range, y = AUC_mean), color = "blue") + xlab('Minimum Split') + ylab('AUC') + ggtitle("Drzewo Decyzyjne - Binarna - Algorytm biblioteki: rpart")
+print(p)
 
 
 maxdepth_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
@@ -86,7 +94,14 @@ for (maxdep in tree_maxdepth_range) {
 }
 maxdepth_test_Bin <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
 ### WYKRES ###
+maxdepth_test_Bin <- as.data.frame(maxdepth_test_Bin)
+maxdepth_test_Bin <- drop_na(maxdepth_test_Bin)
 
+p = ggplot() + geom_line(data = maxdepth_test_Bin, aes(x = tree_maxdepth_range, y = ACC_mean), color = "blue") + xlab('Maximum Depth') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Binarna - Algorytm biblioteki: rpart")
+print(p)
+
+p = ggplot() + geom_line(data = maxdepth_test_Bin, aes(x = tree_maxdepth_range, y = AUC_mean), color = "blue") + xlab('Maximum Depth') + ylab('AUC') + ggtitle("Drzewo Decyzyjne - Binarna - Algorytm biblioteki: rpart")
+print(p)
 
 
 # --- Drzewko Binarne - reczne --- #
@@ -118,14 +133,21 @@ print("### --- knn - reczne --- ###")
 
 print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10))
 
-### knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10)
-### knn_k_range = 2:40
-### for (k_knn in knn_k_range) {
-###   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = k_knn))
-### }
-### knn_k_test_Bin_my <- cbind(knn_k_range, knn_k_test[-1,])
+knn_k_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = 10)
+knn_k_range = 2:25
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="knn", algorytm="my", knn_k = k_knn))
+}
+knn_k_test_Bin_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
+knn_k_test_Bin_my <- as.data.frame(knn_k_test_Bin_my)
+knn_k_test_Bin_my <- drop_na(knn_k_test_Bin_my)
 
+p = ggplot() + geom_line(data = knn_k_test_Bin_my, aes(x = knn_k_range, y = ACC_mean), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - binarny - Algorytm wlasny")
+print(p)
+
+p = ggplot() + geom_line(data = knn_k_test_Bin_my, aes(x = knn_k_range, y = AUC_mean), color = "blue") + xlab('k (dla knn)') + ylab('AUC') + ggtitle("knn - binarny - Algorytm wlasny")
+print(p)
 
 # --- knn - caret --- #
 cat("\n")
@@ -144,6 +166,14 @@ for (k_knn in knn_k_range) {
 }
 knn_k_test_Bin_R <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
+knn_k_test_Bin_R <- as.data.frame(knn_k_test_Bin_R)
+knn_k_test_Bin_R <- drop_na(knn_k_test_Bin_R)
+
+p = ggplot() + geom_line(data = knn_k_test_Bin_R, aes(x = knn_k_range, y = ACC_mean), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - binarny - Algorytm biblioteki: caret")
+print(p)
+
+p = ggplot() + geom_line(data = knn_k_test_Bin_R, aes(x = knn_k_range, y = AUC_mean), color = "blue") + xlab('k (dla knn)') + ylab('AUC') + ggtitle("knn - binarny - Algorytm biblioteki: caret")
+print(p)
 
 
 # --- SVM - reczne --- #
@@ -163,7 +193,14 @@ for (C_svm in svm_C_range) {
 }
 svm_C_test_Bin_my <- cbind(svm_C_range, svm_C_test[-1,])
 ### WYKRES ###
+svm_C_test_Bin_my <- as.data.frame(svm_C_test_Bin_my)
+svm_C_test_Bin_my <- drop_na(svm_C_test_Bin_my)
 
+p = ggplot() + geom_line(data = svm_C_test_Bin_my, aes(x = svm_C_range, y = ACC_mean), color = "blue") + xlab('C (koszt)') + ylab('Accuracy') + ggtitle("SVM - Binarna - Algorytm wlasny")
+print(p)
+
+p = ggplot() + geom_line(data = svm_C_test_Bin_my, aes(x = svm_C_range, y = AUC_mean), color = "blue") + xlab('C (koszt)') + ylab('AUC') + ggtitle("SVM - Binarna - Algorytm wlasny")
+print(p)
 
 # --- SVM - e1071 --- #
 cat("\n")
@@ -183,6 +220,13 @@ for (C_svm in svm_C_range) {
 }
 svm_C_test_Bin_R <- cbind(svm_C_range, svm_C_test[-1,])
 ### WYKRES ###
+svm_C_test_Bin_R <- as.data.frame(svm_C_test_Bin_R)
+
+p = ggplot() + geom_line(data = svm_C_test_Bin_R, aes(x = svm_C_range, y = ACC_mean), color = "blue") + xlab('C (koszt)') + ylab('Accuracy') + ggtitle("SVM - Binarna - Algorytm biblioteki: e1071")
+print(p)
+
+p = ggplot() + geom_line(data = svm_C_test_Bin_R, aes(x = svm_C_range, y = AUC_mean), color = "blue") + xlab('C (koszt)') + ylab('AUC') + ggtitle("SVM - Binarna - Algorytm biblioteki: e1071")
+print(p)
 
 
 # ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
@@ -212,9 +256,9 @@ Dermatology$V35 <- factor(Dermatology$V35)
 
 # -->  przydalaby sie funkcja na losowanie danych treningowych z roznych klas
 
-training.samples <- Dermatology[,"V35"] %>% createDataPartition(p = 0.7, list = FALSE)
-train.data  <- Dermatology[training.samples, ]
-test.data <- Dermatology[-training.samples, ]
+#training.samples <- Dermatology[,"V35"] %>% createDataPartition(p = 0.7, list = FALSE)
+#train.data  <- Dermatology[training.samples, ]
+#test.data <- Dermatology[-training.samples, ]
 
 
 # --- Drzewko Wieloklasowe - rpart --- #
@@ -235,6 +279,9 @@ for (minsplit in tree_minsplit_range) {
 }
 minsplit_test_Class <- cbind(tree_minsplit_range, minsplit_test[-1,])
 ### WYKRES ###
+minsplit_test_Class <- as.data.frame(minsplit_test_Class)
+p = ggplot() + geom_line(data = minsplit_test_Class, aes(x = tree_minsplit_range, y = ACC), color = "blue") + xlab('Minimum Split') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Wieloklasowa - Algorytm biblioteki: rpart")
+print(p)
 
 
 maxdepth_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
@@ -244,14 +291,16 @@ for (maxdep in tree_maxdepth_range) {
 }
 maxdepth_test_Class <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
 ### WYKRES ###
-
+maxdepth_test_Class <- as.data.frame(maxdepth_test_Class)
+p = ggplot() + geom_line(data = maxdepth_test_Class, aes(x = tree_maxdepth_range, y = ACC), color = "blue") + xlab('Maximum Depth') + ylab('Accuracy') + ggtitle("Drzewo Decyzyjne - Wieloklasowa - Algorytm biblioteki: rpart")
+print(p)
 
 
 
 # --- Drzewko Wieloklasowe - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
-Drzewko_Class <- Tree( Y = "V35", Xnames = colnames(Dermatology)[-35], data = train.data, depth = 5, minobs = 1)
+Drzewko_Class <- Tree( Y = "V35", Xnames = colnames(Dermatology)[-35], data = Dermatology, depth = 8, minobs = 48)
 plot(Drzewko_Class)
 Drzewko_Class_Vis <- ToDataFrameTree(Drzewko_Class)
 print("Drzewo Decyzyjne z najlepszymi parametrami dla Drzewa z biblioteki rpart")
@@ -273,14 +322,16 @@ print("### --- knn - reczne --- ###")
 
 print(Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 5))
 
-### knn_k_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 10)
-### knn_k_range = 2:40
-### for (k_knn in knn_k_range) {
-###   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = k_knn))
-### }
-### knn_k_test_Class_my <- cbind(knn_k_range, knn_k_test[-1,])
+knn_k_test <- Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = 10)
+knn_k_range = 2:25
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Dermatology, Dane_Y=Dermatology$V35, Dane_Y_Y=Dermatology_Y, k_folds=5, typ_danych="class", model="knn", algorytm="my", knn_k = k_knn))
+}
+knn_k_test_Class_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
-
+knn_k_test_Class_my <- as.data.frame(knn_k_test_Class_my)
+p = ggplot() + geom_line(data = knn_k_test_Class_my, aes(x = knn_k_range, y = ACC), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - Wieloklasowa - Algorytm wlasny")
+print(p)
 
 # --- knn - caret --- #
 cat("\n")
@@ -298,7 +349,9 @@ for (k_knn in knn_k_range) {
 }
 knn_k_test_Class_R <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
-
+knn_k_test_Class_R <- as.data.frame(knn_k_test_Class_R)
+p = ggplot() + geom_line(data = knn_k_test_Class_R, aes(x = knn_k_range, y = ACC), color = "blue") + xlab('k (dla knn)') + ylab('Accuracy') + ggtitle("knn - Wieloklasowa - Algorytm biblioteki: caret")
+print(p)
 
 
 # ------------------------------------------- ### ---------------------------------------- ### --------------------------------------- ### --------------------------- #
@@ -318,9 +371,9 @@ colnames(Concrete)<-c("Cement","Zuzel","Popiol","Woda","Superplastyfikator","Kru
 print(summary(Concrete))
 
 
-training.samples <- Concrete[,9] %>% createDataPartition(p = 0.7, list = FALSE)
-train.data  <- Concrete[training.samples, ]
-test.data <- Concrete[-training.samples, ]
+#training.samples <- Concrete[,9] %>% createDataPartition(p = 0.7, list = FALSE)
+#train.data  <- Concrete[training.samples, ]
+#test.data <- Concrete[-training.samples, ]
 
 
 # --- Drzewko Regresja - rpart --- #
@@ -341,7 +394,9 @@ for (minsplit in tree_minsplit_range) {
 }
 minsplit_test_Reg <- cbind(tree_minsplit_range, minsplit_test[-1,])
 ### WYKRES ###
-
+minsplit_test_Reg <- as.data.frame(minsplit_test_Reg)
+p = ggplot() + geom_line(data = minsplit_test_Reg, aes(x = tree_minsplit_range, y = MAPE_mean), color = "blue") + xlab('Minimum Split') + ylab('MAPE') + ggtitle("Drzewo Decyzyjne - Regresja - Algorytm biblioteki: rpart")
+print(p)
 
 maxdepth_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
 tree_maxdepth_range = 1:15
@@ -350,13 +405,15 @@ for (maxdep in tree_maxdepth_range) {
 }
 maxdepth_test_Reg <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
 ### WYKRES ###
-
+maxdepth_test_Reg <- as.data.frame(maxdepth_test_Reg)
+p = ggplot() + geom_line(data = maxdepth_test_Reg, aes(x = tree_maxdepth_range, y = MAPE_mean), color = "blue") + xlab('Maximum Depth') + ylab('MAPE') + ggtitle("Drzewo Decyzyjne - Regresja - Algorytm biblioteki: rpart")
+print(p)
 
 
 # --- Drzewko Regresja - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
-Drzewko_Reg <- Tree( Y = "Wytrzymalosc", Xnames = colnames(Concrete)[-9], data = train.data, depth = 10, minobs = 2)
+Drzewko_Reg <- Tree( Y = "Wytrzymalosc", Xnames = colnames(Concrete)[-9], data = Concrete, depth = 10, minobs = 15)
 Drzewko_Reg_Vis <- ToDataFrameTree(Drzewko_Reg)
 print("Drzewo Decyzyjne z najlepszymi parametrami dla Drzewa z biblioteki rpart")
 print(Drzewko_Reg_Vis)
@@ -377,14 +434,16 @@ print("### --- knn - reczne --- ###")
 
 print(Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 5))
 
-### knn_k_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 10)
-### knn_k_range = 2:40
-### for (k_knn in knn_k_range) {
-###   knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = k_knn))
-### }
-### knn_k_test_Reg_my <- cbind(knn_k_range, knn_k_test[-1,])
+knn_k_test <- Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = 10)
+knn_k_range = 2:25
+for (k_knn in knn_k_range) {
+  knn_k_test <- rbind(knn_k_test,Krosswalidacja_param(Dane = Concrete, Dane_Y=Concrete$Wytrzymalosc, Dane_Y_Y=NULL, k_folds=5, typ_danych="reg", model="knn", algorytm="my", knn_k = k_knn))
+}
+knn_k_test_Reg_my <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
-
+knn_k_test_Reg_my <- as.data.frame(knn_k_test_Reg_my)
+p = ggplot() + geom_line(data = knn_k_test_Reg_my, aes(x = knn_k_range, y = MAPE_mean), color = "blue") + xlab('k (dla knn)') + ylab('MAPE') + ggtitle("knn - Regresja - Algorytm wlasny")
+print(p)
 
 
 # --- knn - caret --- #
@@ -403,4 +462,9 @@ for (k_knn in knn_k_range) {
 }
 knn_k_test_Reg_R <- cbind(knn_k_range, knn_k_test[-1,])
 ### WYKRES ###
+knn_k_test_Reg_R <- as.data.frame(knn_k_test_Reg_R)
+p = ggplot() + geom_line(data = knn_k_test_Reg_R, aes(x = knn_k_range, y = MAPE_mean), color = "blue") + xlab('k (dla knn)') + ylab('MAPE') + ggtitle("knn - Regresja - Algorytm biblioteki: caret")
+print(p)
+
+
 
