@@ -61,16 +61,39 @@ print("### --- Tree - rpart --- ###")
 
 # print(kupa <- ModelOcena(test.data$Y_out, pred_Drzewko_Bin_rpart))
 
+print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5))
 
-print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=1, tree_maxdepth=7))
+minsplit_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
+tree_minsplit_range = 1:50
+for (minsplit in tree_minsplit_range) {
+  #print(minsplit)
+  #print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=7))
+  minsplit_test <- rbind(minsplit_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=minsplit, tree_maxdepth=5))
+}
+minsplit_test <- cbind(tree_minsplit_range, minsplit_test[-1,])
+### WYKRES ###
 
+maxdepth_test <- Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=5)
+tree_maxdepth_range = 1:15
+for (maxdep in tree_maxdepth_range) {
+  #print(maxdep)
+  #print(Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
+  maxdepth_test <- rbind(maxdepth_test,Krosswalidacja_param(Dane = Transfusion_Bin, Dane_Y=Transfusion_Bin$Y_out, Dane_Y_Y=Transfusion_Bin_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=25, tree_maxdepth=maxdep))
+}
+maxdepth_test <- cbind(tree_maxdepth_range, maxdepth_test[-1,])
+### WYKRES ###
 
 # --- Drzewko Binarne - reczne --- #
 cat("\n")
 print("### --- Tree - reczne --- ###")
-Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = train.data, depth = 5, minobs = 1)
+Drzewko_Bin <- Tree( Y = "Y_out", Xnames = c("Recency", "Frequency","Monetary","Time"), data = Transfusion_Bin, depth = 5, minobs = 25)
+
+pdf('Drzewko_My_Binarne.pdf')
 plot(Drzewko_Bin)
+dev.off()
+
 Drzewko_Bin_Vis <- ToDataFrameTree(Drzewko_Bin)
+print("Drzewo Decyzyjne z najlepszymi parametrami dla Drzewa z biblioteki rpart")
 print(Drzewko_Bin_Vis)
 
 

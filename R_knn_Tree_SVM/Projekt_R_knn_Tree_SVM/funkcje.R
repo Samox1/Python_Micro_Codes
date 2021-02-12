@@ -441,7 +441,7 @@ Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="
   
 
   for (folds_num in 1:k_folds) {
-    print(folds_num)
+    #print(folds_num)
     
     train <- Dane[-folds_list[[folds_num]],]
     test <- Dane[folds_list[[folds_num]],]
