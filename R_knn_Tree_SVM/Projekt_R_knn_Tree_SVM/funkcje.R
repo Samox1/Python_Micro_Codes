@@ -325,7 +325,7 @@ MAPE <- function(y_tar, y_hat){
 }
 
 AUC_MT <- function(y_tar, y_hat){
-  roc_obj <- roc(y_tar, y_hat)
+  roc_obj <- roc(y_tar, y_hat, quiet = TRUE)
   TPR <- rev(roc_obj$sensitivities) #czu?o?? posortowana rosn?co
   FPR <- rev(1 - roc_obj$specificities) #1 - specyficzno?? posortowana rosn?co
   dFPR <- c(diff(FPR), 0) #r??nica pomi?dzy kolejnymi warto?ciami czu?o?ci
@@ -335,7 +335,7 @@ AUC_MT <- function(y_tar, y_hat){
 }
 
 J <- function(y_tar, y_hat){
-  roc_obj <- roc(y_tar, y_hat) 
+  roc_obj <- roc(y_tar, y_hat, quiet = TRUE) 
   TPR <- roc_obj$sensitivities #czu?o??
   FPR <- roc_obj$specificities #specyficzno??
   max_J <- 0
@@ -416,7 +416,176 @@ ModelOcena_Class <- function(y_pred, y_source){
 
 
 
+Krosswalidacja_param <- function(Dane, Dane_Y, Dane_Y_Y, k_folds=5, typ_danych="bin", model="tree", algorytm="R", tree_minsplit=1, tree_maxdepth=5, knn_k=5, svm_cost=100, svm_lr=0.001, svm_maxiter=500, seed=1234) {
 
+  set.seed(seed)
+  folds_list <- createFolds(Dane_Y, k = k_folds, list = TRUE, returnTrain = FALSE)
+  
+  
+  if (typ_danych == "bin") {
+    AUC <- vector()
+    TPR <- vector()
+    FPR <- vector()
+    ACC <- vector()
+  }
+  
+  if (typ_danych == "class") {
+    ACC <- vector()
+  }
+  
+  if (typ_danych == "reg") {
+    MAE <- vector()
+    MSE <- vector()
+    MAPE <- vector()
+  }
+  
+
+  for (folds_num in 1:k_folds) {
+    print(folds_num)
+    
+    train <- Dane[-folds_list[[folds_num]],]
+    test <- Dane[folds_list[[folds_num]],]
+    train_Y <- Dane_Y_Y[-folds_list[[folds_num]]]
+    test_Y <- Dane_Y_Y[folds_list[[folds_num]]]
+  
+
+    if (typ_danych == "bin") {
+
+      if (model == "tree") {
+        Drzewko_Bin_rpart = rpart( formula = Y_out ~ . , data = train, minsplit = tree_minsplit, maxdepth = tree_maxdepth)
+        pred_Drzewko_Bin_rpart_class <- predict(Drzewko_Bin_rpart, newdata = test, type="class")
+        pred_Drzewko_Bin_rpart <- predict(Drzewko_Bin_rpart, newdata = test, type="prob")[,2]
+        Ocena <- ModelOcena(test$Y_out, pred_Drzewko_Bin_rpart)
+        AUC <- append(AUC, Ocena[1])
+        TPR <- append(TPR, Ocena[2])
+        FPR <- append(FPR, Ocena[3])
+        ACC <- append(ACC, Ocena[4])
+      }
+
+      if (model == "knn") {
+
+        if (algorytm == "my") {
+          knn_model_Bin <- KNNtrain(train[-5], train_Y, k=knn_k, 0, 1)
+          pred_knn_Bin <- KNNpred(knn_model_Bin, test[-5])
+          Ocena <- ModelOcena(test$Y_out, pred_knn_Bin)
+          AUC <- append(AUC, Ocena[1])
+          TPR <- append(TPR, Ocena[2])
+          FPR <- append(FPR, Ocena[3])
+          ACC <- append(ACC, Ocena[4])
+        }
+
+        if (algorytm == "R") {
+          knn_model_Bin_caret <- knn3(Y_out ~ . , data = train, k=knn_k)
+          pred_knn_model_Bin_caret <- predict(knn_model_Bin_caret, test, type="prob")[,2]
+          Ocena <- ModelOcena(test$Y_out, pred_knn_model_Bin_caret)
+          AUC <- append(AUC, Ocena[1])
+          TPR <- append(TPR, Ocena[2])
+          FPR <- append(FPR, Ocena[3])
+          ACC <- append(ACC, Ocena[4])
+        }
+      }
+
+      if (model == "svm") {
+
+        if (algorytm == "my") {
+          train_Y_class <- ifelse( train_Y == 0, -1, train_Y )
+          SVM_model_Bin <- trainSVM( as.matrix(train[-5]), train_Y_class, C = svm_cost, lr = svm_lr, maxiter = svm_maxiter )
+          pred_SVM_model_Bin <- predSVM( as.matrix(train[-5]), SVM_model_Bin$Theta, SVM_model_Bin$Theta0)
+          Ocena <- ModelOcena(train$Y_out, as.vector(pred_SVM_model_Bin))
+          AUC <- append(AUC, Ocena[1])
+          TPR <- append(TPR, Ocena[2])
+          FPR <- append(FPR, Ocena[3])
+          ACC <- append(ACC, Ocena[4])
+        }
+
+        if (algorytm == "R") {
+          SVM_model_Bin_e1071 <- svm(Y_out ~ . , data = train, probability = TRUE, cost = svm_cost)
+          pred_SVM_model_Bin_e1071 <- predict(SVM_model_Bin_e1071, train, probability = TRUE)
+          prob_SVM_model_Bin_e1071 <- attr(pred_SVM_model_Bin_e1071, "probabilities")[,1]
+          Ocena <- ModelOcena(train$Y_out, prob_SVM_model_Bin_e1071)
+          AUC <- append(AUC, Ocena[1])
+          TPR <- append(TPR, Ocena[2])
+          FPR <- append(FPR, Ocena[3])
+          ACC <- append(ACC, Ocena[4])
+        }
+      }
+
+    }
+
+    if (typ_danych == "class") {
+      
+      if (model == "tree") {
+        Drzewko_Class_rpart = rpart( formula = V35 ~. , data = train, minsplit = tree_minsplit, maxdepth = tree_maxdepth, method = "class")
+        pred_Drzewko_Class_rpart_class <- predict(Drzewko_Class_rpart, newdata = test, type="class")
+        ACC <- append(ACC, (length(test[test$V35 == pred_Drzewko_Class_rpart_class,35]) / length(test$V35)))
+      }
+
+      if (model == "knn") {
+
+        if (algorytm == "my") {
+          knn_model_Class <- KNNtrain(train[-35], train$V35, k=knn_k, 0, 1)
+          pred_knn_Class <- KNNpred(knn_model_Class, test[-35])
+          ACC <- append(ACC, (length(test[test$V35 == pred_knn_Class$Klasa,35]) / length(test$V35)))
+        }
+
+        if (algorytm == "R") {
+          knn_model_Class_caret <- knn3(formula = V35 ~ . , data = train, k = knn_k)
+          pred_knn_model_Class_caret <- predict(knn_model_Class_caret, test, type="class")
+          ACC <- append(ACC, (length(test[test$V35 == pred_knn_model_Class_caret,35]) / length(test$V35)))
+        }
+      }
+    }
+
+    if (typ_danych == "reg") {
+      
+      if (model == "tree") {
+        Drzewko_Reg_rpart = rpart( formula = Wytrzymalosc ~ . , data = train, method = "anova", minsplit = tree_minsplit, maxdepth = tree_maxdepth)
+        pred_Drzewko_Reg_rpart <- as.numeric(predict(Drzewko_Reg_rpart, newdata = test))
+        Ocena <- ModelOcena(train$Wytrzymalosc, pred_Drzewko_Reg_rpart)
+        MAE <- append(MAE, Ocena[1])
+        MSE <- append(MSE, Ocena[2])
+        MAPE <- append(MAPE, Ocena[3])
+      }
+
+      if (model == "knn") {
+
+        if (algorytm == "my") {
+          knn_model_Reg <- KNNtrain(train.data[,-9], train$Wytrzymalosc, k=knn_k, 0, 1)
+          pred_knn_Reg <- KNNpred(knn_model_Reg, test[,-9])
+          Ocena <- ModelOcena(test$Wytrzymalosc, pred_knn_Reg)
+          MAE <- append(MAE, Ocena[1])
+          MSE <- append(MSE, Ocena[2])
+          MAPE <- append(MAPE, Ocena[3])
+        }
+
+        if (algorytm == "R") {
+          knn_model_Reg_caret <- knn3(Wytrzymalosc ~ . , data = train, k=knn_k)
+          pred_knn_model_Reg_caret <- predict(knn_model_Reg_caret, test)
+          Ocena <- ModelOcena(test$Wytrzymalosc, pred_knn_model_Reg_caret)
+          MAE <- append(MAE, Ocena[1])
+          MSE <- append(MSE, Ocena[2])
+          MAPE <- append(MAPE, Ocena[3])
+        }
+      }
+    }
+
+  }
+  
+  if (typ_danych == "bin") {
+    wynik_sredni <- c("AUC_mean" = mean(AUC), "TPR_mean" = mean(TPR), "FPR_mean" = mean(FPR), "ACC_mean" = mean(ACC))
+  }
+  
+  if (typ_danych == "class") {
+    wynik_sredni <- c("ACC_mean" = mean(ACC))
+  }
+  
+  if (typ_danych == "reg") {
+    wynik_sredni <- c("MAE_mean" = mean(MAE), "MSE_mean" = mean(MSE), "MAPE_mean" = mean(MAPE))
+  }
+  
+  return(wynik_sredni)
+
+}
 
 
 
