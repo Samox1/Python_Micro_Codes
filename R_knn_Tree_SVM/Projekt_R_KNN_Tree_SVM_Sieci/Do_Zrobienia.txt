@@ -1,0 +1,13 @@
+*** SVM:
+1) tylko Binarna 
+2) zmienić wartości Class na (-1:1)
+
+
+*** Sieci Neuronowe:
+1) Normalizacja danych
+
+
+*** Ogólne notatki:
+1) Cross-Validation
+2) Wykresy 
+3) Porównanie: Własnych funkcji vs Wbudowane w biblioteki

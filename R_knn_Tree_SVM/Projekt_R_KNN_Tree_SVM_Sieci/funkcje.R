@@ -110,6 +110,16 @@ ModelOcena <- function(y_tar, y_hat){
   }
 }
 
+
+ModelOcena_Jakosc <- function(y_tar, y_hat){
+  return (c("Jakosc" = sum( diag( table( y_tar, y_hat ) ) ) / length(y_tar) ))
+}
+
+norm_0_1 <- function(x){
+  (x- min(x)) /(max(x)-min(x))
+}
+
+
 ######## K najbliższych sąsiadów ########
 
 KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew){
@@ -266,6 +276,9 @@ KNNpred <- function(KNNmodel, X){
     print("Niepoprawne dane!")
   }
 }
+
+
+
 
 
 ######## Drzewa decyzyjne ########
@@ -555,6 +568,8 @@ predSVM <- function( X, theta, theta0 ){
   sign( Decision( X, theta, theta0 ) )
 }
 
+
+
 ######## Sieci neuronowe ########
 
 sigmoid <- function( x ){
@@ -617,7 +632,7 @@ wstecz <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr ){
   return( list( W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
-trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ ){
+trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "binarna" ){
   set.seed( seed )
   X <- cbind( rep( 1, nrow(X) ), x )
   W1 <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
@@ -638,7 +653,7 @@ trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, 
   return( list( y_hat = sygnalwprzod$y_hat, W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
-predNN <- function( xnew, nn, typ ){
+predNN <- function( xnew, nn, typ = "binarna" ){
   xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
   h1 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( xnew %*% nn$W1 )  )
   h2 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( h1 %*% nn$W2 )  )
