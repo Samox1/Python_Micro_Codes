@@ -137,17 +137,47 @@ print("--------------------------------------------------")
 
 
 #binarna
-NN_model_Bin <- trainNN( df_bin_norm[,1:5], df_bin_norm[,6], h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "binarna")
-NN_predict_Bin <- predNN( df_bin_norm[,1:5], NN_model_Bin, typ = "binarna")
+X = as.matrix(df_bin_norm[,1:5])
+Y = as.matrix(norm_0_1(df_bin_norm[,6]))
+
+# NN_model_Bin <- trainNN( X, Y, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "binarna", f_aktywacji = sigmoid, df_aktywacji = dsigmoid)
+# NN_predict_Bin <- predNN( X, NN_model_Bin, typ = "binarna", f_aktywacji = sigmoid)
+# print(NN_predict_Bin)
+# ModelOcena((df_bin[,6]), as.numeric(NN_predict_Bin))
+
+NN_model_Bin_old <- trainNN_old( X, Y, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "binarna")
+NN_predict_Bin_old <- predNN_old( X, NN_model_Bin_old, typ = "binarna")
+print(NN_predict_Bin_old)
+ModelOcena((df_bin[,6]), as.numeric(NN_predict_Bin_old))
 
 
-NN_model_Bin <- trainNN( df_multi_norm[,1:4], df_multi_norm[,5], h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "wieloklasowa")
-NN_predict_Bin <- predNN( df_multi_norm[,1:4], NN_model_Bin, typ = "wieloklasowa")
+#wieloklasowa
+X = as.matrix(df_multi_norm[,1:4])
+Y = as.matrix(norm_0_1(df_multi_norm[,5]))
+
+# NN_model_Multi <- trainNN( X, Y, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "wieloklasowa",  f_aktywacji = sigmoid, df_aktywacji = dsigmoid)
+# NN_predict_Multi <- predNN( X, NN_model_Multi, typ = "wieloklasowa", f_aktywacji = sigmoid)
+# print(NN_predict_Multi)
+# ModelOcena_Jakosc((df_multi[,5]), as.numeric(NN_predict_Multi))
+
+NN_model_Multi_old <- trainNN_old( X, Y, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "wieloklasowa")
+NN_predict_Multi_old <- predNN_old( X, NN_model_Multi_old, typ = "wieloklasowa")
+print(NN_predict_Multi_old)
+ModelOcena_Jakosc((df_multi[,5]), as.numeric(NN_predict_Multi_old))
 
 
-NN_model_Bin <- trainNN( df_reg_norm[,1:4], as.numeric(df_reg_norm[,5]), h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "regresja")
-NN_predict_Bin <- predNN( df_reg_norm[,1:4], NN_model_Bin, typ = "regresja")
+#regresja
+X = as.matrix(df_reg_norm[,1:4])
+Y = as.matrix(norm_0_1(df_reg_norm[,5]))
 
+# NN_model_Reg <- trainNN( X, as.numeric(Y), h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "regresja", f_aktywacji = sigmoid, df_aktywacji = dsigmoid)
+# NN_predict_Reg <- predNN( X, NN_model_Reg, typ = "regresja", f_aktywacji = sigmoid)
+# print(NN_predict_Reg)
+# print(ModelOcena((df_reg[,5]), NN_predict_Reg))
 
+NN_model_Reg_old <- trainNN_old( X, as.numeric(Y), h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "regresja")
+NN_predict_Reg_old <- predNN_old( X, NN_model_Reg_old, typ = "regresja")
+print(NN_predict_Reg_old)
+print(ModelOcena((df_reg[,5]), NN_predict_Reg_old))
 
 
