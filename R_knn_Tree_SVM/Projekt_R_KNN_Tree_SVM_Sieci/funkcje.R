@@ -81,7 +81,7 @@ J <- function(y_tar, y_hat) {
 #}
 
 AUC <- function(y_tar, y_hat){
-  roc_obj <- roc(y_tar, y_hat)
+  roc_obj <- roc(y_tar, y_hat, quiet = TRUE)
   TPR=rev(roc_obj$sensitivities)
   FPR=rev(1 - roc_obj$specificities)
   dFPR = c(diff(FPR), 0)        
@@ -794,7 +794,7 @@ predNN_old <- function( xnew, nn, typ = "binarna" ){
 
 ######## Kroswalidacja ########
 
-CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
+CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm="KNN"){
   
   set.seed(seed)
   
@@ -809,6 +809,10 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
       typ = "multi"
     }
   }
+  
+  print(paste("Algorytm: ", algorytm))
+  print(paste("Typ algorytmu: ",typ))
+  
   
   if(typ=="reg"){
     
@@ -876,7 +880,7 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
         Train_pred <- KNNpred(KNNmodel, X=dane_Train[,X])
         Test_pred <- KNNpred(KNNmodel, X=dane_Test[,X])
         
-        if(typ=="regresja"){
+        if(typ=="reg"){
           y_hatTrain = Train_pred
           y_hatTest = Test_pred
           Train_ocena = ModelOcena(dane_Train[,y], y_hatTrain)
@@ -890,13 +894,13 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
           MSE_Test = append(MSE_Test, Test_ocena["MSE"])
           MAPE_Test = append(MAPE_Test, Test_ocena["MAPE"])
         }
-        else if(typ=="binarna"){
-          y_hatTrain = Train_pred$P
-          y_hatTest = Test_pred$P
+        else if(typ=="bin"){
+          y_hatTrain = as.numeric(Train_pred[,1])
+          y_hatTest = as.numeric(Test_pred[,1])
           Train_ocena = ModelOcena(dane_Train[, y], y_hatTrain)
           Test_ocena = ModelOcena(dane_Test[, y], y_hatTest)
-          Train_miary = Train_ocena$Miary
-          Test_miary = Test_ocena$Miary
+          Train_miary = Train_ocena[[3]]
+          Test_miary = Test_ocena[[3]]
           
           Czulosc_Train <- append(Czulosc_Train, Train_miary["Czulosc"])
           Specyficznosc_Train  <- append(Specyficznosc_Train, Train_miary["Specyficznosc"])
@@ -906,7 +910,7 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
           Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
           Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
         }
-        else if(typ=="wieloklasowa"){
+        else if(typ=="multi"){
           y_hatTrain = Train_pred$Klasa
           y_hatTest = Test_pred$Klasa
           y_tarTest = dane_Test[,y]
@@ -922,57 +926,60 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
         
       }else if(algorytm=="SVM"){                        ### --- ### --- SVM --- ### --- ###
 
-        dane_Test <- dane[indxTest,] 
-        dane_Train <- dane[-indxTest,]
+        if(typ=="bin"){
+          dane_Test <- dane[indxTest,] 
+          dane_Train <- dane[-indxTest,]
 
-        X_train = as.matrix(dane_Train[,X])
-        X_test = as.matrix(dane_Test[,X])
-        y_train = ifelse(dane_Train[,y] == 0, -1, 1)
-        y_test = ifelse(dane_Test[,y] == 0, -1, 1)
+          X_train = as.matrix(dane_Train[,X])
+          X_test = as.matrix(dane_Test[,X])
+          y_train = ifelse(dane_Train[,y] == 0, -1, 1)
+          y_test = ifelse(dane_Test[,y] == 0, -1, 1)
 
-        SVM_model <- trainSVM(X_train, y_train, C=hiper$C, lr = hiper$lr, maxiter = 5000)
-        SVM_pred_Train <- predSVM(X_train, SVM_model$Theta, SVM_model$Theta0)[,1]
-        SVM_pred_Test <- predSVM(X_test, SVM_model$Theta, SVM_model$Theta0)[,1]
+          SVM_model <- trainSVM(X_train, y_train, C=hiper$C, lr = hiper$lr, maxiter = hiper$maxiter)
+          SVM_pred_Train <- predSVM(X_train, SVM_model$Theta, SVM_model$Theta0)
+          SVM_pred_Test <- predSVM(X_test, SVM_model$Theta, SVM_model$Theta0)
 
-        y_train = ifelse(y_train == -1, 0, 1)
-        y_test = ifelse(y_test == -1, 0, 1)
-        SVM_pred_Train = ifelse(SVM_pred_Train == -1, 0, 1)
-        SVM_pred_Test = ifelse(SVM_pred_Test == -1, 0, 1)
-
-                
-        if(typ=="regresja"){
+          y_train = ifelse(y_train == -1, 0, 1)
+          y_test = ifelse(y_test == -1, 0, 1)
+          SVM_pred_Train = ifelse(SVM_pred_Train == -1, 0, 1)
+          SVM_pred_Test = ifelse(SVM_pred_Test == -1, 0, 1)
+        }
+         
+        if(typ=="reg"){
           print("Brak opcji na Regresje!")
         }
-        else if(typ=="binarna"){
-          y_hatTrain = Train_pred$P
-          y_hatTest = Test_pred$P
-          Train_ocena = ModelOcena(y_train, y_hatTrain)
-          Test_ocena = ModelOcena(y_test, y_hatTest)
-          Train_miary = Train_ocena$Miary
-          Test_miary = Test_ocena$Miary
+        else if(typ=="bin"){
           
-          Czulosc_Train <- append(Czulosc_Train, Train_miary["Czulosc"])
-          Specyficznosc_Train  <- append(Specyficznosc_Train, Train_miary["Specyficznosc"])
-          Jakosc_Train  <- append(Jakosc_Train, Train_miary["Jakosc"])
+          czulosc_train = Czulosc_new(y_train, SVM_pred_Train)
+          czulosc_test = Czulosc_new(y_test, SVM_pred_Test)
+          specyficznosc_train = Czulosc_new(y_train, SVM_pred_Train)
+          specyficznosc_test = Czulosc_new(y_test, SVM_pred_Test)
+          jakosc_train = Jakosc_new(y_train, SVM_pred_Train)
+          jakosc_test = Jakosc_new(y_test, SVM_pred_Test)
+          
+          Czulosc_Train <- append(Czulosc_Train, czulosc_train)
+          Specyficznosc_Train  <- append(Specyficznosc_Train, specyficznosc_train)
+          Jakosc_Train  <- append(Jakosc_Train, jakosc_train)
           
           Czulosc_Test <- append(Czulosc_Test, Test_miary["Czulosc"])
           Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
           Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
         }
-        else if(typ=="wieloklasowa"){
+        else if(typ=="multi"){
           print("Brak opcji na klasyfikację Wieloklasową!")
         }
         
     
       
         
-      #}# else if(svm)
-      #else if(algorytm=="sieci"){
+      #}else if(algorytm=="sieci"){
         
       #}# else if(sieci)
       
-    }#for(kFold)
+      }#for(kFold)
     
+    }
+      
     if(typ=="reg"){
       
       mae_train = append(mae_train, mean(MAE_Train))
@@ -1004,7 +1011,7 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
     colnames(wyniki) = c("MAE_TRAIN", "MSE_TRAIN", "MAPE_TRAIN", "MAE_TEST", "MSE_TEST", "MAPE_TEST")
     wyniki[,1] = mae_train
     wyniki[,2] = mse_train
-    wyniki[,3] = map_train
+    wyniki[,3] = mape_train
     wyniki[,4] = mae_test
     wyniki[,5] = mse_test
     wyniki[,6] = mape_test

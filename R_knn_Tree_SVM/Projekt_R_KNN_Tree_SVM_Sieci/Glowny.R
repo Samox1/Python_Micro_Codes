@@ -6,9 +6,12 @@ source("funkcje.R")
 
 
 #dane do klasyfikacji binarnej
+
 df_bin <- read.csv("caesarian.csv",header=T, sep=",")
 df_bin[,6] = as.factor(df_bin[,6])
+df_bin_original <- df_bin
 X_nazwy_bin = colnames(df_bin)[1:5]
+Y_nazwy_bin = colnames(df_bin)[6]
 
 #X_bin = df_bin[,1:5]
 class(df_bin)
@@ -20,8 +23,10 @@ df_multi <- read.csv("balance.csv",header=T, sep=",")
 
 df_multi = as.data.frame(cbind(df_multi[,2:5], Class.Name = df_multi$Class.Name))
 df_multi$Class.Name <- as.factor(as.numeric(df_multi$Class.Name))
+df_multi_original <- df_multi
 
 X_nazwy_multi = colnames(df_multi)[1:4]
+Y_nazwy_multi = colnames(df_multi)[5]
 
 class(df_multi)
 class(df_multi[,5])
@@ -32,8 +37,10 @@ df_reg <- read.csv("servo.csv",header=T, sep=",")
 
 df_reg$motor <- as.numeric(df_reg$motor)
 df_reg$screw <- as.numeric(df_reg$screw)
+df_reg_original <- df_reg
 
 X_nazwy_reg = colnames(df_reg)[1:4]
+Y_nazwy_reg = colnames(df_reg)[5]
 
 class(df_reg)
 class(df_reg[,5])
@@ -117,8 +124,7 @@ df_reg_norm <- as.data.frame(cbind(sapply(df_reg[,1:4],norm_0_1), class = df_reg
 
 
 #binarna
-df_bin_sign <- ifelse( df_bin[,6] == 0, -1, df_bin[,6])
-df_bin_sign <- ifelse( df_bin_sign == 2, 1, df_bin_sign)
+df_bin_sign <- ifelse( df_bin[,6] == 0, -1, 1)
 
 SVM_model <- trainSVM(as.matrix(df_bin_norm[,1:5]), df_bin_sign, C=10, lr = 0.001, maxiter = 500)
 SVM_predict_Bin <- predSVM(as.matrix(df_bin_norm[,1:5]), SVM_model$Theta, SVM_model$Theta0)
@@ -179,5 +185,42 @@ NN_model_Reg_old <- trainNN_old( X, as.numeric(Y), h = c(5,5), lr = 0.01, iter =
 NN_predict_Reg_old <- predNN_old( X, NN_model_Reg_old, typ = "regresja")
 print(NN_predict_Reg_old)
 print(ModelOcena((df_reg[,5]), NN_predict_Reg_old))
+
+
+
+
+
+
+### --- Cross-Validation --- ###
+
+### Szablon:
+# CrossValidTune(dane, X, y, kFold, parTune, seed, algorytm = "KNN" / "drzewa" / "SVM" / "sieci")
+
+# knn_grid_bin = expand.grid(k=2:20)
+# svm_grid_bin = expand.grid(C=5:100, lr = (0.01, 0.001, 0.0001), maxiter = 5000)
+
+knn_grid_bin = expand.grid(k=2:20)
+CrossValidTune(df_bin_original, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = knn_grid_bin, seed = 152, algorytm = "KNN")
+
+knn_grid_multi = expand.grid(k=2:20)
+CrossValidTune(df_multi_original, X_nazwy_multi, Y_nazwy_multi, kFold = 10, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
+
+knn_grid_reg = expand.grid(k=2:20)
+CrossValidTune(df_reg_original, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
+
+
+
+
+
+svm_grid_bin = expand.grid(C=5:100, lr = (0.01, 0.001, 0.0001), maxiter = 5000)
+CrossValidTune(df_reg_original, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
+
+
+
+
+
+
+
+
 
 
