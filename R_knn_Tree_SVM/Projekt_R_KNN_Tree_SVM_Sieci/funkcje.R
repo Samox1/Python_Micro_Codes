@@ -922,19 +922,32 @@ CrossValidTune <- function(dane, X, y, kFold, parTune, seed, algorytm){
         
       }else if(algorytm=="SVM"){                        ### --- ### --- SVM --- ### --- ###
 
-        SVM_model <- trainSVM(as.matrix(df_bin_norm[,1:5]), df_bin_sign, C=10, lr = 0.001, maxiter = 500)
-        SVM_predict_Bin <- predSVM(as.matrix(df_bin_norm[,1:5]), SVM_model$Theta, SVM_model$Theta0)
-        Train_pred <- KNNpred(KNNmodel, X=dane_Train[,X])
-        Test_pred <- KNNpred(KNNmodel, X=dane_Test[,X])
-        
+        dane_Test <- dane[indxTest,] 
+        dane_Train <- dane[-indxTest,]
+
+        X_train = as.matrix(dane_Train[,X])
+        X_test = as.matrix(dane_Test[,X])
+        y_train = ifelse(dane_Train[,y] == 0, -1, 1)
+        y_test = ifelse(dane_Test[,y] == 0, -1, 1)
+
+        SVM_model <- trainSVM(X_train, y_train, C=hiper$C, lr = hiper$lr, maxiter = 5000)
+        SVM_pred_Train <- predSVM(X_train, SVM_model$Theta, SVM_model$Theta0)[,1]
+        SVM_pred_Test <- predSVM(X_test, SVM_model$Theta, SVM_model$Theta0)[,1]
+
+        y_train = ifelse(y_train == -1, 0, 1)
+        y_test = ifelse(y_test == -1, 0, 1)
+        SVM_pred_Train = ifelse(SVM_pred_Train == -1, 0, 1)
+        SVM_pred_Test = ifelse(SVM_pred_Test == -1, 0, 1)
+
+                
         if(typ=="regresja"){
           print("Brak opcji na Regresje!")
         }
         else if(typ=="binarna"){
           y_hatTrain = Train_pred$P
           y_hatTest = Test_pred$P
-          Train_ocena = ModelOcena(dane_Train[, y], y_hatTrain)
-          Test_ocena = ModelOcena(dane_Test[, y], y_hatTest)
+          Train_ocena = ModelOcena(y_train, y_hatTrain)
+          Test_ocena = ModelOcena(y_test, y_hatTest)
           Train_miary = Train_ocena$Miary
           Test_miary = Test_ocena$Miary
           
