@@ -1,4 +1,0 @@
-*** Ogólne notatki:
-1) Cross-Validation
-2) Wykresy 
-3) Porównanie: Własnych funkcji vs Wbudowane w biblioteki

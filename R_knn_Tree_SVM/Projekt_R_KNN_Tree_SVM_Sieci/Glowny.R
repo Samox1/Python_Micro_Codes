@@ -232,20 +232,22 @@ print("--------------------------------------------------")
 
 knn_grid_bin = expand.grid(k=2:50)
 KNN_CV_bin = CrossValidTune(df_bin_original, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = knn_grid_bin, seed = 152, algorytm = "KNN")
+#write.csv(KNN_CV_bin, "KNN_CV_bin.csv", row.names = FALSE)
 
 knn_grid_multi = expand.grid(k=2:50)
 KNN_CV_multi = CrossValidTune(df_multi_original, X_nazwy_multi, Y_nazwy_multi, kFold = 10, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
+#write.csv(KNN_CV_multi, "KNN_CV_multi.csv", row.names = FALSE)
 
 knn_grid_reg = expand.grid(k=2:50)
 KNN_CV_reg = CrossValidTune(df_reg_original, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
-
+#write.csv(KNN_CV_reg, "KNN_CV_reg.csv", row.names = FALSE)
 
 ### SVM - CV ###
 # svm_grid_bin = expand.grid(C=5:100, lr = c(0.01, 0.001, 0.0001), maxiter = 500)
 
 svm_grid_bin = expand.grid(C=c(2:200), lr = c(0.01,0.001,0.0001), maxiter = c(500, 1000, 5000))
 SVM_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = svm_grid_bin, seed = 152, algorytm = "SVM")
-
+#write.csv(SVM_CV_bin, "SVM_CV_bin.csv", row.names = FALSE)
 
 ### Sieci-NN - CV ###
 # nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6)), lr = c(0.01, 0.001, 0.0001), iter = 10000)
@@ -254,13 +256,49 @@ SVM_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune
 nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
 NN_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = nn_grid_bin, seed = 152, algorytm = "sieci")
 
+# h_bin = (NN_CV_bin[,1])
+# h_table = data.frame()
+# for (ii in 1:length(h_bin)) {
+#   h_table[ii,"h1"] = h_bin[[ii]][1]
+#   h_table[ii,"h2"] = h_bin[[ii]][2]
+# }
+# NN_CV_bin_cbind = cbind(h_table,NN_CV_bin[,2:length(NN_CV_bin[1,])])
+# write.csv(NN_CV_bin_cbind, "NN_CV_bin.csv", row.names = FALSE)
+
 
 nn_grid_multi = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
 NN_CV_multi = CrossValidTune(df_multi, X_nazwy_multi, Y_nazwy_multi, kFold = 5, parTune = nn_grid_multi, seed = 152, algorytm = "sieci")
 
+# h_bin = (NN_CV_multi[,1])
+# h_table = data.frame()
+# for (ii in 1:length(h_bin)) {
+#   h_table[ii,"h1"] = h_bin[[ii]][1]
+#   h_table[ii,"h2"] = h_bin[[ii]][2]
+# }
+# NN_CV_multi_cbind = cbind(h_table,NN_CV_multi[,2:length(NN_CV_multi[1,])])
+# write.csv(NN_CV_multi_cbind, "NN_CV_multi.csv", row.names = FALSE)
+
+
 
 nn_grid_reg = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
 NN_CV_reg = CrossValidTune(df_reg, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = nn_grid_reg, seed = 152, algorytm = "sieci")
+
+# h_bin = (NN_CV_reg[,1])
+# h_table = data.frame()
+# for (ii in 1:length(h_bin)) {
+#   h_table[ii,"h1"] = h_bin[[ii]][1]
+#   h_table[ii,"h2"] = h_bin[[ii]][2]
+# }
+# NN_CV_reg_cbind = cbind(h_table,NN_CV_reg[,2:length(NN_CV_reg[1,])])
+# write.csv(NN_CV_reg_cbind, "NN_CV_reg.csv", row.names = FALSE)
+
+
+
+
+
+
+
+
 
 
 
