@@ -227,38 +227,36 @@ print("--------------------------------------------------")
 ### knn - CV ###
 # knn_grid_bin = expand.grid(k=2:20)
 
-knn_grid_bin = expand.grid(k=2:20)
+knn_grid_bin = expand.grid(k=2:100)
 KNN_CV_bin = CrossValidTune(df_bin_original, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = knn_grid_bin, seed = 152, algorytm = "KNN")
 
-knn_grid_multi = expand.grid(k=2:20)
+knn_grid_multi = expand.grid(k=2:100)
 KNN_CV_multi = CrossValidTune(df_multi_original, X_nazwy_multi, Y_nazwy_multi, kFold = 10, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
 
-knn_grid_reg = expand.grid(k=2:20)
+knn_grid_reg = expand.grid(k=2:100)
 KNN_CV_reg = CrossValidTune(df_reg_original, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
 
 
 ### SVM - CV ###
 # svm_grid_bin = expand.grid(C=5:100, lr = c(0.01, 0.001, 0.0001), maxiter = 500)
 
-svm_grid_bin = expand.grid(C=c(2:100), lr = c(0.01,0.001,0.0001), maxiter = c(500))
+svm_grid_bin = expand.grid(C=c(2:200), lr = c(0.01,0.001,0.0001), maxiter = c(500, 1000, 5000))
 SVM_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = svm_grid_bin, seed = 152, algorytm = "SVM")
 
 
 ### Sieci-NN - CV ###
-# nn_grid_bin = expand.grid(h=c(5,5), lr = c(0.01, 0.001, 0.0001), iter = 10000)
+# nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6)), lr = c(0.01, 0.001, 0.0001), iter = 10000)
 
-# h_list = expand.grid(2:6,2:6)
-# nn_grid_bin = expand.grid(h=list(data.frame(2:6,5)), lr = c(0.001), iter = 20000)
 
-nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6)), lr = c(0.001), iter = c(20000, 50000))
+nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
 NN_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = nn_grid_bin, seed = 152, algorytm = "sieci")
 
 
-nn_grid_multi = expand.grid(h=list(data.frame(5,5)), lr = c(0.001), iter = c(20000, 50000, 80000))
+nn_grid_multi = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
 NN_CV_multi = CrossValidTune(df_multi, X_nazwy_multi, Y_nazwy_multi, kFold = 5, parTune = nn_grid_multi, seed = 152, algorytm = "sieci")
 
 
-nn_grid_reg = expand.grid(h=list(data.frame(5,5)), lr = c(0.001), iter = c(20000, 50000, 100000))
+nn_grid_reg = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
 NN_CV_reg = CrossValidTune(df_reg, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = nn_grid_reg, seed = 152, algorytm = "sieci")
 
 
