@@ -115,10 +115,6 @@ ModelOcena_Jakosc <- function(y_tar, y_hat){
   return (c("Jakosc" = sum( diag( table( y_tar, y_hat ) ) ) / length(y_tar) ))
 }
 
-norm_0_1 <- function(x){
-  (x- min(x)) /(max(x)-min(x))
-}
-
 
 ######## K najbliższych sąsiadów ########
 
@@ -600,111 +596,111 @@ MinMaxOdwrot <- function( x, y_min, y_max ){
 
 ### NOWE SIECI ###
 
-wprzod <- function( X, W, f_aktywacji, typ ){
-  H <- list()
-  H[[1]] <- cbind( matrix( 1, nrow = nrow(X) ), f_aktywacji( X %*% W[[1]] )  )
-  for (i in 2:(length(W)-1)){
-    H[[i]] <- cbind( matrix( 1, nrow = nrow(X) ), f_aktywacji( H[[i-1]] %*% W[[i]] )  )
-    
-  }
-  
-  if (typ == "wieloklasowa") {
-    y_hat <- matrix( t( apply( H[[length(W)-1]] %*% W[[length(W)]], 1, SoftMax ) ), nrow = nrow(X) ) # klasyfikacja wieloklasowa
-  } 
-  else if (typ == "regresja") {
-    y_hat <- H[[length(W)-1]] %*% W[[length(W)]] # regresja
-  }
-  else if (typ == "binarna") {
-    y_hat <- f_aktywacji( H[[length(W)-1]] %*% W[[length(W)]] )
-  }
-  nazwy_H<- paste0( "H", 1:(length(W)-1))
-  names(H) <- nazwy_H
-  print(y_hat)
-  return( list( y_hat = y_hat, H = H) )
-}
-
-wstecz <- function( X, y_tar, y_hat, W, H, lr, df_aktywacji, typ ){
-  if (typ == "binarna") {
-    dy_hat <- (y_tar - y_hat) * df_aktywacji( y_hat )#(y_hat-y_tar) 
-  }
-  else if (typ == "wieloklasowa") {
-    dy_hat <- (y_tar - y_hat) / nrow( X ) # klasyfikacja wieloklasowa
-  }
-  else if (typ == "regresja") {
-    dy_hat <- (y_tar - y_hat) # regresja
-  }
-  dW <- list() 
-  dH <- list()
-  dW[[length(W)]] <- t(H[[length(H)]]) %*% dy_hat
-  
-  dH[[length(H)]] <- dy_hat %*% t(W[[length(W)]]) * df_aktywacji( H[[length(H)]] )
-  dW[[length(W)-1]] <- t(H[[length(H)-1]]) %*% dH[[length(H)]][,-1]
-  i=length(W)-2
-  while (i>1){
-    dH[[i]] <- dH[[i+1]][,-1] %*% t(W[[i+1]]) * df_aktywacji( H[[i]] )
-    dW[[i]] <- t(H[[i-1]]) %*% dH[[i]][,-1]
-    i=i-1 
-  }
-  
-  dH[[1]]<- dH[[2]][,-1] %*% t(W[[2]]) * df_aktywacji( H[[1]] )
-  dW[[1]] <- t(X) %*% dH[[1]][,-1]
-  for (k in 1:length(W)){
-    W[[k]] <- W[[k]] + lr * dW[[k]]
-  }
-  return( W )
-} 
-
-trainNN <- function( x, y_tar, h = c(5,5), lr = 0.001, iter = 1000, seed = 123, f_aktywacji, df_aktywacji, typ){
-  set.seed( seed )
-  X <- cbind( rep( 1, nrow(x) ), x )
-  # W1, .... W_liczba_warst_ukrytych+1
-  W <- list()
-  
-  W[[1]] <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
-  for (k in 2:length(h)){
-    W[[k]] <- matrix( runif( (h[k-1]+1) * h[k], -1, 1 ), nrow = h[k-1] + 1 )
-  }
-  W[[length(h)+1]] <- matrix( runif( (h[length(h)]+1) * ncol(y_tar), -1, 1 ), nrow = h[length(h)] + 1 )
-  
-  nazwy<- paste0( "W", 1:(length(h)+1))
-  names(W) <- nazwy
-  
-  error <- double( iter )
-  for( i in 1:iter ){
-    sygnalwprzod <- wprzod( X, W, f_aktywacji, typ )# W = list( W1, W2, W3 )
-    sygnalwtyl <- wstecz( X, y_tar, y_hat = sygnalwprzod$y_hat, W, H = sygnalwprzod$H, lr, df_aktywacji, typ )
-    for (l in 1:(length(h)+1)){
-      W[[l]] <- sygnalwtyl[[l]]
-    }
-    cat( paste0( "\rIteracja: ", i ) )
-    error[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
-  }
-  xwartosci <- seq( 1, iter, length = 1000 )
-  print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
-  return( list( y_hat = sygnalwprzod$y_hat, W = W ) )
-}
-
-predNN <- function( xnew, nn, f_aktywacji, typ ){
-  
-  xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
-  HP <- list()
-  HP[[1]] <- cbind( matrix( 1, nrow = nrow(xnew) ), f_aktywacji( xnew %*% nn$W[[1]] )  )
-  for (i in 2:(length(nn$W)-1)){
-    HP[[i]] <- cbind( matrix( 1, nrow = nrow(xnew) ), f_aktywacji( HP[[i-1]] %*% nn$W[[i]] )  )
-    
-  } 
-  if (typ == "wieloklasowa") {
-    y_hat <- matrix( t( apply( HP[[length(nn$W)-1]] %*% nn$W[[length(nn$W)]], 1, SoftMax ) ), nrow = nrow(xnew) ) # klasyfikacja wieloklasowa
-  } 
-  else if (typ == "regresja") {
-    y_hat <- HP[[length(nn$W)-1]] %*% nn$W[[length(nn$W)]] # regresja
-  }
-  else if (typ == "binarna") {
-    y_hat <- f_aktywacji( HP[[length(nn$W)-1]] %*% nn$W[[length(nn$W)]] )
-  }
-  
-  return( y_hat )
-}
+### wprzod <- function( X, W, f_aktywacji, typ ){
+###   H <- list()
+###   H[[1]] <- cbind( matrix( 1, nrow = nrow(X) ), f_aktywacji( X %*% W[[1]] )  )
+###   for (i in 2:(length(W)-1)){
+###     H[[i]] <- cbind( matrix( 1, nrow = nrow(X) ), f_aktywacji( H[[i-1]] %*% W[[i]] )  )
+###     
+###   }
+###   
+###   if (typ == "wieloklasowa") {
+###     y_hat <- matrix( t( apply( H[[length(W)-1]] %*% W[[length(W)]], 1, SoftMax ) ), nrow = nrow(X) ) # klasyfikacja wieloklasowa
+###   } 
+###   else if (typ == "regresja") {
+###     y_hat <- H[[length(W)-1]] %*% W[[length(W)]] # regresja
+###   }
+###   else if (typ == "binarna") {
+###     y_hat <- f_aktywacji( H[[length(W)-1]] %*% W[[length(W)]] )
+###   }
+###   nazwy_H<- paste0( "H", 1:(length(W)-1))
+###   names(H) <- nazwy_H
+###   # print(y_hat)
+###   return( list( y_hat = y_hat, H = H) )
+### }
+### 
+### wstecz <- function( X, y_tar, y_hat, W, H, lr, df_aktywacji, typ ){
+###   if (typ == "binarna") {
+###     dy_hat <- (y_tar - y_hat) * df_aktywacji( y_hat )#(y_hat-y_tar) 
+###   }
+###   else if (typ == "wieloklasowa") {
+###     dy_hat <- (y_tar - y_hat) / nrow( X ) # klasyfikacja wieloklasowa
+###   }
+###   else if (typ == "regresja") {
+###     dy_hat <- (y_tar - y_hat) # regresja
+###   }
+###   dW <- list() 
+###   dH <- list()
+###   dW[[length(W)]] <- t(H[[length(H)]]) %*% dy_hat
+###   
+###   dH[[length(H)]] <- dy_hat %*% t(W[[length(W)]]) * df_aktywacji( H[[length(H)]] )
+###   dW[[length(W)-1]] <- t(H[[length(H)-1]]) %*% dH[[length(H)]][,-1]
+###   i=length(W)-2
+###   while (i>1){
+###     dH[[i]] <- dH[[i+1]][,-1] %*% t(W[[i+1]]) * df_aktywacji( H[[i]] )
+###     dW[[i]] <- t(H[[i-1]]) %*% dH[[i]][,-1]
+###     i=i-1 
+###   }
+###   
+###   dH[[1]]<- dH[[2]][,-1] %*% t(W[[2]]) * df_aktywacji( H[[1]] )
+###   dW[[1]] <- t(X) %*% dH[[1]][,-1]
+###   for (k in 1:length(W)){
+###     W[[k]] <- W[[k]] + lr * dW[[k]]
+###   }
+###   return( W )
+### } 
+### 
+### trainNN <- function( x, y_tar, h = c(5,5), lr = 0.001, iter = 1000, seed = 123, f_aktywacji, df_aktywacji, typ){
+###   set.seed( seed )
+###   X <- cbind( rep( 1, nrow(x) ), x )
+###   # W1, .... W_liczba_warst_ukrytych+1
+###   W <- list()
+###   
+###   W[[1]] <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
+###   for (k in 2:length(h)){
+###     W[[k]] <- matrix( runif( (h[k-1]+1) * h[k], -1, 1 ), nrow = h[k-1] + 1 )
+###   }
+###   W[[length(h)+1]] <- matrix( runif( (h[length(h)]+1) * ncol(y_tar), -1, 1 ), nrow = h[length(h)] + 1 )
+###   
+###   nazwy<- paste0( "W", 1:(length(h)+1))
+###   names(W) <- nazwy
+###   
+###   error <- double( iter )
+###   for( i in 1:iter ){
+###     sygnalwprzod <- wprzod( X, W, f_aktywacji, typ )# W = list( W1, W2, W3 )
+###     sygnalwtyl <- wstecz( X, y_tar, y_hat = sygnalwprzod$y_hat, W, H = sygnalwprzod$H, lr, df_aktywacji, typ )
+###     for (l in 1:(length(h)+1)){
+###       W[[l]] <- sygnalwtyl[[l]]
+###     }
+###     cat( paste0( "\rIteracja: ", i ) )
+###     error[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
+###   }
+###   xwartosci <- seq( 1, iter, length = 1000 )
+###   print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+###   return( list( y_hat = sygnalwprzod$y_hat, W = W ) )
+### }
+### 
+### predNN <- function( xnew, nn, f_aktywacji, typ ){
+###   
+###   xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
+###   HP <- list()
+###   HP[[1]] <- cbind( matrix( 1, nrow = nrow(xnew) ), f_aktywacji( xnew %*% nn$W[[1]] )  )
+###   for (i in 2:(length(nn$W)-1)){
+###     HP[[i]] <- cbind( matrix( 1, nrow = nrow(xnew) ), f_aktywacji( HP[[i-1]] %*% nn$W[[i]] )  )
+###     
+###   } 
+###   if (typ == "wieloklasowa") {
+###     y_hat <- matrix( t( apply( HP[[length(nn$W)-1]] %*% nn$W[[length(nn$W)]], 1, SoftMax ) ), nrow = nrow(xnew) ) # klasyfikacja wieloklasowa
+###   } 
+###   else if (typ == "regresja") {
+###     y_hat <- HP[[length(nn$W)-1]] %*% nn$W[[length(nn$W)]] # regresja
+###   }
+###   else if (typ == "binarna") {
+###     y_hat <- f_aktywacji( HP[[length(nn$W)-1]] %*% nn$W[[length(nn$W)]] )
+###   }
+###   
+###   return( y_hat )
+### }
 
 ### NOWE SIECI ###
 
@@ -749,7 +745,9 @@ wstecz_old <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr, typ ){
 
 trainNN_old <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "binarna" ){
   set.seed( seed )
-  X <- cbind( rep( 1, nrow(X) ), x )
+  X <- cbind( rep( 1, nrow(x) ), x )
+  
+  h = unlist(h, use.names = FALSE)
   
   W1 <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
   W2 <- matrix( runif( (h[1]+1) * h[2], -1, 1 ), nrow = h[1] + 1 )
@@ -763,7 +761,7 @@ trainNN_old <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 1
     W1 <- sygnalwtyl$W1
     W2 <- sygnalwtyl$W2
     W3 <- sygnalwtyl$W3
-    cat( paste0( "\rIteracja: ", i ) )
+    cat( paste0( "\rIteracja: ", i , " / ", iter) )
 
     error[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
   }
@@ -810,9 +808,12 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
     }
   }
   
+  cat("\n")
+  print("*** ---------- ***")
   print(paste("Algorytm: ", algorytm))
   print(paste("Typ algorytmu: ",typ))
-  
+  print("*** ---------- ***")
+  cat("\n")
   
   if(typ=="reg"){
     
@@ -874,17 +875,16 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
       dane_Test <- dane[indxTest,] 
       dane_Train <- dane[-indxTest,]
     
-      if(algorytm=="KNN"){
+      if(algorytm=="KNN"){                                ### --- ### --- KNN --- ### --- ### 
         
         KNNmodel <- KNNtrain( X=dane_Train[,X], y_tar=dane_Train[,y], k = hiper, XminNew=0, XmaxNew=1 )
-        Train_pred <- KNNpred(KNNmodel, X=dane_Train[,X])
-        Test_pred <- KNNpred(KNNmodel, X=dane_Test[,X])
+        KNNpred_Train <- KNNpred(KNNmodel, X=dane_Train[,X])
+        KNNpred_Test <- KNNpred(KNNmodel, X=dane_Test[,X])
         
-        if(typ=="reg"){
-          y_hatTrain = Train_pred
-          y_hatTest = Test_pred
-          Train_ocena = ModelOcena(dane_Train[,y], y_hatTrain)
-          Test_ocena = ModelOcena(dane_Test[,y], y_hatTest)
+        if(typ=="reg")
+        {
+          Train_ocena = ModelOcena(dane_Train[,y], KNNpred_Train)
+          Test_ocena = ModelOcena(dane_Test[,y], KNNpred_Test)
           
           MAE_Train = append(MAE_Train, Train_ocena["MAE"])
           MSE_Train = append(MSE_Train, Train_ocena["MSE"])
@@ -894,11 +894,11 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
           MSE_Test = append(MSE_Test, Test_ocena["MSE"])
           MAPE_Test = append(MAPE_Test, Test_ocena["MAPE"])
         }
-        else if(typ=="bin"){
-          y_hatTrain = as.numeric(Train_pred[,1])
-          y_hatTest = as.numeric(Test_pred[,1])
-          Train_ocena = ModelOcena(dane_Train[, y], y_hatTrain)
-          Test_ocena = ModelOcena(dane_Test[, y], y_hatTest)
+        else if(typ=="bin")
+        {
+          Train_ocena = ModelOcena(dane_Train[, y], as.numeric(KNNpred_Train[,1]))
+          Test_ocena = ModelOcena(dane_Test[, y], as.numeric(KNNpred_Test[,1]))
+          
           Train_miary = Train_ocena[[3]]
           Test_miary = Test_ocena[[3]]
           
@@ -910,14 +910,10 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
           Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
           Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
         }
-        else if(typ=="multi"){
-          y_hatTrain = Train_pred$Klasa
-          y_hatTest = Test_pred$Klasa
-          y_tarTest = dane_Test[,y]
-          y_tarTrain = dane_Train[,y]
-          
-          Jakosc_Train <- append(Jakosc_Train, sum( diag( table( y_tarTrain, y_hatTrain ) ) ) / nrow(dane_Train))
-          Jakosc_Test <- append(Jakosc_Test, sum( diag( table( y_tarTest, y_hatTest ) ) ) / nrow(dane_Test))
+        else if(typ=="multi")
+        {
+          Jakosc_Train <- append(Jakosc_Train, Trafnosc_new(dane_Train[,y], KNNpred_Train$Klasa))
+          Jakosc_Test <- append(Jakosc_Test, Trafnosc_new(dane_Test[,y], KNNpred_Test$Klasa))
         }
         
       }else if(algorytm=="drzewa"){                     ### --- ### --- DRZEWA --- ### --- ### 
@@ -927,56 +923,121 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
       }else if(algorytm=="SVM"){                        ### --- ### --- SVM --- ### --- ###
 
         if(typ=="bin"){
-          dane_Test <- dane[indxTest,] 
+          dane_Test <- dane[indxTest,]
           dane_Train <- dane[-indxTest,]
 
-          X_train = as.matrix(dane_Train[,X])
-          X_test = as.matrix(dane_Test[,X])
+          X_train = as.matrix(sapply(dane_Train[,X],MinMax))
+          X_test = as.matrix(sapply(dane_Test[,X],MinMax))
           y_train = ifelse(dane_Train[,y] == 0, -1, 1)
           y_test = ifelse(dane_Test[,y] == 0, -1, 1)
 
           SVM_model <- trainSVM(X_train, y_train, C=hiper$C, lr = hiper$lr, maxiter = hiper$maxiter)
           SVM_pred_Train <- predSVM(X_train, SVM_model$Theta, SVM_model$Theta0)
           SVM_pred_Test <- predSVM(X_test, SVM_model$Theta, SVM_model$Theta0)
-
+          
           y_train = ifelse(y_train == -1, 0, 1)
           y_test = ifelse(y_test == -1, 0, 1)
           SVM_pred_Train = ifelse(SVM_pred_Train == -1, 0, 1)
           SVM_pred_Test = ifelse(SVM_pred_Test == -1, 0, 1)
+
+          czulosc_train_svm = Czulosc_new(y_train, SVM_pred_Train)
+          czulosc_test_svm = Czulosc_new(y_test, SVM_pred_Test)
+          specyficznosc_train_svm = Czulosc_new(y_train, SVM_pred_Train)
+          specyficznosc_test_svm = Czulosc_new(y_test, SVM_pred_Test)
+          jakosc_train_svm = Trafnosc_new(y_train, SVM_pred_Train)
+          jakosc_test_svm = Trafnosc_new(y_test, SVM_pred_Test)
+          
+          Czulosc_Train <- append(Czulosc_Train, czulosc_train_svm)
+          Specyficznosc_Train  <- append(Specyficznosc_Train, specyficznosc_train_svm)
+          Jakosc_Train  <- append(Jakosc_Train, jakosc_train_svm)
+          
+          Czulosc_Test <- append(Czulosc_Test, czulosc_test_svm)
+          Specyficznosc_Test  <- append(Specyficznosc_Test, specyficznosc_test_svm)
+          Jakosc_Test <- append(Jakosc_Test, jakosc_test_svm)
         }
-         
-        if(typ=="reg"){
+        else if(typ=="reg"){
           print("Brak opcji na Regresje!")
-        }
-        else if(typ=="bin"){
-          
-          czulosc_train = Czulosc_new(y_train, SVM_pred_Train)
-          czulosc_test = Czulosc_new(y_test, SVM_pred_Test)
-          specyficznosc_train = Czulosc_new(y_train, SVM_pred_Train)
-          specyficznosc_test = Czulosc_new(y_test, SVM_pred_Test)
-          jakosc_train = Jakosc_new(y_train, SVM_pred_Train)
-          jakosc_test = Jakosc_new(y_test, SVM_pred_Test)
-          
-          Czulosc_Train <- append(Czulosc_Train, czulosc_train)
-          Specyficznosc_Train  <- append(Specyficznosc_Train, specyficznosc_train)
-          Jakosc_Train  <- append(Jakosc_Train, jakosc_train)
-          
-          Czulosc_Test <- append(Czulosc_Test, Test_miary["Czulosc"])
-          Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
-          Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
         }
         else if(typ=="multi"){
           print("Brak opcji na klasyfikację Wieloklasową!")
         }
-        
-    
+       
       
+      }else if(algorytm=="sieci"){                      ### --- ### --- Neural Network --- ### --- ###
+
+        dane_Test <- dane[indxTest,]
+        dane_Train <- dane[-indxTest,]
+
+        X_Train = as.matrix(sapply(dane_Train[,X],MinMax))
+        X_Test = as.matrix(sapply(dane_Test[,X],MinMax))
         
-      #}else if(algorytm=="sieci"){
         
-      #}# else if(sieci)
-      
-      }#for(kFold)
+        if(typ=="bin"){
+
+          Y_Train = as.matrix(as.numeric(dane_Train[,y]))
+          Y_Test = as.matrix(as.numeric(dane_Test[,y]))
+
+          NN_model_Bin <- trainNN_old( X_Train, Y_Train, h = hiper$h[1], lr = hiper$lr, iter = hiper$iter, seed = 123, typ = "binarna")
+          NN_predict_Bin_Train <- predNN_old( X_Train, NN_model_Bin, typ = "binarna")
+          NN_predict_Bin_Test <- predNN_old( X_Test, NN_model_Bin, typ = "binarna")
+
+          Train_ocena = ModelOcena(dane_Train[, y], NN_predict_Bin_Train)
+          Test_ocena = ModelOcena(dane_Test[, y], NN_predict_Bin_Test)
+          Train_miary = Train_ocena[[3]]
+          Test_miary = Test_ocena[[3]]
+          
+          Czulosc_Train <- append(Czulosc_Train, Train_miary["Czulosc"])
+          Specyficznosc_Train  <- append(Specyficznosc_Train, Train_miary["Specyficznosc"])
+          Jakosc_Train  <- append(Jakosc_Train, Train_miary["Jakosc"])
+          
+          Czulosc_Test <- append(Czulosc_Test, Test_miary["Czulosc"])
+          Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
+          Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
+        
+        }else if(typ=="multi"){
+
+          klasy = levels(dane[,y])
+          Y_Train = model.matrix( ~ dane_Train[,y] - 1, dane_Train)
+          Y_Test = model.matrix( ~ dane_Test[,y] - 1, dane_Test)
+
+          NN_model_Multi <- trainNN_old( X_Train, Y_Train, h = hiper$h[1], lr = hiper$lr, iter = hiper$iter, seed = 123, typ = "wieloklasowa")
+          NN_predict_Multi_Train <- predNN_old( X_Train, NN_model_Multi, typ = "wieloklasowa")
+          NN_predict_Multi_Test <- predNN_old( X_Test, NN_model_Multi, typ = "wieloklasowa")
+
+          NNpred_Train <- as.numeric(klasy[apply( NN_predict_Multi_Train, 1, which.max )])
+          NNpred_Test <- as.numeric(klasy[apply( NN_predict_Multi_Train, 1, which.max )])
+          
+          Jakosc_Train <- append(Jakosc_Train, Trafnosc_new(NNpred_Train, dane_Train[,y]))
+          Jakosc_Test <- append(Jakosc_Test, Trafnosc_new(NNpred_Test, dane_Test[,y]))
+        
+        }else if(typ=="reg"){
+
+          Y_Train = as.matrix(MinMax(dane_Train[,y]))
+          Y_Test = as.matrix(MinMax(dane_Test[,y]))
+          Y_min = min(dane[,y])
+          Y_max = max(dane[,y])
+
+          NN_model_Reg <- trainNN_old( X_Train, Y_Train, h = hiper$h[1], lr = hiper$lr, iter = hiper$iter, seed = 123, typ = "regresja")
+          NN_predict_Reg_Train <- predNN_old( X_Train, NN_model_Reg, typ = "regresja")
+          NN_predict_Reg_Test <- predNN_old( X_Test, NN_model_Reg, typ = "regresja")
+
+          NN_predict_Reg_Train_Scale <- MinMaxOdwrot(NN_predict_Reg_Train, Y_min, Y_max)
+          NN_predict_Reg_Test_Scale <- MinMaxOdwrot(NN_predict_Reg_Test, Y_min, Y_max)
+          
+          Train_ocena = ModelOcena(dane_Train[,y], NN_predict_Reg_Train_Scale)
+          Test_ocena = ModelOcena(dane_Test[,y], NN_predict_Reg_Test_Scale)
+          
+          MAE_Train = append(MAE_Train, Train_ocena["MAE"])
+          MSE_Train = append(MSE_Train, Train_ocena["MSE"])
+          MAPE_Train = append(MAPE_Train, Train_ocena["MAPE"])
+          
+          MAE_Test = append(MAE_Test, Test_ocena["MAE"])
+          MSE_Test = append(MSE_Test, Test_ocena["MSE"])
+          MAPE_Test = append(MAPE_Test, Test_ocena["MAPE"])
+        }
+
+
+      }
     
     }
       
@@ -1019,6 +1080,7 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
   else if(typ=="bin"){
     wyniki <- data.frame(matrix(0, nrow(parTune), ncol=6))
     colnames(wyniki) = c("Czulosc_TRAIN", "Specyficznosc_TRAIN", "Jakosc_TRAIN", "Czulosc_TEST", "Specyficznosc_TEST", "Jakosc_TEST")
+    # print(czulosc_train)
     wyniki[,1] = czulosc_train
     wyniki[,2] = specyficznosc_train
     wyniki[,3] = jakosc_train
@@ -1037,7 +1099,6 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
 }#CrossValidTune
 
 
-#wybór najlepszych wyników
 
 
 
