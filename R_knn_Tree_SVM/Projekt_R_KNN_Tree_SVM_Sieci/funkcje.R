@@ -896,9 +896,10 @@ CrossValidTune <- function(dane, X, y, kFold = 10, parTune, seed = 123, algorytm
         }
         else if(typ=="bin")
         {
+          print(1)
           Train_ocena = ModelOcena(dane_Train[, y], as.numeric(KNNpred_Train[,1]))
           Test_ocena = ModelOcena(dane_Test[, y], as.numeric(KNNpred_Test[,1]))
-          
+          print(2)
           Train_miary = Train_ocena[[3]]
           Test_miary = Test_ocena[[3]]
           

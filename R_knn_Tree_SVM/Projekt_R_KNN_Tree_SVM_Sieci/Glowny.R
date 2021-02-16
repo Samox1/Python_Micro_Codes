@@ -230,13 +230,13 @@ print("--------------------------------------------------")
 ### knn - CV ###
 # knn_grid_bin = expand.grid(k=2:20)
 
-knn_grid_bin = expand.grid(k=2:100)
+knn_grid_bin = expand.grid(k=2:50)
 KNN_CV_bin = CrossValidTune(df_bin_original, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = knn_grid_bin, seed = 152, algorytm = "KNN")
 
-knn_grid_multi = expand.grid(k=2:100)
+knn_grid_multi = expand.grid(k=2:50)
 KNN_CV_multi = CrossValidTune(df_multi_original, X_nazwy_multi, Y_nazwy_multi, kFold = 10, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
 
-knn_grid_reg = expand.grid(k=2:100)
+knn_grid_reg = expand.grid(k=2:50)
 KNN_CV_reg = CrossValidTune(df_reg_original, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
 
 
