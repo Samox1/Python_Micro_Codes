@@ -183,15 +183,18 @@ print("--------------------------------------------------")
 
 
 print("Neural Network - OLD - Ocena modelu na calym zbiorze: WIELOKLASOWY")
+X = as.matrix(df_multi_norm[,1:4])
+Y = model.matrix( ~ df_multi[,5] - 1, df_multi )
+
 NN_model_Multi_old <- trainNN_old( X, Y, h = c(5,5), lr = 0.01, iter = 80000, seed = 123, typ = "wieloklasowa")
 NN_predict_Multi_old <- predNN_old( X, NN_model_Multi_old, typ = "wieloklasowa")
-# print(NN_predict_Multi_old)
-etykiety <- levels( df_multi[,5] )
-y_hatTrain <- as.numeric( etykiety[apply( NN_predict_Multi_old, 1, which.max )] )
 
-print(ModelOcena_Jakosc((df_multi[,5]), y_hatTrain))
+klasy <- levels( df_multi[,5] )
+NN_pred_Klasy <- as.numeric( klasy[apply( NN_predict_Multi_old, 1, which.max )] )
+
+print(ModelOcena_Jakosc((df_multi[,5]), NN_pred_Klasy))
 print("--------------------------------------------------")
-# NN_predict_Multi_old <- cbind(NN_predict_Multi_old, y_hatTrain)
+
 
 
 #regresja
@@ -207,7 +210,7 @@ Y_max = max(Y)
 # print(NN_predict_Reg)
 # print(ModelOcena((df_reg[,5]), NN_predict_Reg))
 
-NN_model_Reg_old <- trainNN_old( X, Y, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "regresja")
+NN_model_Reg_old <- trainNN_old( X, Y, h = c(5,5), lr = 0.01, iter = 50000, seed = 123, typ = "regresja")
 NN_predict_Reg_old <- predNN_old( X, NN_model_Reg_old, typ = "regresja")
 NN_predict_Reg_old_Scale <- MinMaxOdwrot(NN_predict_Reg_old, Y_min, Y_max)
 
