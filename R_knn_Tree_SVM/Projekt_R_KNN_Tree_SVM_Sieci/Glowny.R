@@ -2,6 +2,7 @@
 
 rm(list=ls())
 
+library(rpart.plot)
 source("funkcje.R")
 
 
@@ -226,7 +227,7 @@ print("*** Testowy --> Jakosc = 0.8125 : k = 11")
 ggplot(KNN_CV_bin , aes(x=k)) +
   geom_line(aes(y = Jakosc_TRAIN, color='blue'), size=1, ) +
   geom_line(aes(y = Jakosc_TEST, color='red'), size=1,) +
-  labs(title='KNN: Jakosc od k', x='k', y='Accuracy') +
+  labs(title='KNN: Accuracy od k', x='k', y='Accuracy') +
   scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
   theme(legend.position = "bottom")
 
@@ -246,7 +247,7 @@ print("*** Testowy --> Jakosc = 0.9194 : k = 42")
 ggplot(KNN_CV_multi , aes(x=k)) +
   geom_line(aes(y = Jakosc_TRAIN, color='blue'), size=1, ) +
   geom_line(aes(y = Jakosc_TEST, color='red'), size=1,) +
-  labs(title='KNN: Jakosc od k', x='k', y='Accuracy') +
+  labs(title='KNN: Accuracy od k', x='k', y='Accuracy') +
   scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
   theme(legend.position = "bottom")
 
@@ -266,7 +267,7 @@ print("*** Testowy --> MAPE = 0.2782 : k = 2")
 ggplot(KNN_CV_reg , aes(x=k)) +
   geom_line(aes(y = MAE_TRAIN, color='blue'), size=1, ) +
   geom_line(aes(y = MAE_TEST, color='red'), size=1,) +
-  labs(title='KNN: MAE od k', x='k', y='Accuracy') +
+  labs(title='KNN: MAE od k', x='k', y='MAE') +
   scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
   theme(legend.position = "bottom")
 
@@ -372,17 +373,47 @@ KNN_bin_R = train(x=df_bin_norm[,X_nazwy_bin], y=as.factor(df_bin_norm[,Y_nazwy_
 KNN_bin_R_Wynik = KNN_bin_R$results
 print(paste("Najlepszy KNN w R - Binarny: k = ", KNN_bin_R$finalModel$k, " | Accuracy = " ,KNN_bin_R_Wynik$Accuracy[KNN_bin_R_Wynik$k == KNN_bin_R$finalModel$k]))
 
+Porownanie_KNN_Bin <- data.frame(cbind(k = KNN_CV_bin$k[1:40], KNN_W = KNN_CV_bin$Jakosc_TEST[1:40], KNN_R = KNN_bin_R_Wynik$Accuracy[1:40]))
+
+ggplot(Porownanie_KNN_Bin , aes(x=k)) +
+  geom_line(aes(y = KNN_W, color='blue'), size=1, ) +
+  geom_line(aes(y = KNN_R, color='red'), size=1,) +
+  labs(title='KNN: Accuracy od k', x='k', y='Accuracy') +
+  scale_color_discrete(name = "Implementacja", labels = c("Wlasna", "Biblioteka R")) +
+  theme(legend.position = "bottom")
+
+
 
 knn_grid_multi = expand.grid(k=2:50)
 KNN_multi_R = train(x=df_multi_norm[,X_nazwy_multi], y=as.factor(df_multi_norm[,Y_nazwy_multi]), tuneGrid=knn_grid_multi, method='knn', metric='Accuracy', trControl=cv_R)
 KNN_multi_R_Wynik = KNN_multi_R$results
 print(paste("Najlepszy KNN w R - Wieloklasowy: k = ", KNN_multi_R$finalModel$k, " | Accuracy = " ,KNN_multi_R_Wynik$Accuracy[KNN_multi_R_Wynik$k == KNN_multi_R$finalModel$k]))
 
+Porownanie_KNN_Multi <- data.frame(cbind(k = KNN_CV_multi$k[1:40], KNN_W = KNN_CV_multi$Jakosc_TEST[1:40], KNN_R = KNN_multi_R_Wynik$Accuracy[1:40]))
+
+ggplot(Porownanie_KNN_Multi , aes(x=k)) +
+  geom_line(aes(y = KNN_W, color='blue'), size=1, ) +
+  geom_line(aes(y = KNN_R, color='red'), size=1,) +
+  labs(title='KNN: Accuracy od k', x='k', y='Accuracy') +
+  scale_color_discrete(name = "Implementacja", labels = c("Wlasna", "Biblioteka R")) +
+  theme(legend.position = "bottom")
+
+
 
 knn_grid_reg = expand.grid(k=2:50)
 KNN_reg_R = train(x=df_reg_norm[,X_nazwy_reg], y=(df_reg_norm[,Y_nazwy_reg]), tuneGrid=knn_grid_reg, method='knn', metric='MAE', trControl=cv_R)
 KNN_reg_R_Wynik = KNN_reg_R$results
 print(paste("Najlepszy KNN w R - Regresja: k = ", KNN_reg_R$finalModel$k, " | MAE = " ,KNN_reg_R_Wynik$MAE[KNN_reg_R_Wynik$k == KNN_reg_R$finalModel$k]))
+
+Porownanie_KNN_Reg <- data.frame(cbind(k = KNN_CV_reg$k[1:40], KNN_W = KNN_CV_reg$MAE_TEST[1:40], KNN_R = KNN_reg_R_Wynik$MAE[1:40]))
+
+ggplot(Porownanie_KNN_Reg , aes(x=k)) +
+  geom_line(aes(y = KNN_W, color='blue'), size=1, ) +
+  geom_line(aes(y = KNN_R, color='red'), size=1,) +
+  labs(title='KNN: MAE od k', x='k', y='MAE') +
+  scale_color_discrete(name = "Implementacja", labels = c("Wlasna", "Biblioteka R")) +
+  theme(legend.position = "bottom")
+
 
 
 print("SVM - R")
@@ -391,6 +422,16 @@ svm_grid_bin = expand.grid(C=c(2:200))
 SVM_bin_R <- train(x=df_bin_norm[,X_nazwy_bin], y=as.factor(df_bin_norm[,Y_nazwy_bin]), tuneGrid=svm_grid_bin, method='svmLinear', metric='Accuracy', trControl=cv_R)
 SVM_bin_R_Wynik = SVM_bin_R$results
 print(paste("Najlepszy SVM w R - Binarny: Cost = ", SVM_bin_R[["finalModel"]]@param[["C"]], " | Accuracy = " , SVM_bin_R_Wynik$Accuracy[SVM_bin_R_Wynik$C == SVM_bin_R[["finalModel"]]@param[["C"]]]))
+
+Porownanie_SVM_Bin <- data.frame(cbind(C = SVM_CV_bin$C[1:100], SVM_W = SVM_CV_bin$Jakosc_TEST[1:100], SVM_R = SVM_bin_R_Wynik$Accuracy[1:100]))
+
+ggplot(Porownanie_SVM_Bin , aes(x=C)) +
+  geom_line(aes(y = SVM_W, color='blue'), size=1, ) +
+  geom_line(aes(y = SVM_R, color='red'), size=1,) +
+  labs(title='SVM Porownanie: Accuracy od C', x='C', y='Accuracy') +
+  scale_color_discrete(name = "Implementacja", labels = c("Wlasna", "Biblioteka R")) +
+  theme(legend.position = "bottom")
+
 
 
 
@@ -436,9 +477,10 @@ print(paste("Najlepszy Tree w R - Binarny: Max Depth = ", Tree_bin_R[["finalMode
 
 ggplot(Tree_bin_R_Wynik , aes(x=maxdepth)) +
   geom_line(aes(y = Accuracy), size=1, color='blue') +
-  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia', x='Max Depth', y='Accuracy')+
+  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia - Binarna', x='Max Depth', y='Accuracy')+
   theme(legend.position = "bottom")
 
+rpart.plot(Tree_bin_R$finalModel)
 
 tree_grid_multi = expand.grid(maxdepth=2:15)
 Tree_multi_R = train(x=df_multi[,X_nazwy_multi], y=as.factor(df_multi_norm[,Y_nazwy_multi]), tuneGrid=tree_grid_multi, method='rpart2', metric='Accuracy', trControl=cv_R)
@@ -447,20 +489,22 @@ print(paste("Najlepszy Tree w R - Wieloklasowy: Max Depth = ", Tree_multi_R[["fi
 
 ggplot(Tree_multi_R_Wynik , aes(x=maxdepth)) +
   geom_line(aes(y = Accuracy), size=1, color='blue') +
-  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia', x='Max Depth', y='Accuracy')+
+  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia - Wieloklasowa', x='Max Depth', y='Accuracy')+
   theme(legend.position = "bottom")
 
+rpart.plot(Tree_multi_R$finalModel)
 
 tree_grid_reg = expand.grid(maxdepth=2:15)
-Tree_reg_R = train(x=df_reg[,X_nazwy_reg], y=(df_reg_norm[,Y_nazwy_reg]), tuneGrid=tree_grid_reg, method='rpart2', metric='MAE', trControl=cv_R)
+Tree_reg_R = train(x=df_reg[,X_nazwy_reg], y=as.numeric(df_reg_norm[,Y_nazwy_reg]), tuneGrid=tree_grid_reg, method='rpart2', metric='MAE', trControl=cv_R)
 Tree_reg_R_Wynik = Tree_reg_R$results
 print(paste("Najlepszy Tree w R - Regresja: Max Depth = ", Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | MAE = " , Tree_reg_R_Wynik$MAE[Tree_reg_R_Wynik$maxdepth == Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
 
 ggplot(Tree_reg_R_Wynik , aes(x=maxdepth)) +
   geom_line(aes(y = MAE), size=1, color='blue') +
-  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia', x='Max Depth', y='MAE')+
+  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia - Regresja', x='Max Depth', y='MAE')+
   theme(legend.position = "bottom")
 
+rpart.plot(Tree_reg_R$finalModel)
 
 
 ######## Drzewa decyzyjne - Wlasna Implementacja ########
