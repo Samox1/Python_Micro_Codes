@@ -146,25 +146,8 @@ print(ModelOcena((df_bin[,6]), as.numeric(NN_predict_Bin_old))[[3]])
 print("--------------------------------------------------")
 
 
+
 #wieloklasowa
-# print("Neural Network - NEW - Ocena modelu na calym zbiorze: WIELOKLASOWY")
-
-# X = as.matrix(df_multi_norm[,1:4])
-# Y = model.matrix( ~ df_multi[,5] - 1, df_multi )
-
-# NN_model_Multi <- trainNN( X, Y, h = c(5,5), lr = 0.01, iter = 100000, seed = 123, typ = "wieloklasowa",  f_aktywacji = sigmoid, df_aktywacji = dsigmoid)
-# NN_predict_Multi <- predNN( X, NN_model_Multi, typ = "wieloklasowa", f_aktywacji = sigmoid)
-
-# print(NN_predict_Multi)
-# ModelOcena_Jakosc((df_multi[,5]), as.numeric(NN_predict_Multi))
-
-# etykiety <- levels( df_multi[,5] )
-# y_hatTrain <- as.numeric( etykiety[apply( NN_predict_Multi, 1, which.max )] )
-
-# print(ModelOcena_Jakosc((df_multi[,5]), y_hatTrain))
-# print("--------------------------------------------------")
-
-
 
 print("Neural Network - OLD - Ocena modelu na calym zbiorze: WIELOKLASOWY")
 X = as.matrix(df_multi_norm[,1:4])
