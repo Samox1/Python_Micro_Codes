@@ -54,23 +54,6 @@ df_reg_norm <- as.data.frame(cbind(sapply(df_reg[,1:4],MinMax), class = df_reg$c
 
 
 
-######## Drzewa decyzyjne ########
-
-### Szablon
-#Tree <- function(Y, X, data, type, depth, minobs, overfit, cf)
-  
-#binarna
-Drzewko_bin <- Tree("Caesarian", X_nazwy_bin, data=df_bin, type='Gini', depth=2, minobs=2, overfit='none', cf=0.001)
-
-#wieloklasowa
-Drzewko_multi <- Tree("Class.Name", X_nazwy_multi, data=df_multi, type='Gini', depth=6, minobs=2, overfit='none', cf=0.001)        
-
-
-#regresja - 
-Drzewko_reg <- Tree("class", X_nazwy_reg, data=df_reg, type='SS', depth=9, minobs=2, overfit='none', cf=0.001)
-
-
-
 ######## K najbliższych sąsiadów ########
 
 ### Szablon:
@@ -240,6 +223,14 @@ print("Najlepsze KNN dla zbioru: ")
 print("*** Treningowy --> Jakosc = 0.775 : k = 2")
 print("*** Testowy --> Jakosc = 0.8125 : k = 11")
 
+ggplot(KNN_CV_bin , aes(x=k)) +
+  geom_line(aes(y = Jakosc_TRAIN, color='blue'), size=1, ) +
+  geom_line(aes(y = Jakosc_TEST, color='red'), size=1,) +
+  labs(title='KNN: Jakosc od k', x='k', y='Accuracy') +
+  scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
+  theme(legend.position = "bottom")
+
+
 
 knn_grid_multi = expand.grid(k=2:50)
 KNN_CV_multi = CrossValidTune(df_multi_original, X_nazwy_multi, Y_nazwy_multi, kFold = 10, parTune = knn_grid_multi, seed = 152, algorytm = "KNN")
@@ -250,6 +241,15 @@ print(KNN_CV_multi[which.max(KNN_CV_multi$Jakosc_TEST),])
 print("Najlepsze KNN dla zbioru: ")
 print("*** Treningowy --> Jakosc = 0.9166 : k = 2")
 print("*** Testowy --> Jakosc = 0.9194 : k = 42")
+
+
+ggplot(KNN_CV_multi , aes(x=k)) +
+  geom_line(aes(y = Jakosc_TRAIN, color='blue'), size=1, ) +
+  geom_line(aes(y = Jakosc_TEST, color='red'), size=1,) +
+  labs(title='KNN: Jakosc od k', x='k', y='Accuracy') +
+  scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
+  theme(legend.position = "bottom")
+
 
 
 knn_grid_reg = expand.grid(k=2:50)
@@ -263,10 +263,20 @@ print("*** Treningowy --> MAPE = 0.1666 : k = 2")
 print("*** Testowy --> MAPE = 0.2782 : k = 2")
 
 
+ggplot(KNN_CV_reg , aes(x=k)) +
+  geom_line(aes(y = MAE_TRAIN, color='blue'), size=1, ) +
+  geom_line(aes(y = MAE_TEST, color='red'), size=1,) +
+  labs(title='KNN: MAE od k', x='k', y='Accuracy') +
+  scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
+  theme(legend.position = "bottom")
+
+
+
 ### SVM - CV ###
 # svm_grid_bin = expand.grid(C=5:100, lr = c(0.01, 0.001, 0.0001), maxiter = 500)
 
-svm_grid_bin = expand.grid(C=c(2:200), lr = c(0.01,0.001,0.0001), maxiter = c(500, 1000, 5000))
+#svm_grid_bin = expand.grid(C=c(2:200), lr = c(0.01,0.001,0.0001), maxiter = c(500, 1000, 5000))
+svm_grid_bin = expand.grid(C=c(2:200), lr = c(0.001), maxiter = c(1000))
 SVM_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = svm_grid_bin, seed = 152, algorytm = "SVM")
 #write.csv(SVM_CV_bin, "SVM_CV_bin.csv", row.names = FALSE)
 print("SVM - Binarny - Cross-Validation - Wyniki:")
@@ -276,12 +286,20 @@ print("Najlepsze SVM dla zbioru: ")
 print("*** Treningowy --> Jakosc = 0.7688 : Cost = 196 || lr = 0.0001 || maxiter = 5000")
 print("*** Testowy --> Jakosc = 0.7625 : Cost = 30 || lr = 0.001 || maxiter = 500")
 
+ggplot(SVM_CV_bin[1:100,] , aes(x=C)) +
+  geom_line(aes(y = Jakosc_TRAIN, color='blue'), size=1, ) +
+  geom_line(aes(y = Jakosc_TEST, color='red'), size=1,) +
+  labs(title='SVM: Jakosc od C (kosztu)', x='C', y='Accuracy') +
+  scale_color_discrete(name = "Zbiór", labels = c("Treningowy", "Testowy")) +
+  theme(legend.position = "bottom")
+
 
 
 ### Sieci-NN - CV ###
 # nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6)), lr = c(0.01, 0.001, 0.0001), iter = 10000)
 
-nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
+# nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
+nn_grid_bin = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(50000))
 NN_CV_bin = CrossValidTune(df_bin, X_nazwy_bin, Y_nazwy_bin, kFold = 5, parTune = nn_grid_bin, seed = 152, algorytm = "sieci")
 # h_bin = (NN_CV_bin[,1])
 # h_table = data.frame()
@@ -297,9 +315,10 @@ print(NN_CV_bin[which.max(NN_CV_bin$Jakosc_TEST),])
 print("Najlepsze NN dla zbioru: ")
 print("*** Treningowy --> Jakosc = 0.60 : h = (6,6) || lr = 0.001 || maxiter = 10000")
 print("*** Testowy --> Jakosc = 0.66 : h = (4,4) || lr = 0.001 || maxiter = 10000")
+print(NN_CV_bin)
 
-
-nn_grid_multi = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
+# nn_grid_multi = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
+nn_grid_multi = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(50000))
 NN_CV_multi = CrossValidTune(df_multi, X_nazwy_multi, Y_nazwy_multi, kFold = 5, parTune = nn_grid_multi, seed = 152, algorytm = "sieci")
 # h_bin = (NN_CV_multi[,1])
 # h_table = data.frame()
@@ -315,9 +334,10 @@ print(NN_CV_multi[which.max(NN_CV_multi$Jakosc_TEST),])
 print("Najlepsze NN dla zbioru: ")
 print("*** Treningowy --> Jakosc = 0.8796 : h = (5,5) || lr = 0.001 || maxiter = 100000")
 print("*** Testowy --> Jakosc = 0.4736 : h = (6,6) || lr = 0.001 || maxiter = 80000")
+print(NN_CV_multi)
 
-
-nn_grid_reg = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
+# nn_grid_reg = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(10000, 20000, 50000, 80000, 100000))
+nn_grid_reg = expand.grid(h=list(data.frame(4,4), data.frame(5,5), data.frame(6,6), data.frame(7,7), data.frame(8,8)), lr = c(0.001), iter = c(50000))
 NN_CV_reg = CrossValidTune(df_reg, X_nazwy_reg, Y_nazwy_reg, kFold = 5, parTune = nn_grid_reg, seed = 152, algorytm = "sieci")
 # h_bin = (NN_CV_reg[,1])
 # h_table = data.frame()
@@ -333,7 +353,7 @@ print(NN_CV_reg[which.min(NN_CV_reg$MAPE_TEST),])
 print("Najlepsze NN dla zbioru: ")
 print("*** Treningowy --> MAPE = 0.3314 : h = (8,8) || lr = 0.001 || maxiter = 100000")
 print("*** Testowy --> MAPE = 0.26669 : h = (8,8) || lr = 0.001 || maxiter = 100000")
-
+print(NN_CV_reg)
 
 
 
@@ -343,6 +363,7 @@ print("*** Modele z bibliotek R ***")
 cat("\n")
 
 cv_R <- trainControl(method="cv", number=10)
+
 
 print("KNN - R")
 
@@ -364,19 +385,108 @@ KNN_reg_R_Wynik = KNN_reg_R$results
 print(paste("Najlepszy KNN w R - Regresja: k = ", KNN_reg_R$finalModel$k, " | MAE = " ,KNN_reg_R_Wynik$MAE[KNN_reg_R_Wynik$k == KNN_reg_R$finalModel$k]))
 
 
+print("SVM - R")
+
+svm_grid_bin = expand.grid(C=c(2:200))
+SVM_bin_R <- train(x=df_bin_norm[,X_nazwy_bin], y=as.factor(df_bin_norm[,Y_nazwy_bin]), tuneGrid=svm_grid_bin, method='svmLinear', metric='Accuracy', trControl=cv_R)
+SVM_bin_R_Wynik = SVM_bin_R$results
+print(paste("Najlepszy SVM w R - Binarny: Cost = ", SVM_bin_R[["finalModel"]]@param[["C"]], " | Accuracy = " , SVM_bin_R_Wynik$Accuracy[SVM_bin_R_Wynik$C == SVM_bin_R[["finalModel"]]@param[["C"]]]))
 
 
 
+print("Neural Network - R")
+
+nn_grid_bin = expand.grid(size=4:10, decay=0.00001)
+NN_bin_R = train(x=df_bin_norm[,X_nazwy_bin], y=as.factor(df_bin_norm[,Y_nazwy_bin]), tuneGrid=nn_grid_bin, method='nnet', metric='Accuracy', trControl=cv_R)
+NN_bin_R_Wynik = NN_bin_R$results
+print(paste("Najlepszy NN w R - Binarny: h = ", NN_bin_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_bin_R_Wynik$Accuracy[NN_bin_R_Wynik$size == NN_bin_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+ggplot(NN_bin_R_Wynik , aes(x=size)) +
+  geom_line(aes(y = Accuracy), size=1, color="blue") +
+  labs(title='NNET: Accuracy w zaleznosci od liczby neuronow - Binarny', x='h', y='Accuracy')
+
+
+nn_grid_multi = expand.grid(size=4:10, decay=0.00001)
+NN_multi_R = train(x=df_multi_norm[,X_nazwy_multi], y=as.factor(df_multi_norm[,Y_nazwy_multi]), tuneGrid=nn_grid_multi, method='nnet', metric='Accuracy', trControl=cv_R)
+NN_multi_R_Wynik = NN_multi_R$results
+print(paste("Najlepszy NN w R - Wieloklasowy: h = ", NN_multi_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_multi_R_Wynik$Accuracy[NN_multi_R_Wynik$size == NN_multi_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+ggplot(NN_multi_R_Wynik , aes(x=size)) +
+  geom_line(aes(y = Accuracy), size=1, color="blue") +
+  labs(title='NNET: Accuracy w zaleznosci od liczby neuronow - Wieloklasowy', x='h', y='Accuracy')
+
+
+nn_grid_reg = expand.grid(size=4:10, decay = 0.00001)
+NN_reg_R = train(x=df_reg_norm[,X_nazwy_reg], y=(df_reg[,Y_nazwy_reg]), tuneGrid=nn_grid_reg, method='nnet', metric='MAE', trControl=cv_R)
+NN_reg_R_Wynik = NN_reg_R$results
+print(paste("Najlepszy NN w R - Regresja: h = ", NN_reg_R[["finalModel"]][["tuneValue"]][["size"]], " | MAE = " , NN_reg_R_Wynik$MAE[NN_reg_R_Wynik$size == NN_reg_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+ggplot(NN_reg_R_Wynik , aes(x=size)) +
+  geom_line(aes(y = MAE), size=1, color="blue") +
+  labs(title='NNET: MAE w zaleznosci od liczby neuronow - Regresja', x='h', y='MAE')
 
 
 
+print("Tree - R")
+
+tree_grid_bin = expand.grid(maxdepth=2:15)
+Tree_bin_R = train(x=df_bin[,X_nazwy_bin], y=as.factor(df_bin_norm[,Y_nazwy_bin]), tuneGrid=tree_grid_bin, method='rpart2', metric='Accuracy', trControl=cv_R)
+Tree_bin_R_Wynik = Tree_bin_R$results
+print(paste("Najlepszy Tree w R - Binarny: Max Depth = ", Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_bin_R_Wynik$Accuracy[Tree_bin_R_Wynik$maxdepth == Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+ggplot(Tree_bin_R_Wynik , aes(x=maxdepth)) +
+  geom_line(aes(y = Accuracy), size=1, color='blue') +
+  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia', x='Max Depth', y='Accuracy')+
+  theme(legend.position = "bottom")
+
+
+tree_grid_multi = expand.grid(maxdepth=2:15)
+Tree_multi_R = train(x=df_multi[,X_nazwy_multi], y=as.factor(df_multi_norm[,Y_nazwy_multi]), tuneGrid=tree_grid_multi, method='rpart2', metric='Accuracy', trControl=cv_R)
+Tree_multi_R_Wynik = Tree_multi_R$results
+print(paste("Najlepszy Tree w R - Wieloklasowy: Max Depth = ", Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_multi_R_Wynik$Accuracy[Tree_multi_R_Wynik$maxdepth == Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+ggplot(Tree_multi_R_Wynik , aes(x=maxdepth)) +
+  geom_line(aes(y = Accuracy), size=1, color='blue') +
+  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia', x='Max Depth', y='Accuracy')+
+  theme(legend.position = "bottom")
+
+
+tree_grid_reg = expand.grid(maxdepth=2:15)
+Tree_reg_R = train(x=df_reg[,X_nazwy_reg], y=(df_reg_norm[,Y_nazwy_reg]), tuneGrid=tree_grid_reg, method='rpart2', metric='MAE', trControl=cv_R)
+Tree_reg_R_Wynik = Tree_reg_R$results
+print(paste("Najlepszy Tree w R - Regresja: Max Depth = ", Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | MAE = " , Tree_reg_R_Wynik$MAE[Tree_reg_R_Wynik$maxdepth == Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+ggplot(Tree_reg_R_Wynik , aes(x=maxdepth)) +
+  geom_line(aes(y = MAE), size=1, color='blue') +
+  labs(title='RPART: Zaleznosc pomiedzy jakoscia a glebokoscia', x='Max Depth', y='MAE')+
+  theme(legend.position = "bottom")
 
 
 
+######## Drzewa decyzyjne - Wlasna Implementacja ########
 
+### Szablon
+#Tree <- function(Y, X, data, type, depth, minobs, overfit, cf)
 
+#Binarna
+print("Wlasna Implementacja - Drzewa Decyzyjne - Diagramy")
+cat("\n")
+print("Drzewa Decyzyjne - Binarny")
+Drzewko_bin <- Tree(Y_nazwy_bin, X_nazwy_bin, data=df_bin, type='Gini', depth=Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]], minobs=2, overfit='none', cf=0.001)
+plot(Drzewko_bin)
+print(Drzewko_bin)
 
+#Wieloklasowa
+print("Drzewa Decyzyjne - Wieloklasowy")
+Drzewko_multi <- Tree(Y_nazwy_multi, X_nazwy_multi, data=df_multi, type='Gini', depth=Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]], minobs=2, overfit='none', cf=0.001)        
+plot(Drzewko_multi)
+print(Drzewko_multi)
 
+#Regresja
+print("Drzewa Decyzyjne - Regresja")
+Drzewko_reg <- Tree(Y_nazwy_reg, X_nazwy_reg, data=df_reg, type='SS', depth=Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], minobs=2, overfit='none', cf=0.001)
+plot(Drzewko_reg)
+print(Drzewko_reg)
 
 
 
