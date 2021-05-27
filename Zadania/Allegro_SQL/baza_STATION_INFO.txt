@@ -1,0 +1,6 @@
+46	San Antonio Park	OK-L12	12	CREDITCARD	KEY	15	6064907e-3871-4b2c-829b-d01406cee6fb	http://app.fordgobike.com/Z6gL/SiFlGfIOTF?station_id=46	0	1	POINT(-122.242373228073 37.7901398518536)
+168	Alcatraz Ave at Shattuck Ave	OK-B1	12	CREDITCARD	KEY	15	04059da9-ebad-42e8-928b-14e5e3edf26f	http://app.fordgobike.com/Z6gL/SiFlGfIOTF?station_id=168	0	1	POINT(-122.265568971634 37.8495949677766)
+170	Telegraph Ave at 58th St	OK-B3	12	CREDITCARD	KEY	15	50518b51-6910-4f71-bb20-7b0d0fc4f4b7	http://app.fordgobike.com/Z6gL/SiFlGfIOTF?station_id=170	0	1	POINT(-122.261351 37.8444927)
+172	College Ave at Taft Ave	OK-B5	12	CREDITCARD	KEY	15	5f13426c-73f2-4272-a498-f11ff007e8d3	http://app.fordgobike.com/Z6gL/SiFlGfIOTF?station_id=172	0	1	POINT(-122.2515349 37.8417999)
+173	Shattuck Ave at 55th St	OK-D3-1	12	CREDITCARD	KEY	15	cd4b4099-e2f5-4d46-bc1f-ed96d22548cc	http://app.fordgobike.com/Z6gL/SiFlGfIOTF?station_id=173	0	1	POINT(-122.2644881 37.8403643)
+175	49th St at Telegraph Ave	OK-D4	12	CREDITCARD	KEY	15	971307f6-5491-4112-beac-6b6960af6c0d	http://app.fordgobike.com/Z6gL/SiFlGfIOTF?station_id=175	0	1	POINT(-122.2623663 37.8359455)

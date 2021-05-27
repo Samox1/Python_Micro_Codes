@@ -1,0 +1,8 @@
+Question
+
+Duża wariancja zmiennej ułatwia przeprowadzanie testów statystycznych.
+Choose the right answer
+
+Prawda
+
+Fałsz

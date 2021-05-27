@@ -1,0 +1,52 @@
+Rekrutacja na DaftAcademy Python 4 Beginers
+Wprowadzenie:
+
+Jesteœ pracownikiem firmy spedycyjnej "TEU Logistics".
+
+Twoja firma zajmuje siê przewozem morskim kontenerów po ca³ym œwiecie.
+
+Dosta³es plik z danymi (CSV) w którym s¹ aktualnie transportowane kontenery.
+
+W pierwszym wierszu, w ka¿dej kolumnie podany jest numer, nazwa i klasa statku który przewozi ³adunek. W kolejnych wierszach w ka¿dej kolumnie s¹ podane dane kontenera znajduj¹cego siê na pok³adzie wraz z kowot¹ jaka zosta³a pobrana za przewóz kontenera.
+Szczegó³y:
+
+Nazwa statku jest w formacie:
+
+    nn: xxxxxx (ttttttt)
+
+gdzie:
+
+    nn: id statku
+    xxxxxx: nazwa statku
+    tttttt: klasa statku
+
+Ka¿dy kontener ma numer nadany w formacie:
+
+    aa-bb-cccccccc/yyyy/xx@ddddddddd.ee
+
+gdzie:
+
+    aa - kraj pochodzenia kontenera
+    bb - kraj docelowy kontenera
+    ccccccccc - numer kontenera
+    yyyy - waga kontenera w kilogramach (cyfrowo 0001-9999)
+    xx - typ ³adunku w kontenrze (A0-Z9)
+    dddddddd.ee - nazwa i kraj pochodzenia firmy która nadaje kontener
+    d³ugoœæ pó³ cccccc, dddddd nie jest sta³a
+    pl-jp-2343432/2201/A1@companyname.pl oraz pl-jp-1223123/2201/A1@companyname.de to konentery 2 ró¿nych firm.
+
+Rekord jest po³¹czeniem numeru kontenera i kwoty w formacie:
+
+    numer/kwota np: pl-jp-2343432/3100/Z1@companyname.pl/83427 <- koszt to 834.27 USD
+
+Z powodów takich jak ró¿ne kontrakty, terminy, kolejnoœæ za³adunku, waga i rodzaj ³adunku cena wysy³ki kontenera jest bardzo ró¿na. Zauwa¿ ¿e kraj pochodzenia i destynacji kontenera nie jest to¿samy z portem docelowym dla kontenera.
+
+CSV: Rekordy odzielone s¹ od siebie znakiem œrednika ';' a wiersze znakiem nowej linii '\n'
+
+
+Pytania OTWARTE z zadania:
+2. Ile kontenerów finalnie trafi do Japonii?
+3. Jaka klasa statku œrednio przewozi najwiêcej kontenerów?
+4. Jaka jest œrednia waga kontenera z materia³ami ³atwopalnymi (X1) z dok³adnoœci¹ do 1 kg np: 1234 (zaokr¹glane w górê)?
+5. Która firma w Polsce wysy³a najwiêcej kontenerów?
+6. Jakiego typu ³adunek o najwiêkszej wartoœci (stosunek wagi do ceny) eksportuj¹ niemieckie firmy z Niemiec?

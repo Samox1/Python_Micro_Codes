@@ -1,0 +1,8 @@
+Question
+
+Osiągnięcie lub przekroczenie minimalnej liczebności próby gwarantuje, że uzyskany w teście statystycznym wynik odpowiada rzeczywistości i wartość statystyki z próby odpowiada wartości z populacji
+Choose the right answer
+
+Prawda
+
+Fałsz

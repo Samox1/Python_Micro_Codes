@@ -1,0 +1,33 @@
+Question 8
+
+Zespół deweloperów przygotował dwa warianty wyglądu strony głównej allegro.pl.
+
+Oba warianty udostępniliśmy równolegle użytkownikom - połowa użytkowników zobaczy wariant A, a druga połowa wariant B.
+
+W teście statystycznym chi kwadrat po eksperymencie dla podanych parametrów otrzymaliśmy następujące wyniki:
+
+    Moc testu = 0.85
+    Poziom istotności = 0.01
+    P Value = 0.014
+    Minimalna liczebność próby = 10400
+    Uzyskana wielkość próby wariantu A = 11278
+    Uzyskana wielkość próby wariantu B = 11249
+    Uzyskana wartość metryki X wariantu A = 0.239
+    Uzyskana wartość metryki X wariantu B = 0.244
+
+Chcemy maksymalizować metrykę X.
+
+Jaka powinna być rekomendacja po przeprowadzonym teście?
+Choose the right answers
+
+Zastosować wariant A
+
+Zastosować wariant B
+
+Powtórzyć test, bo mamy za małą próbkę w wariancie B
+
+Powtórzyć test, bo poziom istotności wyszedł za niski
+
+Nie można nic powiedzieć na podstawie tego eksperymentu przyjmując powyższe założenia
+
+Wdrożyć wariant A w 50% i wariant B w 50%
