@@ -129,3 +129,5 @@ Reorgenizer_for_timeseries_raport_files/Jaw_2019-05.txt
 Reorgenizer_for_timeseries_raport_files/Jaw_2019-04.txt
 Reorgenizer_for_timeseries_raport_files/export-ami.csv
 .Rproj.user
+ECG_Timeseries_Neural_Network/mitbih_train.csv
+ECG_Timeseries_Neural_Network/mitbih_test.csv
