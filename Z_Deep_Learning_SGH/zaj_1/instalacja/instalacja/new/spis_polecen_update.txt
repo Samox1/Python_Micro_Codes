@@ -1,0 +1,132 @@
+# https://www.tensorflow.org/install/gpu
+#https://linuxconfig.org/how-to-uninstall-the-nvidia-drivers-on-ubuntu-20-04-focal-fossa-linux
+#https://linuxconfig.org/how-to-install-the-nvidia-drivers-on-ubuntu-20-04-focal-fossa-linux
+#sudo dpkg -P $(dpkg -l | grep nvidia-driver | awk '{print $2}')
+
+
+
+sudo apt update
+sudo apt-get purge nvidia* -y
+sudo apt-get purge cuda* -y
+sudo apt-get autoremove -y
+sudo apt update
+#sudo apt-get --purge remove cuda  -y
+#sudo apt-get --purge remove nvidia -y
+sudo apt-get autoremove --purge nvidia  -y
+sudo apt-get autoremove --purge cuda -y
+sudo apt autoremove -y
+sudo apt update
+
+#v3
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+sudo apt-get update
+sudo apt-get -y install cuda-11-0
+
+mkdir ~/instalki
+cp /media/bartpaw/UUI/Instalacja_cuda_10k0/cudnn-11.0-linux-x64-v8.0.5.39.tgz ~/instalki
+cd ~/instalki
+tar -xf ~/instalki/cudnn-11.0-linux-x64-v8.0.5.39.tgz
+cd cuda
+sudo cp -P include/cudnn.h /usr/
+sudo cp -P lib64/libcudnn* /usr/lib/x86_64-linux-gnu/
+sudo chmod a+r /usr/lib/x86_64-linux-gnu/libcudnn*
+
+#sudo apt install nvidia-cuda-toolkit
+
+
+echo 'PATH=/usr/local/cuda-11.0/bin:$PATH' >> ~/.bashrc 
+echo 'LD_LIBRARY_PATH=/usr/local/cuda-11.0/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc 
+#echo 'LD_LIBRARY_PATH=/usr/local/cuda-11.0/lib64:$LD_LIBRARY_PATH' >> /etc/ld.so.conf 
+bash
+nvcc --version
+sudo apt update
+reboot
+
+#ANACONDA POCZ
+ cp /media/bartpaw/UUI/Instalacja_cuda_10k0/Anaconda/Anaconda3-2020.11-Linux-x86_64.sh ~/instalki/
+cd ~/instalki/
+bash Anaconda3-2020.11-Linux-x86_64.sh 
+bash
+which pip #(powinno wyskoczyæ /home/bart/anaconda3/bin/pip)
+pip install tensorflow-gpu
+python
+import tensorflow as tf
+print(tf.config.list_physical_devices('GPU'))
+#ANACONDA KON
+
+
+sudo apt install python3-pip -y
+sudo apt install python3-testresources -y
+pip3 install tensorflow-gpu
+
+echo 'PATH=/home/bartpaw/.local/bin:$PATH' >> ~/.bashrc
+bash
+
+python3
+import tensorflow as tf
+print(tf.config.list_physical_devices('GPU'))
+exit()
+
+pip3 install sklearn
+pip3 install matplotlib
+pip3 install pandas
+pip3 install gym
+
+sudo apt update
+sudo apt install -y xvfb
+python3 -m pip install -U pyvirtualdisplay
+
+
+pip3 install notebook
+
+#echo 'PATH=/home/bartpaw/.local/bin:$PATH' >> ~/.bashrc
+#bash
+
+
+#https://github.com/ageron/handson-ml2
+sudo apt install git
+
+git clone https://github.com/ageron/handson-ml2.git
+cd handson-ml2/
+jupyter notebook
+
+
+sudo apt install cmake libz-dev
+pip3 install atari-py
+python3 -m pip install -U 'gym[atari]'
+python3 -m pip install -U tf-agents
+
+
+cd ~/instalki/
+cp /media/bartpaw/UUI/Instalacja_cuda_10k0/Pycharm/pycharm-community-2020.3.3.tar.gz ~/instalki/
+cd ~/instalki
+#mkdir ~/pycharm_instal
+#tar -zxvf pycharm-*.tar.gz -C ~/pycharm_instal/
+sudo tar xzf pycharm-*.tar.gz -C /opt/
+cd /opt/pycharm-*/bin
+sh pycharm.sh
+
+
+  WARNING: The scripts f2py, f2py3 and f2py3.8 are installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script wheel is installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script markdown_py is installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The scripts pyrsa-decrypt, pyrsa-encrypt, pyrsa-keygen, pyrsa-priv2pub, pyrsa-sign and pyrsa-verify are installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script google-oauthlib-tool is installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script tensorboard is installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The scripts estimator_ckpt_converter, import_pb_to_tensorboard, saved_model_cli, tensorboard, tf_upgrade_v2, tflite_convert, toco and toco_from_protos are installed in '/home/bartpaw/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+
+
+
+
+
+

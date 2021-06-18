@@ -1,0 +1,86 @@
+Po zaistalowaniu NVIDI (sterownikow)
+Jeœli nie pojawia siê menu gruba:
+ 1. Uruchom terminal
+ 2. `sudo nano /etc/default/grub`
+ 3. dodaj # na pocz¹tku GRUB_HIDDEN_TIMEOUT=0
+ 4. Zmieñ GRUB_HIDDEN_TIMEOUT_QUIET= z true na false
+ 5. WyjdŸ ctrl+x, zapisz zmiany.
+ 6. Uruchom `sudo update-grub`.
+ 7. Reboot
+ -> œcie¿ka 1
+
+Kroki po kolei:
+ 1. Tak jak w "instalacja_ubuntu" - zainstalowaæ sterowniki Nvidii przez panel dodatkowych sterowników ubuntu
+ 2. Œci¹gn¹æ `cuda` wersjê `v8.0` ze strony nvidii (google -> cuda download -> legacy releases) -> najnowsza, zainstalowaæ zgodnie z instrukcj¹ (deb (local)), x86_64
+ (dalej jak w instkcji CUDA po pobraniu 1 pliku), przchodzmy do katlogu obrane i):
+ 3. sudo dpkg -i ŒÆI¥GNIÊTY_PLIK.deb
+ 4. sudo apt-get update
+ 5. sudo apt-get install cuda
+
+ i teraz jak wpiszemy 
+ echo $?
+ to powinnismy otrzymac 0 (brak bledu)
+
+ 6. Dodajemy œcie¿ki do PATH i LD_LIBRARY_PATH:
+ a) cd ~ 
+ b) nano .bashrc 
+ dodajemy na koñcu linie
+ 
+ #PATH=/usr/local/cuda-8.0/bin:$PATH
+ PATH=/usr/local/cuda-11.0/bin:$PATH
+
+ #LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:$LD_LIBRARY_PATH
+ LD_LIBRARY_PATH=/usr/local/cuda-11.0/lib64:$LD_LIBRARY_PATH, or, add /usr/local/cuda-11.0/lib64 to /etc/ld.so.conf and run ldconfig as root
+ 
+ 7. bash (¿eby zrestartowaæ shella)
+ 8. nvcc --version
+ (powinna byc odp)
+
+ TERAZ INSTALUJEMY CUDNN
+ 9. google cudnn download (ze strony nvidii)
+ logujemy siê i œci¹gamy v6.0 pasuj¹c¹ do CUDA 8.0 (cuDNN library for linux)
+ 10. cd Pobrane
+ 11. tar -xf POBRANY_PLIK
+ 12. cd utworzony katalog (cuda)
+ 13. 
+
+sudo cp -P include/cudnn.h /usr/
+sudo cp -P lib64/libcudnn* /usr/lib/x86_64-linux-gnu/
+sudo chmod a+r /usr/lib/x86_64-linux-gnu/libcudnn*
+
+ 14. œci¹gamy anacondê (3.6 ze strony)
+ 15. cd Pobrane
+ 16. bash Anaconda(TAB i ten plik)
+ 17. Podczas instalacji (Enter, q, Enter, yes, yes)
+w razie jakby co nano ~/.bashrc i na koñcu linia export ...
+ 18. bash
+ 
+INSTALUJEMY tensorflow-gpu
+
+ 19. which pip (powinno wyskoczyæ /home/bart/anaconda3/bin/pip)
+ 20. pip install tensorflow-gpu
+ 21. ipython
+
+ import tensorflow as tf
+ from tensorflow.python.client import device_lib
+ device_lib.list_local_devices()
+
+ (powinno siê pojawiæ "GPU" w którejœ linijce od do³u)
+
+ 22. Mo¿na przetestowaæ czy dzia³a mno¿enie macierzy na GPU:
+(https://www.tensorflow.org/tutorials/using_gpu)
+ # Creates a graph.
+with tf.device('/gpu:0'):
+  a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+  b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+c = tf.matmul(a, b)
+# Creates a session with log_device_placement set to True.
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+# Runs the op.
+print(sess.run(c))
+
+powinien siê wykonaæ
+
+ (jeœli nie dzia³a, to sprawdŸ czy inna instancja procesu nie chodzi pod spodem) 
+
+

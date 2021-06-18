@@ -1,0 +1,41 @@
+https://www.youtube.com/watch?v=BHplY6uU1Iw
+
+
+sciagamy z : https://www.jetbrains.com/pycharm/download/#section=windows
+wersje Community
+cd ~/Pobrane
+tar -zxvf pobrany_plik
+cd pycharm-community-2017.2.3/bin
+[opcjonalnie ls]
+./pycharm.sh
+[do not import settings]
+okno dialogowe "Initial Configuration" - OK
+New Projekt
+File-> settings->appearance->Theme=Darcula, OK
+
+
+==================================== INSTALACJA GIT ============
+sudo apt-get update
+sudo apt-get install git
+
+==================================== Tflearn ============
+http://tflearn.org/installation/
+pip install git+https://github.com/tflearn/tflearn.git
+
+
+wchodzimy na example: Convolutional Network (CIFAR-10)
+https://github.com/tflearn/tflearn/blob/master/examples/images/convnet_cifar10.py
+
+ALT + ENTER - import
+
+z modyfikacj¹:
+# Data loading and preprocessing
+from tflearn.datasets import cifar10
+(X, Y), (X_test, Y_test) = cifar10.load_data()
+X, Y = shuffle(X, Y)
+Y = to_categorical(Y, 10)
+Y_test = to_categorical(Y_test, 10)
+
+img=X[1,:,:,:]
+imgplot = plt.imshow(img,interpolation='bilinear')
+plt.show()
