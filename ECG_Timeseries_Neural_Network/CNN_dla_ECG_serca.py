@@ -41,7 +41,9 @@ print("*** Rozklad klas w danych treningowych ***")
 train_raw[187] = train_raw[187].astype(int)
 train_class_spread = train_raw.pivot_table(index = [187], aggfunc ='size')
 print(train_class_spread)
-sns.catplot(x = 187, kind = 'count', data = train_raw)
+wykres_train = sns.catplot(x = 187, kind = 'count', data = train_raw)
+wykres_train.set_axis_labels("Klasy","Count")
+wykres_train.ax.set_title("Rozklad klas w danych treningowych")
 plt.show()
 
 # Pokazanie przykladowych przebiegow czasowych dla kazdej klasy
@@ -61,8 +63,13 @@ plt.plot(x,y3, label = "Klasa 3")
 y4 = train_raw.loc[train_raw[187] == 4]
 y4 = y4.iloc[1,:-1]
 plt.plot(x,y4, label = "Klasa 4")
+plt.title("Przykladowe przebiegi czasowe dla kazdej klasy")
 plt.legend()
 plt.show()
+
+
+
+
 
 ### Dane Testowe
 test_raw = pd.read_csv("mitbih_test.csv", header=None)
@@ -73,8 +80,15 @@ print("*** Rozklad klas w danych testowych ***")
 test_raw[187] = test_raw[187].astype(int)
 test_class_spread = test_raw.pivot_table(index = [187], aggfunc ='size')
 print(test_class_spread)
-sns.catplot(x = 187, kind = 'count', data = test_raw)
+wykres_test = sns.catplot(x = 187, kind = 'count', data = test_raw)
+wykres_test.set_axis_labels("Klasy","Count")
+wykres_test.ax.set_title("Rozklad klas w danych testowych")
 plt.show()
+
+
+
+
+
 
 ### Dostosowanie danych wejsciowych:
 # Dane X musza miec wymiar: (87554, 187, 1)
@@ -122,8 +136,8 @@ print(Y_train.shape)
 ### Blok konwolucji (splotu), dodawania i maxpoolingu - pozniej wykorzystane w petli
 def conv_unit(unit, input_layer):
     s = '_' + str(unit)
-    layer = keras.layers.Conv1D(name='Conv1' + s, filters=32, kernel_size=5, strides=1, padding='same', activation='relu')(input_layer) # Konwolucja 1D
-    layer = keras.layers.Conv1D(name='Conv2' + s, filters=32, kernel_size=5, strides=1, padding='same', activation=None)(layer )        # Konwolucja 1D
+    layer = keras.layers.Conv1D(name='Conv1' + s, filters=32, kernel_size=5, strides=1, padding='same', activation='relu', trainable=False)(input_layer) # Konwolucja 1D, wagi=freeze (nie uczą się)
+    layer = keras.layers.Conv1D(name='Conv2' + s, filters=32, kernel_size=5, strides=1, padding='same', activation=None, trainable=False)(layer )        # Konwolucja 1D, wagi=freeze (nie uczą się)
     layer = keras.layers.Add(name='ResidualSum' + s)([layer, input_layer])               # Sumowanie
     layer = keras.layers.Activation("relu", name='Act_relu' + s)(layer)                  # Aktywacja - ReLU
     layer = keras.layers.MaxPooling1D(name='MaxPool' + s, pool_size=5, strides=2)(layer) # Maxpool - maksymalne wartosci z kolejnych 5 wartosci
@@ -135,7 +149,7 @@ def conv_unit(unit, input_layer):
 def get_uncompiled_model():
 
     inputs = keras.layers.Input(shape=(187,1), name="Inputo") # Warstwa wejsciowa o odpowiednich wymiarach
-    current_layer = keras.layers.Conv1D(name='Conv1D_1', filters=32, kernel_size=5, strides=1, padding='same', input_shape=(187,1))(inputs) # Konwolucja 1D
+    current_layer = keras.layers.Conv1D(name='Conv1D_1', filters=32, kernel_size=5, strides=1, padding='same', trainable=False)(inputs) # Konwolucja 1D, wagi=freeze (nie uczą się)
 
     for i in range(5):
         current_layer = conv_unit(i + 1, current_layer)     # Blok konwolucji
