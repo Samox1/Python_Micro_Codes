@@ -30,6 +30,14 @@ from sklearn.metrics import classification_report, confusion_matrix
 # Klasa: 2 =  5788
 # Klasa: 3 =   641
 # Klasa: 4 =  6431
+#
+#
+# Rozklad klas w danych testowych:
+# Klasa: 0 = 18118
+# Klasa: 1 =   556
+# Klasa: 2 =  1448
+# Klasa: 3 =   162
+# Klasa: 4 =  1608
 
 
 ### Dane Treningowe
@@ -68,9 +76,6 @@ plt.legend()
 plt.show()
 
 
-
-
-
 ### Dane Testowe
 test_raw = pd.read_csv("mitbih_test.csv", header=None)
 print(test_raw.head())
@@ -86,13 +91,30 @@ wykres_test.ax.set_title("Rozklad klas w danych testowych")
 plt.show()
 
 
+### --- OPCJONALNIE: ZBALANSOWANIE DANYCH
 
+# klasa_0 = train_raw.loc[train_raw[187] == 0].sample(20000)                                    # Klasa 0 = wybranie losowo 20 tys wartosci
+# klasa_1 = pd.concat([train_raw.loc[train_raw[187] == 1]] * 4, ignore_index=True)              # Klasa 1 = powtorzenie wszystkich wartosci 4 razy
+# klasa_2 = pd.concat([train_raw.loc[train_raw[187] == 2]] * 2, ignore_index=True)              # Klasa 2 = powtorzenie wszystkich wartosci 2 razy
+# klasa_3 = pd.concat([train_raw.loc[train_raw[187] == 3]] * 5, ignore_index=True)              # Klasa 3 = powtorzenie wszystkich wartosci 5 razy
+# klasa_4 = pd.concat([train_raw.loc[train_raw[187] == 4]] * 2, ignore_index=True)              # Klasa 4 = powtorzenie wszystkich wartosci 2 razy
+# train_balanced = pd.concat([klasa_0, klasa_1, klasa_2, klasa_3, klasa_4], ignore_index=True)  # Polaczenie danych wszystkich klas
+# train_balanced = train_balanced.sample(frac=1)                                                # Roszada zbalansowanych danych
+#
+# train_balanced_class_spread = train_balanced.pivot_table(index = [187], aggfunc ='size')      # Wyliczenie liczebnosci kazdej z klas
+# print(train_balanced_class_spread)
+# wykres_train_balanced = sns.catplot(x = 187, kind = 'count', data = train_balanced)           # Wykres liczebnosci kazdej z klas
+# wykres_train_balanced.set_axis_labels("Klasy","Count")
+# wykres_train_balanced.ax.set_title("Rozklad klas w danych treningowych - zbalansowanych")
+# plt.show()
+#
+# train_raw = train_balanced                                                                    # Podmiana zbalansowanych danych jako zbioru treningowego
 
 
 
 ### Dostosowanie danych wejsciowych:
-# Dane X musza miec wymiar: (87554, 187, 1)
-# Dane Y musza miec wymiar: (87554, 5)
+# Dane X musza miec wymiar: (wiersze, 187, 1)
+# Dane Y musza miec wymiar: (wiersze, 5)
 
 X_train = np.array(train_raw.iloc[:,:-1].values)
 Y_train = to_categorical(train_raw[187].values)
@@ -134,8 +156,8 @@ print(Y_train.shape)
 
 
 ### Blok konwolucji (splotu), dodawania i maxpoolingu - pozniej wykorzystane w petli
-def conv_unit(unit, input_layer):
-    s = '_' + str(unit)
+def blok_conv(iter, input_layer):
+    s = '_' + str(iter)
     layer = keras.layers.Conv1D(name='Conv1' + s, filters=32, kernel_size=5, strides=1, padding='same', activation='relu', trainable=False)(input_layer) # Konwolucja 1D, wagi=freeze (nie uczą się)
     layer = keras.layers.Conv1D(name='Conv2' + s, filters=32, kernel_size=5, strides=1, padding='same', activation=None, trainable=False)(layer )        # Konwolucja 1D, wagi=freeze (nie uczą się)
     layer = keras.layers.Add(name='ResidualSum' + s)([layer, input_layer])               # Sumowanie
@@ -149,10 +171,10 @@ def conv_unit(unit, input_layer):
 def get_uncompiled_model():
 
     inputs = keras.layers.Input(shape=(187,1), name="Inputo") # Warstwa wejsciowa o odpowiednich wymiarach
-    current_layer = keras.layers.Conv1D(name='Conv1D_1', filters=32, kernel_size=5, strides=1, padding='same', trainable=False)(inputs) # Konwolucja 1D, wagi=freeze (nie uczą się)
+    current_layer = keras.layers.Conv1D(name='Conv1D_1', filters=32, kernel_size=5, strides=1, padding='same')(inputs) # Konwolucja 1D, (wagi sie zmieniaja)
 
     for i in range(5):
-        current_layer = conv_unit(i + 1, current_layer)     # Blok konwolucji
+        current_layer = blok_conv(i + 1, current_layer)     # Blok konwolucji
 
     current_layer = keras.layers.Flatten()(current_layer)   # Przekształcenie macierzy 2D na 1D
     
@@ -167,10 +189,9 @@ def get_uncompiled_model():
 
 ### Kompilacja modelu sieci neuronowej
 def get_compiled_model():
-    model = get_uncompiled_model()                                  # Zwrocenie modelu sieci neuronowej
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])  # Kompilacja modelu
-
-    return model
+    cnn_model = get_uncompiled_model()                                  # Zwrocenie modelu sieci neuronowej
+    cnn_model.compile(optimizer='adam', loss=tf.losses.CategoricalCrossentropy(), metrics=['accuracy'])  # Kompilacja modelu
+    return cnn_model
 
 
 ### Tworzenie modelu i opcje monitorowania nauczania sieci
@@ -193,7 +214,7 @@ model.summary()
 
 
 ### Nauczanie modelu na danych treningowych
-history = model.fit(X_train, Y_train, epochs = 5, validation_data=(X_test, Y_test))
+history = model.fit(X_train, Y_train, epochs = 10, validation_data=(X_test, Y_test))
 # history = model.fit(X_train, Y_train, epochs = 5, callbacks=callbacks_list, validation_data=(X_test, Y_test))  # OPCJONALNIE = Uczenie modelu z parametrami do zapisu najlepszego modelu i zapisanie go jako pliku
 
 
@@ -202,7 +223,7 @@ pd.DataFrame(history.history)
 pd.DataFrame(history.history)[['accuracy', 'val_accuracy']].plot()
 pd.DataFrame(history.history)[['loss', 'val_loss']].plot()
 
-### Predykcja na danych testowych / walidacyjnych
+### Predykcja na danych testowych
 predict = model.predict(X_test)
 
 # Zamiana prawdopodobienstwa na klasy (rozklad prawdopodobienstwa na wektor klas)
