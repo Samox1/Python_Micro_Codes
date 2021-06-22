@@ -224,6 +224,8 @@ pd.DataFrame(history.history)[['accuracy', 'val_accuracy']].plot()
 pd.DataFrame(history.history)[['loss', 'val_loss']].plot()
 
 ### Predykcja na danych testowych
+print("")
+print("*** Predykcja modelu na zbiorze testowym ***")
 predict = model.predict(X_test)
 
 # Zamiana prawdopodobienstwa na klasy (rozklad prawdopodobienstwa na wektor klas)
