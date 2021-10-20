@@ -1,0 +1,69 @@
+X <- data.frame( x1 = c(0.4,.55,.65,.9,1,.35,.5,.15,0.2,.85),
+                 x2 = c(0.85,.95,.8,.87,.5,.55,.5,.2,.1,.3) )
+y_tar <- c(1,1,1,1,1,0,0,1,0,0)
+
+plot( X$x1, X$x2, col = ifelse( y_tar == 0, "red", "blue" ) )
+
+Decision <- function( X, theta, theta0 ){
+  X %*% t( theta ) + theta0
+}
+
+Margin <- function( X, y, theta, theta0 ){
+  y * Decision( X, theta, theta0 )
+}
+
+Cost <- function( margin, theta, C ){
+  (1/2) * theta %*% t(theta) + C * sum( pmax( 0, 1 - margin ) )
+}
+
+trainSVM <- function( X, y, C = 1, lr = 0.001, maxiter = 500 ){
+  d <- nrow(X)
+  p <- ncol(X)
+  theta <- matrix( runif(p), nrow = 1 )
+  theta0 <- 0
+  loss <- double(maxiter)
+  for( i in 1:maxiter ){
+    margin <- Margin( X, y, theta, theta0 )
+    loss[i] <- Cost( margin, theta, C )
+    miss_indx <- which( margin < 1 )
+    d_theta <- theta - C * y[miss_indx] %*% X[miss_indx,]
+    theta <- theta - lr * d_theta
+    d_theta0 <- - C * sum( y[miss_indx] )
+    theta0 <- theta0 - lr * d_theta0
+  }
+  supp_vect <- which( Margin( X, y, theta, theta0 ) <= 1 )
+  return( list( SP = supp_vect, Theta = theta, Theta0 = theta0 ) )
+}
+
+predSVM <- function( X, theta, theta0 ){
+  sign( Decision( X, theta, theta0 ) )
+}
+
+
+model <- trainSVM( as.matrix(X), ifelse( y_tar == 0, -1, 1 ), C = 10, lr = 0.001, maxiter = 5000 )
+table( tar = ifelse( y_tar == 0, -1, 1 ), pred = predSVM( as.matrix(X), model$Theta, model$Theta0 ) )
+
+plot( X$x1, X$x2, col = ifelse( y_tar == 0, "red", "blue" ) )
+x1x2 <- seq( 0, 1, by = 0.1 )
+decision <- outer( x1x2, x1x2, function( x1, x2 ){ Decision( cbind(x1,x2), model$Theta, model$Theta0 ) } )
+contour( x1x2, x1x2, decision, add = T, lwd = 2, levels = c(-1,0,1), col = c("red","blue","red"), lty = c(2,1,2) )
+points( X$x1[model$SP], X$x2[model$SP], lwd = 3, col = ifelse( y_tar[model$SP] == 0, "red", "blue") )
+
+library(e1071)
+model2 <- svm( y = factor(y_tar), x = X,  kernel = "linear" )
+table( tar = factor(y_tar), pred = predict( model2, X) )
+
+iris_ <- iris[iris$Species != "setosa",]
+X <- iris_[,3:4]
+y_tar <- ifelse( iris_$Species == "versicolor", -1, 1)
+
+model3 <- trainSVM( as.matrix(X), y_tar, C = 15, lr = 0.001, maxiter = 5000 )
+table( tar = y_tar, pred = predSVM( as.matrix(X), model3$Theta, model3$Theta0 ) )
+
+plot( X$Petal.Length, X$Petal.Width, col = ifelse( y_tar == -1, "red", "blue" ) )
+x1x2 <- seq( 1, 7, by = 0.5 )
+decision <- outer( x1x2, x1x2, function( x1, x2 ){ Decision( cbind(x1,x2), model3$Theta, model3$Theta0 ) } )
+contour( x1x2, x1x2, decision, add = T, lwd = 2, levels = c(-1,0,1), col = c("red","blue","red"), lty = c(2,1,2) )
+points( X$Petal.Length[model3$SP], X$Petal.Width[model3$SP], lwd = 3, 
+        col = ifelse( y_tar[model3$SP] == -1, "red", "blue") )
+

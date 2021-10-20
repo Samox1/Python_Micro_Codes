@@ -1,0 +1,63 @@
+sigmoid <- function( x ){
+  return( 1 / (1 + exp( -x ) ) )
+}
+
+wprzod <- function( x, Win, Wout ){
+  z1 <- cbind( 1, x ) %*% Win
+  H <- sigmoid( z1 )
+  z2 <- cbind( 1, H ) %*% Wout
+  y_hat <- sigmoid( z2 )
+  return( list( y_hat = y_hat, H = H ) )
+}
+
+wstecz <- function( x, y_tar, y_hat, Win, Wout, H, lr ){
+  dWout <- t( cbind( 1, H ) ) %*% ( y_hat - y_tar )
+  dH <- ( y_hat - y_tar ) %*% t( Wout[-1,, drop=F] )
+  dWin <- t( cbind( 1, x ) ) %*% ( H * (1-H) * dH )
+  Win <- Win - lr * dWin
+  Wout <- Wout - lr * dWout
+  return( list( Win = Win, Wout = Wout) )
+}
+
+trainNN <- function( x, y_tar, h = 5, lr = 0.01, iter = 10000 ){
+  p <- ncol(x)
+  Win <- matrix( rnorm( (p + 1) * h ), p + 1, h )
+  Wout <- matrix( rnorm( h + 1 ) )
+  for( i in 1:iter ){
+    sygnalwprzod <- wprzod( x, Win, Wout )
+    sygnalwtyl <- wstecz( x, y_tar, 
+                          y_hat = sygnalwprzod$y_hat, 
+                          Win, Wout, 
+                          H = sygnalwprzod$H, lr )
+    Win <- sygnalwtyl$Win
+    Wout <- sygnalwtyl$Wout
+    print( i )
+  }
+  return( list( y_hat = sygnalwprzod$y_hat, Win = Win, Wout = Wout ) )
+}
+
+predNN <- function( xnew, nn ){
+  z1 <- cbind( 1, xnew ) %*% nn$Win
+  H <- sigmoid( z1 )
+  z2 <- cbind( 1, H ) %*% nn$Wout
+  y_hat <- sigmoid( z2 )
+  return( y_hat )
+}
+
+X <- iris[ iris$Species != "setosa",]
+y_tar <- ifelse( X$Species == "versicolor", 0, 1 )
+X <- X[,-c(1:2,5)]  
+
+MinMax <- function( x ){
+  return( ( x - min(x) ) / ( max(x) - min(x) ) )
+}  
+
+X <- sapply( X, MinMax )
+summary(X) 
+
+siec <- trainNN( X, y_tar, h = 5, lr = 0.01, iter = 10000 )
+siec
+
+table( y_tar, ifelse( siec$y_hat < 0.5, 0, 1 ) )
+table( y_tar, ifelse( predNN( X, siec ) < 0.5, 0, 1 ) )
+

@@ -1,0 +1,119 @@
+x0 <- rep(1,5)
+x1 <- 1:5
+X <- cbind( x0, x1 )
+
+y <- matrix( c(3,7,5,11,14) )
+
+summary(lm( y ~ X[,2] ))
+
+
+library(MASS) #ginv()
+#Slajd 6 (XTX)-1 *XTy
+thetaLinKMNK <- solve( t(X) %*% X ) %*% t(X) %*% y
+
+# XT * (XXT)-1 * y, Slajd 8
+X %*% t(X)
+alphaLinGram <- ginv( X %*% t(X)) %*% y
+thetaLinGram <- t(X) %*% alphaLinGram
+
+# Wwartosci przewidywane
+X[1,,drop = F] %*% thetaLinGram; y[1] # Slajd 9
+y_hatLinGram <- X %*% thetaLinGram
+
+plot( y, lwd = 2 )
+lines( y_hatLinGram, col = "red" )
+
+## Estymacja iteracyjna
+# 1/n * sum i=1 do n ( y_tar - y_pred ) * x
+gradient <- function( x, y, theta, n ){
+  grad <- (1/n) * t(X) %*% (X %*% t(theta) - y)
+  return( t(grad) )
+}
+gradient( X, y, matrix(0,1,2), 5 )
+
+# 1/n   ('                              y_pred                      '       - y_tar ) * x
+(1/5) * ( rowSums(sweep( x = X, MARGIN = 2,  STATS = matrix(0,1,2), FUN = "*")) - y ) * X
+
+(1/5) *  rowSums( sapply( 1:nrow(X), function( i, err, x ){ err[i] * x[i,] }, 
+                          err = ( rowSums(sweep( x = X, MARGIN = 2,  STATS = matrix(0,1,2), FUN = "*")) - y ), x = X ) )
+
+# XT * theta, theta^T * X
+(1/5) * t(X) %*% (X %*% t(matrix(0,1,2)) - y)
+
+GradDescent <- function( y, X, maxit ){
+  theta <- matrix( 0, 1, ncol(X) )
+  alpha <- 0.05
+  n <- nrow(X)
+  for( i in 1:maxit ){
+    theta <- theta - alpha * gradient( X, y, theta, n )
+  }
+  return( theta )
+}
+GradDescent( y, X, 1000 )
+thetaLinGram
+
+# Regresja grzbietowa
+lambda <- 0
+# (XXT +lambdaI)-1 * y
+alphaRidgeGram <- ginv( X %*% t(X) + lambda * diag(nrow(X)) ) %*% y
+alphaRidgeGram <- ginv( X %*% t(X) ) %*% y
+alphaLinGram
+
+thetaRidgeGram <- t(X) %*% alphaRidgeGram
+
+PredRide <- function( alpha, X, Xnew ){
+  pred <- double( nrow(Xnew) )
+  for( i in 1:nrow(Xnew)){
+    temp <- double( length(alpha) )
+    for( j in 1:length(alpha) ){
+      temp[j] <- sum( alpha[j] * (X[j,,drop=F] %*% t(Xnew[i,,drop=F]) ) )
+    }
+    pred[i] <- sum(temp)
+  }
+  return( pred )
+}
+PredRide( alphaRidgeGram, X, X )
+y_hatLinGram
+
+X %*% thetaRidgeGram
+
+# Kernel Ridge Regression
+kernelLin <- function( x1, x2 ){
+  x1 %*% t(x2)
+}
+kernelPoly <- function( x1, x2, c, d ){
+  ( x1 %*% t(x2) + c )^ d 
+}
+
+PredRideKernel <- function( alpha, X, Xnew, Lin = T, c = 0.5, d = 2 ){
+  pred <- double( nrow(Xnew) )
+  for( i in 1:nrow(Xnew)){
+    temp <- double( length(alpha) )
+    for( j in 1:length(alpha) ){
+      if(Lin){
+        temp[j] <- sum( alpha[j] * kernelLin( X[j,,drop=F], Xnew[i,,drop=F] ) )
+      }else{
+        temp[j] <- sum( alpha[j] * kernelPoly( X[j,,drop=F], Xnew[i,,drop=F], c, d ) )
+      }
+    }
+    pred[i] <- sum(temp)
+  }
+  return( pred )
+}
+
+alphaRidgeLin <- ginv( kernelLin(X,X) ) %*% y
+alphaRidgePoly <- ginv( kernelPoly(X,X,0.5,2) ) %*% y
+
+PredRideKernel( alphaRidgeLin, X, X, T )
+PredRideKernel( alphaRidgePoly, X, X, F, 0.5, 2)
+
+plot( y, lwd = 2 )
+lines( PredRideKernel( alphaRidgeLin, X, X, T ), col = "red" )
+lines( PredRideKernel( alphaRidgePoly, X, X, F, 0.5, 2), col = "blue" )
+
+MSE <- function( y_tar, y_pred ){
+  mean( c(y_tar-y_pred)^2 )
+}
+MSE( y, PredRideKernel( alphaRidgeLin, X, X, T ) )
+MSE( y, PredRideKernel( alphaRidgePoly, X, X, F, 0.5, 2) )
+

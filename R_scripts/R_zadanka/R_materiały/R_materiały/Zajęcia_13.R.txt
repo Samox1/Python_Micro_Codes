@@ -1,0 +1,124 @@
+sigmoid <- function( x ){
+  return( 1 / (1 + exp( -x ) ) )
+}
+dsigmoid <- function( x ){
+  return( x * (1 - x) )
+}
+ReLu <- function( x ){
+  return( ifelse( x <= 0, 0, x ) )
+}
+dReLu <- function( x ){
+  return( ifelse( x <= 0, 0, 1 ) )
+}
+lossSS <- function( y_tar, y_hat ){
+  return( 1/2 * sum( ( y_tar - y_hat )^2 ) )
+}
+SoftMax <- function(x){
+  exp( x ) / sum( exp( x ) )
+}
+
+wprzod <- function( X, W1, W2, W3 ){
+  h1 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W1 )  )
+  h2 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( h1 %*% W2 )  )
+  # y_hat <- sigmoid( h2 %*% W3 ) # klasyfikacja binarna
+  # y_hat <- matrix( t( apply( h2 %*% W3, 1, SoftMax ) ), nrow = nrow(X) ) # klasyfikacja wieloklasowa
+  y_hat <- h2 %*% W3 # regresja
+  return( list( y_hat = y_hat, H1 = h1, H2 = h2 ) )
+}
+
+wstecz <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr ){
+  # dy_hat <- (y_tar - y_hat) * dsigmoid( y_hat ) # klasyfikacja binarna
+  # dy_hat <- (y_tar - y_hat) / nrow( X ) # klasyfikacja wieloklasowa
+  dy_hat <- (y_tar - y_hat) # regresja
+  dW3 <- t(H2) %*% dy_hat
+  dH2<- dy_hat %*% t(W3) * dsigmoid( H2 )
+  dW2 <- t(H1) %*% dH2[,-1]
+  dH1<- dH2[,-1] %*% t(W2) * dsigmoid( H1 )
+  dW1 <- t(X) %*% dH1[,-1]
+  W1 <- W1 + lr * dW1
+  W2 <- W2 + lr * dW2
+  W3 <- W3 + lr * dW3
+  return( list( W1 = W1, W2 = W2, W3 = W3 ) )
+}
+
+trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123 ){
+  set.seed( seed )
+  X <- cbind( rep( 1, nrow(X) ), x )
+  # W1, .... W_liczba_warst_ukrytych+1
+  # assign( paste0( "W", 1:W_liczba_warst_ukrytych+1), matrix( rnorm( h + 1 ) ) )
+  W1 <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
+  W2 <- matrix( runif( (h[1]+1) * h[2], -1, 1 ), nrow = h[1] + 1 )
+  W3 <- matrix( runif( (h[2]+1) * ncol(y_tar), -1, 1 ), nrow = h[2] + 1 )
+  error <- double( iter )
+  for( i in 1:iter ){
+    sygnalwprzod <- wprzod( X, W1, W2, W3 )# W = list( W1, W2, W3 )
+    sygnalwtyl <- wstecz( X, y_tar, y_hat = sygnalwprzod$y_hat, W1, W2, W3, H1 = sygnalwprzod$H1, H2 = sygnalwprzod$H2, lr )
+    W1 <- sygnalwtyl$W1
+    W2 <- sygnalwtyl$W2
+    W3 <- sygnalwtyl$W3
+    cat( paste0( "\rIteracja: ", i ) )
+    error[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
+  }
+  xwartosci <- seq( 1, iter, length = 1000 )
+  print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+  return( list( y_hat = sygnalwprzod$y_hat, W1 = W1, W2 = W2, W3 = W3 ) )
+}
+
+predNN <- function( xnew, nn ){
+  xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
+  h1 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( xnew %*% nn$W1 )  )
+  h2 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( h1 %*% nn$W2 )  )
+  y_hat <- sigmoid( h2 %*% nn$W3 )
+  return( y_hat )
+}
+
+library( ggplot2 )
+
+X <- iris[ iris$Species != "setosa",]
+y_tar <- matrix( ifelse( X$Species == "versicolor", 0, 1 ) )
+X <- X[,-c(1:2,5)]  
+
+MinMax <- function( x ){
+  return( ( x - min(x) ) / ( max(x) - min(x) ) )
+}  
+MinMaxOdwrot <- function( x, y_min, y_max ){
+  return(  x * (y_max - y_min) + y_min )
+}  
+
+X <- sapply( X, MinMax )
+summary(X) 
+
+siec <- trainNN( X, y_tar, h = c(5,5), lr = 0.01, iter = 50000, seed = 123 )
+siec
+
+table( y_tar, ifelse( siec$y_hat < 0.5, 0, 1 ) )
+table( y_tar, ifelse( predNN( X, siec ) < 0.5, 0, 1 ) )
+
+X <- as.matrix( iris[,-5] )
+y_tar <- model.matrix( ~ Species - 1, iris )
+
+siec3 <- trainNN( X, y_tar, h = c(5,5), lr = 0.01, iter = 50000, seed = 123 )
+siec3
+
+etykiety <- levels( iris[,5] )
+head(siec3$y_hat)
+pred_iris <- as.factor( etykiety[apply( siec3$y_hat, 1,  which.max )] )
+table( iris[,5], pred_iris )
+
+rowSums(siec3$y_hat)
+
+X <- sapply( iris[,-c(4,5)], MinMax )
+summary(X) 
+
+y_tar <- sapply( iris[ , 4, drop = F ], MinMax )
+y_min <- min( iris[, 4] )
+y_max <- max( iris[, 4] )
+
+siecReg <- trainNN( X, y_tar, h = c(5,5), lr = 0.01, iter = 50000, seed = 123 )
+siecReg
+
+lossSS( y_tar, siecReg$y_hat )
+lossSS( MinMaxOdwrot( y_tar, y_min, y_max ), MinMaxOdwrot( siecReg$y_hat, y_min, y_max ) )
+
+
+iris[, 4] - MinMaxOdwrot( y_tar, y_min, y_max )

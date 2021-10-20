@@ -1,0 +1,91 @@
+set.seed( 666 )
+zbiorD <- data.frame( y = factor( c( rep(1,5), rep(2,5) ) ), x1 = rnorm(10) )
+zbiorD$x2 <- ifelse( zbiorD$y == 1, zbiorD$x1 + 1, zbiorD$x1 + 10 )
+zbiorD$x2[c(3,8)] <- c(14,2)
+zbiorD
+
+library( rpart )
+rpart( formula = y~x2, data = zbiorD, minsplit = 1, maxdepth = 3 )
+
+Entropy <- function( prob ){
+  
+  res <- prob * log2( prob )
+  res[ prob == 0 ] <- 0
+  res <- -sum( res )
+  return( res )
+  
+}
+Entropy( c(0,1) )
+Entropy( c(0.5,0.5) )
+Entropy( c(0.7,0.3) )
+
+Prob <- function( y ){
+  
+  res <- unname( table( y ) )
+  res <- res / sum( res )
+  
+  return( res )
+  
+}
+Prob( zbiorD$y )
+Prob( zbiorD$y[1:6] )
+Prob( zbiorD$y[1:5] )
+
+library( data.tree )
+Tree <- function( Y, X, data, depth, minobs, splitP ){
+  
+  # Tworzenie korzenia
+  tree <- Node$new( "Root" )
+  tree$Depth <- 0
+  tree$Count <- nrow( data )
+
+  # Funkcja budująca drzewo
+  BuildTree( tree, Y, X, data, depth, minobs, splitP )
+ 
+  return( tree )
+  
+}
+# Tree( "y", "x2", zbiorD, 3, 1, 10 )
+
+BuildTree <- function( node, Y, X, data, depth, minobs, splitP ){
+  
+  node$Count <- nrow( data )
+  node$Prob <- Prob( data[,Y] )
+  
+  # splitP <- BestSplit()
+  tab <- table( data[,X] <= splitP )
+  ifStop <- dim( tab ) == 1 | any( tab < minobs )
+  
+  if( node$Depth == depth | ifStop | all(  node$Prob %in% c(0,1) ) ){
+    
+    node$Leaf <- "*"
+    return( node )
+    
+  }else{
+    
+    split_indx <- data[,X] <= splitP
+    child_frame <- split( data, split_indx )
+    
+    name <- sprintf( "%s <= %s", X, splitP )
+    child_l <- node$AddChild( name )
+    child_l$value <- split_indx
+    child_l$Depth <- node$Depth + 1
+    
+    BuildTree( child_l, Y, X, child_frame[[1]], depth, minobs, splitP - 1 )
+      
+    name <- sprintf( "%s >  %s", X, splitP )
+    child_r <- node$AddChild( name )
+    child_r$value <- split_indx
+    child_r$Depth <- node$Depth + 1
+    
+    BuildTree( child_r, Y, X, child_frame[[2]], depth, minobs, splitP - 1 )
+    
+  }
+  
+}
+Drzewko <- Tree( "y", "x2", zbiorD, 3, 1, 10 )
+Drzewko <- Tree( "y", "x2", zbiorD, 2, 2, 10 )
+
+rpart( formula = y~x2, data = zbiorD, minsplit = 1, maxdepth = 3 )
+
+print( Drzewko, "Count","Prob","Leaf")
