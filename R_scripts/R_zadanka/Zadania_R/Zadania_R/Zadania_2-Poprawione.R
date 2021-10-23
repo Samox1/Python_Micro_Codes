@@ -56,13 +56,15 @@ library(pryr)
 library(data.table)
 library("doParallel")
 library("doSNOW")
+library(stringr)
+
 
 
 
 ### Zad. 0 ###
 
 set.seed = (555)
-macierz <- matrix(nrow = 1000, ncol = 1001)
+macierz <- matrix(0, nrow = 1000, ncol = 1001)
 colnames(macierz) <- c("Y", paste("x_", seq(1:(ncol(macierz)-1)), sep = ""))
 macierz[,'Y'] <- runif(nrow(macierz), min = 1, max = 100)
 
@@ -74,7 +76,6 @@ for (i in 1:nrow(macierz)) {
 }
 rm(i)
 rm(j)
-
 
 
 
@@ -127,19 +128,36 @@ ModelParallel <- function(dane, Ynazwa, XnazwyList, Nrdzeni, metoda) {
 
 ### Zad. 2 ###
 
-# 50 MB RAM-u
-rozmiar <- 50 * 1048576
+
 
 Filtr <- function(dane, filtr) {
-  dane = data.table(dane)
-  if (object_size(dane) > rozmiar) {
+  
+  rozmiar_RAM_MB <- 7                   # 50 MB RAM-u
+  rozmiar_B <- 1048576
+  RAM_B <- rozmiar_RAM_MB * rozmiar_B
+  
+  if (object_size(dane) > RAM_B) 
+  {
+    print("Za duza tablica! Uzycie 'big.matrix'...")
     small <- as.big.matrix(dane)
-    if (object_size(small) > rozmiar) {
-      c("Za duzy rozmiar")
+    
+    fraza_filtru <- filtr
+    kolumny <- str_extract_all(filtr, "[x][_][0-9]+")[[1]]
+    
+    for(i in 1:length(kolumny))
+    {
+      print(kolumny[i])
+      dodatek <- paste0("small[,","\'", kolumny[i], "\'] ")
+      print(dodatek)
+      fraza_filtru <- gsub(kolumny[i], dodatek, fraza_filtru)
     }
+    print(fraza_filtru)
+    return(small[eval(parse(text = fraza_filtru)),])
   }
-  else{
-    macierz[,eval(parse(text = filtr))]
+  else
+  {
+    dane = data.table(dane)
+    return(dane[eval(parse(text = filtr))])
   }
 }
 
@@ -155,19 +173,22 @@ klaster <- makeCluster(nCores)
 registerDoParallel(klaster)
 Xnazwy <- paste("x_", seq(1:(ncol(macierz)-1)), sep = "")
 
-lista_LM <- ModelParallel(macierz, 'Y', list('x_1', c('x_1', 'x_5', 'x_7'), 'x_2', 'x_3'), nCores, 'for')         # 'for' - dziala
-lista_LM <- ModelParallel(macierz, 'Y', Xnazwy, nCores, 'for')
+lista_LM_for_small <- ModelParallel(macierz, 'Y', list('x_1', c('x_1', 'x_5', 'x_7'), 'x_2', 'x_3'), nCores, 'for')         # 'for' - dziala
+lista_LM_for_all <- ModelParallel(macierz, 'Y', Xnazwy, nCores, 'for')
 
-lista_LM <- ModelParallel(macierz, 'Y', list('x_1', c('x_1', 'x_5', 'x_7'), 'x_2', 'x_3'), nCores, 'lapply')      # 'lapply' - jeszcze nie dziala
+lista_LM_lapply_small <- ModelParallel(macierz, 'Y', list('x_1', c('x_1', 'x_5', 'x_7'), 'x_2', 'x_3'), nCores, 'lapply')      # 'lapply' - jeszcze nie dziala
+lista_LM_lapply_all <- ModelParallel(macierz, 'Y', Xnazwy, nCores, 'lapply')
+
 
 
 # Zad. 2) 
 
-filtr_text <- 'x_230 > 50'
-p1 <- eval(parse(text = filtr_text))
-macierz_1[,p1]
+filtrowanie_1 <- Filtr(macierz, 'x_25 > 15.3 | x_2 < 9.2')
+filtrowanie_2 <- Filtr(macierz, 'x_15 < 25 & x_250 < 10')
 
-Filtr(macierz, 'x_230 > 50')
+
+
+
 
 
 

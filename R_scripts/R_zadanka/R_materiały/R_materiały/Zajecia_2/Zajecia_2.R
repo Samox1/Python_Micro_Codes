@@ -113,6 +113,9 @@ str( small_tabela )
 small_tabela
 small_tabela[1:10, 1:10]
 
+Big = big_tabela[ big_tabela[,1] > 0.5, ]
+
+
 microbenchmark( Big = big_tabela[ big_tabela[,1] > 0.5, ],
                 Small = small_tabela[ small_tabela[,1] > 0.5, ] )
 
