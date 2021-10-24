@@ -132,7 +132,7 @@ ModelParallel <- function(dane, Ynazwa, XnazwyList, Nrdzeni, metoda) {
 
 Filtr <- function(dane, filtr) {
   
-  rozmiar_RAM_MB <- 7                   # 50 MB RAM-u
+  rozmiar_RAM_MB <- 50                   # 50 MB RAM-u
   rozmiar_B <- 1048576
   RAM_B <- rozmiar_RAM_MB * rozmiar_B
   
@@ -141,18 +141,26 @@ Filtr <- function(dane, filtr) {
     print("Za duza tablica! Uzycie 'big.matrix'...")
     small <- as.big.matrix(dane)
     
-    fraza_filtru <- filtr
+    
     kolumny <- str_extract_all(filtr, "[x][_][0-9]+")[[1]]
+    fraza_filtru <- str_split(filtr, " ")[[1]]
     
     for(i in 1:length(kolumny))
     {
-      print(kolumny[i])
-      dodatek <- paste0("small[,","\'", kolumny[i], "\'] ")
-      print(dodatek)
-      fraza_filtru <- gsub(kolumny[i], dodatek, fraza_filtru)
+      #print(kolumny[i])
+      dodatek <- paste0("small[,","\'", kolumny[i], "\']")
+      #print(dodatek)
+      fraza_filtru[which(fraza_filtru == kolumny[i])] <- dodatek
+      #print(fraza_filtru)
     }
-    print(fraza_filtru)
-    return(small[eval(parse(text = fraza_filtru)),])
+    #print(paste(fraza_filtru, collapse = " "))
+    nowy_filtr <- paste(fraza_filtru, collapse = " ")
+    #print(nowy_filtr)
+    
+    macierz_wyfiltrowana <- data.table(small[eval(parse(text = nowy_filtr)),])
+    print(paste0("Macierz po filtrze zajmuje = ",object_size(macierz_wyfiltrowana), " B = ", object_size(macierz_wyfiltrowana)/1000, " KB = ", object_size(macierz_wyfiltrowana)/10^6, " MB" ))
+    
+    return(macierz_wyfiltrowana)
   }
   else
   {
@@ -185,12 +193,4 @@ lista_LM_lapply_all <- ModelParallel(macierz, 'Y', Xnazwy, nCores, 'lapply')
 
 filtrowanie_1 <- Filtr(macierz, 'x_25 > 15.3 | x_2 < 9.2')
 filtrowanie_2 <- Filtr(macierz, 'x_15 < 25 & x_250 < 10')
-
-
-
-
-
-
-
-
 
