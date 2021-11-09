@@ -66,9 +66,15 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
   }
   else{
   {
+    
     if(is.matrix(X))
     {
-      X <- data.frame(X)
+      X_norm <- matrix(0,nrow(X),ncol(X))
+    }
+    else if(is.data.frame(X))
+    {
+      X_norm <- matrix(0,nrow(X),ncol(X))
+      X_norm <- as.data.frame(X_norm)
     }
     
     # Sprawdzic KOD z Projekt_R_knn_Tree_SVM -> funkcje.R
@@ -79,33 +85,38 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
     minmaxNew <- c(XminNew, XmaxNew)
     column_names <- colnames(X)
       
-      for (name in column_names) {
-        if (is.numeric(X[name])) {
-          nazwa <- append(nazwa, name)
-          minOrg <- append(minOrg, min(X[name]))
-          maxOrg <- append(maxOrg, max(X[name]))
-          X[name] <- ((X[name] - min(X[name])) / (max(X[name]) - min(X[name]))) * (XmaxNew - XminNew) + XminNew
-        }
-        else if(is.factor(X[name]) & is.ordered(X[name]) | is.factor(X[name])){
-          X_norm[,i] <- X[,i]
-          minOrg[i] <- append(minOrg, NA)
-          maxOrg[i] <- append(maxOrg, NA)
-        }
-        else{
-          message(paste0("Wartosci niepoprawne w X, kolumna: ", name))
-        }
+    for(i in 1:ncol(X)) 
+    {
+      message(typeof(X[,i]))
+      if (is.numeric(X[,i])) 
+      {
+        nazwa <- append(nazwa, name)
+        minOrg <- append(minOrg, min(X[,i]))
+        maxOrg <- append(maxOrg, max(X[,i]))
+        X_norm[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
       }
+      else if(is.factor(X[,i]) & is.ordered(X[,i]) | is.factor(X[,i]))
+      {
+        X_norm[,i] <- X[,i]
+        minOrg <- append(minOrg, NA)
+        maxOrg <- append(maxOrg, NA)
+      }
+      else
+      {
+          message(paste0("Wartosci niepoprawne w X, kolumna: ", name))
+      }
+    }
       
-      names(maxOrg) <- nazwa
-      names(minOrg) <- nazwa
-      attr(X, 'minOrg') <- minOrg
-      attr(X, 'maxOrg') <- maxOrg
-      attr(X, 'minmaxNew') <- minmaxNew
+    names(maxOrg) <- nazwa
+    names(minOrg) <- nazwa
+    attr(X_norm, 'minOrg') <- minOrg
+    attr(X_norm, 'maxOrg') <- maxOrg
+    attr(X_norm, 'minmaxNew') <- minmaxNew
       
-      knn <- list()
-      knn[["X"]] <- X
-      knn[["y"]] <- y_tar
-      knn[["k"]] <- k
+    knn <- list()
+    knn[["X"]] <- X_norm
+    knn[["y"]] <- y_tar
+    knn[["k"]] <- k
       
     }
     return(knn)
@@ -114,10 +125,12 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
 
 
 # - test 1
-fac1 <- sample(1:6, 10, replace = TRUE)
-fac2 <- sample(2:4, 10, replace = TRUE)
-mata <- cbind(fac1,fac2)
-X <- matrix(mata, ncol = ncol(mata), nrow = nrow(mata))
+fac1 <- as.numeric(sample(1:5, 10, replace = TRUE))
+fac2 <- as.factor(sample(2:4, 10, replace = TRUE))
+mata <- cbind(fac1,factor(fac2))
+X <- matrix(0, ncol = ncol(mata), nrow = nrow(mata))
+X[,1] <- fac1
+X[,2] <- fac2
 # X[4,2] <- 'a'
 y_tar <- sample(0:1, 10, replace = TRUE)
 k = 2
