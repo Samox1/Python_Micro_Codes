@@ -48,8 +48,10 @@ library(caret)
 
 ### Zad. 1 ###
 
-KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
-  if (any(is.na(X) == TRUE || is.na(y_tar) == TRUE)) {
+KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) 
+{
+  if (any(is.na(X) == TRUE || is.na(y_tar) == TRUE)) 
+  {
     stop("Niekompletne dane!")
   }
   else if(k <= 0)
@@ -64,20 +66,11 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
   {
     stop("Dane nie sa macierza lub ramka danych!")
   }
-  else{
+  else
   {
-    
-    if(is.matrix(X))
-    {
-      X_norm <- matrix(0,nrow(X),ncol(X))
-    }
-    else if(is.data.frame(X))
-    {
-      X_norm <- matrix(0,nrow(X),ncol(X))
-      X_norm <- as.data.frame(X_norm)
-    }
-    
-    # Sprawdzic KOD z Projekt_R_knn_Tree_SVM -> funkcje.R
+    X <- data.frame(X)
+    X_norm <- data.frame(X)
+    X_norm[,] <- 0
     
     nazwa <- vector()
     minOrg <- vector()
@@ -87,10 +80,12 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
       
     for(i in 1:ncol(X)) 
     {
-      message(typeof(X[,i]))
+      #message(typeof(X[,i]))
+      
+      nazwa <- append(nazwa, i)
+      
       if (is.numeric(X[,i])) 
       {
-        nazwa <- append(nazwa, name)
         minOrg <- append(minOrg, min(X[,i]))
         maxOrg <- append(maxOrg, max(X[,i]))
         X_norm[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
@@ -119,28 +114,33 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) {
     knn[["k"]] <- k
       
     }
-    return(knn)
-  }
+  
+  return(knn)
 }
 
 
-# - test 1
-fac1 <- as.numeric(sample(1:5, 10, replace = TRUE))
-fac2 <- as.factor(sample(2:4, 10, replace = TRUE))
-mata <- cbind(fac1,factor(fac2))
-X <- matrix(0, ncol = ncol(mata), nrow = nrow(mata))
-X[,1] <- fac1
-X[,2] <- fac2
-# X[4,2] <- 'a'
+# --- test 1
+fac1 <- (sample(1:10, 10, replace = TRUE))
+fac2 <- as.factor(sample(1:4, 10, replace = TRUE))
+
+X1 <- cbind(fac1,fac2)
+X1 <- as.matrix(X1)
+
+X2 <- data.frame(fac1, fac2)
+
 y_tar <- sample(0:1, 10, replace = TRUE)
 k = 2
 XminNew <- 0
 XmaxNew <- 1
 
-tabelka <- KNNtrain(X, y_tar, k, XminNew, XmaxNew)
-tabelka
-attributes(tabelka[["X"]])
-# - koniec testu 1
+tabelka1 <- KNNtrain(X1, y_tar, k, XminNew, XmaxNew)
+tabelka2 <- KNNtrain(X2, y_tar, k, XminNew, XmaxNew)
+tabelka1
+tabelka2
+attributes(tabelka1$X)
+attributes(tabelka2$X)
+# --- koniec testu 1
+
 
 
 
@@ -175,7 +175,7 @@ d_gower <- function(x_i, x_n, p, skala) {
     }
     return(suma_G / p)
   }
-  else if (skala == 'porz?dkowa') {
+  else if (skala == 'porzadkowa') {
     z <- 0
     for (j in 1:p) {
       z[j] <- (x_i[j] - 1) / (max(x_i - 1))
@@ -271,73 +271,82 @@ KNNpred <- function(KNNmodel, X) {
 #### --------------- ####
 
 
-KNNpred <- function(KNNmodel, X) {
+KNNpred <- function(KNNmodel, X) 
+{
   if (is.na(KNNmodel) == TRUE || is.na(X) == TRUE) 
   {
     stop("Niekompletne dane!")
   }
-  else if((nrow(KNNmodel$X) != nrow(X)) || ncol(KNNmodel&X) != ncol(X)) 
+  else if((nrow(KNNmodel$X) != nrow(X)) || ncol(KNNmodel$X) != ncol(X)) 
   {
     stop("Dane z modelu nie zgadzaja sie z danymi wejsciowymi!")
   }
   else
   {
-        
+    # c) Normalizacja "X" przy pomocy atrybutów z "KNNmodel$X"
     
-      #regresja
-      nTrain <- nrow(KNNmodel$X)
-      nPred <- nrow(X)
-      odl_eukl <- matrix(0, nTrain, nPred)
-      odl_hamming <- matrix(0, nTrain, nPred)
-      for (i in 1:nTrain) {
-        for (j in 1:nPred) {
-          odl_eukl[i, j] <- d_euklides(KNNmodel$X[i, ], X[j, ])
-          odl_hamming[i, j] <- d_hamming(KNNmodel$X[i, ], X[j, ])
-          if (ncol(Filter(is.numeric, X)) != 0 &
-              ncol(Filter(is.factor, X)) == 0 & ncol(Filter(is.ordered, X)) == 0) {
-            skala = 'ilorazowa'
-          }
-          else if (ncol(Filter(is.numeric, X)) == 0 &
-                   ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) == 0) {
-            skala = 'nominalna'
-          }
-          else if (ncol(Filter(is.numeric, X)) == 0 &
-                   ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) == 0) {
-            skala = 'porz?dkowa'
-          }
-          odl_gower[i, j] <- d_gower(KNNmodel$X[i, ], X[j, ], skala)
-        }
-      }
-      pred <- double(nPred)
-      for (i in 1:nPred) {
-        kNaj_eukl <- order(odl_eukl[, i])
-        kNaj_hamming <- order(odl_hamming[, i])
-        kNaj_gower <- order(odl_gower[, i])
-        kNaj_eukl <- kNaj_eukl[1:KNNmodel$k]
-        kNaj_hamming <- kNaj_hamming[1:KNNmodel$k]
-        kNaj_gower <- kNaj_gower[1:KNNmodel$k]
-        y_hat_eukl <- mean(KNNmodel$y[kNaj_eukl])
-        y_hat_hamming <- mean(KNNmodel$y[kNaj_hamming])
-        y_hat_gower <- mean(KNNmodel$y[kNaj_gower])
-        pred_eukl[i] <- y_hat_eukl
-        pred_hamming[i] <- y_hat_hamming
-        pred_gower[i] <- y_hat_gower
-      }
-      
-      if (ncol(Filter(is.numeric, X)) != 0 &
-          ncol(Filter(is.factor, X)) == 0 & ncol(Filter(is.ordered, X)) == 0) {
-        return(pred_eukl)
-      }
-      else if (ncol(Filter(is.numeric, X)) == 0 &
-               ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) == 0) {
-        return(pred_hamming)
-      }
-      else if (ncol(Filter(is.numeric, X)) != 0 &
-               ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) != 0) {
-        return(pred_gower)
-      }
+    
+    for(i in 1:ncol(X))
+    {
+      X_norm[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
     }
+    
+    
+      # Regresja
+      #
+      # nTrain <- nrow(KNNmodel$X)
+      # nPred <- nrow(X)
+      # odl_eukl <- matrix(0, nTrain, nPred)
+      # odl_hamming <- matrix(0, nTrain, nPred)
+      # for (i in 1:nTrain) {
+      #   for (j in 1:nPred) {
+      #     odl_eukl[i, j] <- d_euklides(KNNmodel$X[i, ], X[j, ])
+      #     odl_hamming[i, j] <- d_hamming(KNNmodel$X[i, ], X[j, ])
+      #     if (ncol(Filter(is.numeric, X)) != 0 &
+      #         ncol(Filter(is.factor, X)) == 0 & ncol(Filter(is.ordered, X)) == 0) {
+      #       skala = 'ilorazowa'
+      #     }
+      #     else if (ncol(Filter(is.numeric, X)) == 0 &
+      #              ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) == 0) {
+      #       skala = 'nominalna'
+      #     }
+      #     else if (ncol(Filter(is.numeric, X)) == 0 &
+      #              ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) == 0) {
+      #       skala = 'porz?dkowa'
+      #     }
+      #     odl_gower[i, j] <- d_gower(KNNmodel$X[i, ], X[j, ], skala)
+      #   }
+      # }
+      # pred <- double(nPred)
+      # for (i in 1:nPred) {
+      #   kNaj_eukl <- order(odl_eukl[, i])
+      #   kNaj_hamming <- order(odl_hamming[, i])
+      #   kNaj_gower <- order(odl_gower[, i])
+      #   kNaj_eukl <- kNaj_eukl[1:KNNmodel$k]
+      #   kNaj_hamming <- kNaj_hamming[1:KNNmodel$k]
+      #   kNaj_gower <- kNaj_gower[1:KNNmodel$k]
+      #   y_hat_eukl <- mean(KNNmodel$y[kNaj_eukl])
+      #   y_hat_hamming <- mean(KNNmodel$y[kNaj_hamming])
+      #   y_hat_gower <- mean(KNNmodel$y[kNaj_gower])
+      #   pred_eukl[i] <- y_hat_eukl
+      #   pred_hamming[i] <- y_hat_hamming
+      #   pred_gower[i] <- y_hat_gower
+      # }
+      # 
+      # if (ncol(Filter(is.numeric, X)) != 0 & ncol(Filter(is.factor, X)) == 0 & ncol(Filter(is.ordered, X)) == 0) 
+      # {
+      #   return(pred_eukl)
+      # }
+      # else if (ncol(Filter(is.numeric, X)) == 0 & ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) == 0) 
+      # {
+      #   return(pred_hamming)
+      # }
+      # else if (ncol(Filter(is.numeric, X)) != 0 & ncol(Filter(is.factor, X)) != 0 & ncol(Filter(is.ordered, X)) != 0) 
+      # {
+      #   return(pred_gower)
+      # }
   }
 }
+
 
 
