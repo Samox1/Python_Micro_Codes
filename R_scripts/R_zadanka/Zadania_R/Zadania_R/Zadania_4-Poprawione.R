@@ -284,7 +284,9 @@ KNNpred <- function(KNNmodel, X)
   else
   {
     # c) Normalizacja "X" przy pomocy atrybutów z "KNNmodel$X"
-    
+    X <- data.frame(X)
+    X_norm <- data.frame(X)
+    X_norm[,] <- 0
     
     for(i in 1:ncol(X))
     {
