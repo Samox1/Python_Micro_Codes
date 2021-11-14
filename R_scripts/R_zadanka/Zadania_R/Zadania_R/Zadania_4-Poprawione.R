@@ -120,28 +120,18 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew)
 
 
 # --- test 1
-fac1 <- 1:10
-fac2 <- 11:20
-fac3 <- 21:30
+fac1 <- sample(1:10, 10, replace = FALSE)
+fac2 <- fac1 + 10
+fac3 <- sample(1:10, 10, replace = FALSE)
 
-X1 <- cbind(fac1,fac2)
-X1 <- as.matrix(X1)
-
-X2 <- data.frame(as.factor(fac1), as.factor(fac2), as.factor(fac3))
-
-y_tar1 <- 1:10
+X2 <- data.frame(as.factor(fac1), fac2, as.ordered(as.factor(fac3)))
 y_tar2 <- as.factor(c(0,0,0,0,0,1,1,1,1,1))
-y_tar3 <- as.factor(c(0,0,0,1,1,1,2,2,2,2))
 k = 2
 XminNew <- 0
 XmaxNew <- 1
 
-tabelka1 <- KNNtrain(X1, y_tar1, k, XminNew, XmaxNew)
 tabelka2 <- KNNtrain(X2, y_tar2, k, XminNew, XmaxNew)
-tabelka3 <- KNNtrain(X2, y_tar3, k, XminNew, XmaxNew)
-tabelka1
 tabelka2
-attributes(tabelka1$X)
 attributes(tabelka2$X)
 # --- koniec testu 1
 
@@ -150,11 +140,6 @@ attributes(tabelka2$X)
 
 
 ### Zad. 2 ###
-
-
-#### --------------- ####
-#### - NOWA WERSJA - ####
-#### --------------- ####
 
 
 KNNpred <- function(KNNmodel, X) 
@@ -170,7 +155,7 @@ KNNpred <- function(KNNmodel, X)
   }
   else
   {
-    # c) Normalizacja "X" przy pomocy atrybutów z "KNNmodel$X"
+    
     if(!is.data.frame(X))
     {
       X <- data.frame(X)
@@ -229,7 +214,6 @@ KNNpred <- function(KNNmodel, X)
         for(j in 1:n_wierszy_znorm)
         {
           odleglosc[i, j] <- ( (sum(KNNmodel$X[i,] != X_znormalizowane[j,])) / n_kolumn_znorm )
-          # odleglosc[i, j] <- ( (sum(KNNmodel$X[i,] == X_znormalizowane[j,])) / n_kolumn_znorm )
         }
       }
     }
@@ -249,7 +233,36 @@ KNNpred <- function(KNNmodel, X)
     }
     else
     {
-      c("odległość Gowera")
+      for(i in 1:n_wierszy_model)
+      {
+        for(j in 1:n_wierszy_znorm)
+        {
+          pomoc <- 0
+          
+          for(k in 1:n_kolumn_znorm)
+          {
+            if(is.numeric(X_znormalizowane[,k]))
+            {
+              pomoc <- pomoc + (abs(KNNmodel$X[i,k] - X_znormalizowane[j,k]) / (as.numeric(attributes(KNNmodel$X)$maxOrg[k]) - as.numeric(attributes(KNNmodel$X)$minOrg[k]) )) 
+            }
+            else if(is.factor(X_znormalizowane[,k]))
+            {
+              if(KNNmodel$X[i,k] != X_znormalizowane[j,k])
+              {
+                pomoc <- pomoc + 1
+              }
+            }
+            else if(is.factor(X_znormalizowane[,k]) & is.ordered(X_znormalizowane[,k]))
+            {
+              z_i <- (i - 1) / (n_wierszy_model - 1)
+              z_n <- (j - 1) / (n_wierszy_znorm - 1)
+              pomoc <- pomoc + (abs(z_i - z_n) / (n_wierszy_model - 1))
+            }
+          }
+          
+          odleglosc[i, j] <- pomoc / n_kolumn_znorm
+        }
+      }
     }
 
     # return(odleglosc)
@@ -308,23 +321,30 @@ KNNpred <- function(KNNmodel, X)
     {
       stop("Dane y modelu sa niepoprawne!")
     }
+    
   }
 }
 
-f1 <- sample(1:10, 10, replace = FALSE)
-f2 <- f1 + 10
-f3 <- f2 + 10
-X1n <- cbind(f1,f2)
-X1n <- as.matrix(X1n)
-X2n <- data.frame(as.factor(f1), as.factor(f2), as.factor(f3))
 
-KNNpred(tabelka1, X1n)
-KNNpred(tabelka2, X2n)
-KNNpred(tabelka3, X2n)
-tabelka1$X
-tabelka2$X
 
-cbind(fac1, tabelka1$y, f1, KNNpred(tabelka1, X1n))
+# --- test 2
+library(caret)
 
-cbind(f1,KNNpred(tabelka2, X2n)[,3])
+iris_test <- as.data.frame(iris)
+iris_test$Species <- as.factor(iris_test$Species)
+iris_test$Petal.Width <- as.factor(iris_test$Petal.Width)
+wiersze <- sample(nrow(iris_test), 125, replace = FALSE)
+iris_train <- iris_test[wiersze,]
+iris_pred <- iris_test[-wiersze,]
+
+KNN_model_pakiet <- knn3( iris_train[,-5], iris_train[,5], k = 2 )
+kappa <- predict( KNN_model_pakiet, iris_pred[,-5] )
+
+kappa <- cbind(kappa, '|')
+
+KNN_model <- KNNtrain(iris_train[,-5], iris_train[,5], k = 2, 0, 1)
+kappa <- cbind(kappa, KNNpred(KNN_model, iris_pred[,-5]))
+
+kappa
+# --- koniec test 2
 
