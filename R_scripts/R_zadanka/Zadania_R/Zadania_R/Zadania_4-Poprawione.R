@@ -43,14 +43,12 @@
 
 #### OCENA - 38%
 
-library(caret)
-
 
 ### Zad. 1 ###
 
 KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) 
 {
-  if (any(is.na(X) == TRUE || is.na(y_tar) == TRUE)) 
+  if (any(is.na(X) == TRUE) || any(is.na(y_tar) == TRUE)) 
   {
     stop("Niekompletne dane!")
   }
@@ -76,12 +74,9 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew)
     minOrg <- vector()
     maxOrg <- vector()
     minmaxNew <- c(XminNew, XmaxNew)
-    column_names <- colnames(X)
       
     for(i in 1:ncol(X)) 
     {
-      #message(typeof(X[,i]))
-      
       nazwa <- append(nazwa, i)
       
       if (is.numeric(X[,i])) 
@@ -98,7 +93,7 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew)
       }
       else
       {
-          message(paste0("Wartosci niepoprawne w X, kolumna: ", name))
+        message(paste0("Wartosci niepoprawne w X, kolumna: ", name))
       }
     }
       
@@ -113,9 +108,8 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew)
     knn[["y"]] <- y_tar
     knn[["k"]] <- k
       
-    }
-  
-  return(knn)
+    return(knn)
+  }
 }
 
 
@@ -124,13 +118,13 @@ fac1 <- sample(1:10, 10, replace = FALSE)
 fac2 <- fac1 + 10
 fac3 <- sample(1:10, 10, replace = FALSE)
 
-X2 <- data.frame(as.factor(fac1), fac2, as.ordered(as.factor(fac3)))
-y_tar2 <- as.factor(c(0,0,0,0,0,1,1,1,1,1))
+X <- data.frame(as.factor(fac1), fac2, as.ordered(as.factor(fac3)))
+y_tar <- as.factor(c(0,0,0,0,0,1,1,1,1,1))
 k = 2
 XminNew <- 0
 XmaxNew <- 1
 
-tabelka2 <- KNNtrain(X2, y_tar2, k, XminNew, XmaxNew)
+tabelka2 <- KNNtrain(X, y_tar, k, XminNew, XmaxNew)
 tabelka2
 attributes(tabelka2$X)
 # --- koniec testu 1
@@ -145,7 +139,7 @@ attributes(tabelka2$X)
 KNNpred <- function(KNNmodel, X) 
 {
   
-  if (is.na(KNNmodel) == TRUE || is.na(X) == TRUE) 
+  if (any(is.na(KNNmodel) == TRUE) || any(is.na(X) == TRUE)) 
   {
     stop("Niekompletne dane!")
   }
@@ -226,7 +220,7 @@ KNNpred <- function(KNNmodel, X)
           for(k in 1:n_kolumn_znorm)
           {
             unikalne <- length(unique(X_znormalizowane[,k]))
-            odleglosc[i, j] <- (sum( abs(as.numeric(KNNmodel$X[i,]) - as.numeric(X_znormalizowane[i,]))  / (unikalne - 1)) )
+            odleglosc[i, j] <- (sum( abs(as.numeric(KNNmodel$X[i,]) - as.numeric(X_znormalizowane[j,]))  / (unikalne - 1)) )
           }
         }
       }
@@ -332,19 +326,43 @@ library(caret)
 
 iris_test <- as.data.frame(iris)
 iris_test$Species <- as.factor(iris_test$Species)
-iris_test$Petal.Width <- as.factor(iris_test$Petal.Width)
 wiersze <- sample(nrow(iris_test), 125, replace = FALSE)
 iris_train <- iris_test[wiersze,]
 iris_pred <- iris_test[-wiersze,]
 
 KNN_model_pakiet <- knn3( iris_train[,-5], iris_train[,5], k = 2 )
-kappa <- predict( KNN_model_pakiet, iris_pred[,-5] )
-
-kappa <- cbind(kappa, '|')
+test_1 <- predict( KNN_model_pakiet, iris_pred[,-5] )
+test_1 <- cbind(test_1, '|')
 
 KNN_model <- KNNtrain(iris_train[,-5], iris_train[,5], k = 2, 0, 1)
-kappa <- cbind(kappa, KNNpred(KNN_model, iris_pred[,-5]))
-
-kappa
+test_1 <- cbind(test_1, KNNpred(KNN_model, iris_pred[,-5]))
+test_1 <- cbind(test_1, TRUE_Y = iris_pred[,5])
+test_1
 # --- koniec test 2
+
+
+
+# --- test 3
+#install.packages("mlbench")
+library(mlbench)
+
+data("BostonHousing")
+head(BostonHousing)
+ncol_BH <- ncol(BostonHousing)    # 14
+nrow_BH <- nrow(BostonHousing)    # 506
+
+wiersze_train <- sample(nrow(BostonHousing), 480, replace = FALSE)
+BH_train <- BostonHousing[wiersze_train,]
+BH_pred <- BostonHousing[-wiersze_train,]
+
+KNN_model_pakiet <- knnreg(BH_train[,-ncol_BH], BH_train[,ncol_BH], k = 2)
+test_2 <- predict(KNN_model_pakiet, BH_pred[,-ncol_BH] )
+test_2 <- cbind(KNN_PAKIET = test_2)
+
+KNN_model <- KNNtrain(BH_train[,-ncol_BH], BH_train[,ncol_BH], k = 2, 0, 1)
+test_2 <- cbind(test_2, KNN_WLASNE = KNNpred(KNN_model, BH_pred[,-ncol_BH]))
+test_2 <- cbind(test_2, TRUE_Y = BH_pred[,ncol_BH])
+test_2
+# --- koniec test 3
+
 
