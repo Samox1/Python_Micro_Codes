@@ -44,14 +44,20 @@
 
 # Zadanie 1 #
 
+MinMax <- function( x, new_min = 0, new_max = 1 ){
+  return( ( ( x - min(x) ) / ( max(x) - min(x) ) ) * ( new_max - new_min ) + new_min )
+}
+
+
 KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) 
 {
-  if (any(is.na(X) == TRUE) || any(is.na(y_tar) == TRUE) || k <= 0 || is.data.frame(X)== "data.frame" || is.matrix(X)=="matrix" ){
+  if (any(is.na(X) == TRUE) || any(is.na(y_tar) == TRUE) || k <= 0 || (is.data.frame(X) == FALSE & is.matrix(X) == FALSE) ){
     stop("Bledne dane")
   }
   else{
     X <- data.frame(X)
     X_new <- data.frame(matrix(0,ncol = ncol(X), nrow = nrow(X)))
+    colnames(X_new) <- colnames(X)
     
     kolumny <- vector()
     minOrg <- vector()
@@ -63,11 +69,12 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew)
       kolumny <- append(kolumny, i)
       
       if (is.numeric(X[,i])) {
-        X_new[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
+        X_new[,i] <- MinMax(X[,i], new_min = XminNew, new_max = XmaxNew)
+        #X_new[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
         minOrg <- append(minOrg, min(X[,i]))
         maxOrg <- append(maxOrg, max(X[,i]))
       }
-      else if(is.factor(X[,i]) & is.ordered(X[,i]) | is.factor(X[,i])){
+      else if(is.factor(X[,i]) & is.ordered(X[,i]) || is.factor(X[,i])){
         X_new[,i] <- X[,i]
         minOrg <- append(minOrg, NA)
         maxOrg <- append(maxOrg, NA)
@@ -117,7 +124,7 @@ attributes(KNN_model$X)
 
 KNNpred <- function(KNNmodel, X) 
 {
-  if (is.na(KNNmodel) == TRUE || is.na(X) == TRUE || ncol(KNNmodel$X) != ncol(X)){
+  if (is.na(KNNmodel) == TRUE || is.na(X) == TRUE || ncol(KNNmodel$X) != ncol(X) || colnames(KNNmodel$X) != colnames(X)){
     stop("Niekompletne dane!")
   }
   else{
@@ -211,13 +218,13 @@ KNNpred <- function(KNNmodel, X)
       return(prognoza)
     }
     else if(is.factor(KNNmodel$y)){
-      prognoza <- as.data.frame(matrix(nrow = n_row_Xnew, ncol = length(unique(KNNmodel$y))+1))
+      prognoza <- as.data.frame(matrix(nrow = n_row_Xnew, ncol = nlevels(KNNmodel$y)+1))
       
       for(i in 1:n_row_Xnew){
         knn_best <- order(distance[,i])
         knn_best <- knn_best[1:KNNmodel$k]
         
-        if(length(unique(KNNmodel$y)) == 2){
+        if(nlevels(KNNmodel$y) == 2){
           names(prognoza) <- c('P', 'N', 'Klasa')
           
           positive <- sum(KNNmodel$y[knn_best] == 1) / KNNmodel$k
@@ -228,18 +235,18 @@ KNNpred <- function(KNNmodel, X)
           prognoza[i,2] <- negative
           prognoza[i,3] <- class_predict
         }
-        else if(length(unique(KNNmodel$y)) > 2){
+        else if(nlevels(KNNmodel$y) > 2){
           unikalne_klasy <- sort(unique(KNNmodel$y))
           
           names(prognoza) <- unikalne_klasy
-          names(prognoza)[length(unique(KNNmodel$y))+1] <- 'Klasa'
+          names(prognoza)[nlevels(KNNmodel$y)+1] <- 'Klasa'
           
           for(j in 1:length(unikalne_klasy)){
             positive <- sum(KNNmodel$y[knn_best] == as.character(unikalne_klasy[j])) / KNNmodel$k
             prognoza[i,j] <- positive
           }
           class_predict <- unikalne_klasy[which.max(prognoza[i,])]
-          prognoza[i,'Klasa'] <- as.character(class_predict)
+          prognoza[i,'Klasa'] <- as.factor(class_predict)
         }
       }
       return(prognoza)
