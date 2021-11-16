@@ -46,6 +46,11 @@
 
 ### Zad. 1 ###
 
+MinMax <- function( x, new_min = 0, new_max = 1 ){
+  return( ( ( x - min(x) ) / ( max(x) - min(x) ) ) * ( new_max - new_min ) + new_min )
+}
+
+
 KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) 
 {
   if (any(is.na(X) == TRUE) || any(is.na(y_tar) == TRUE)) 
@@ -83,12 +88,14 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew)
       {
         minOrg <- append(minOrg, min(X[,i]))
         maxOrg <- append(maxOrg, max(X[,i]))
-        X_norm[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
+        
+        X_norm[,i] <- MinMax(X[,i], XminNew, XmaxNew)
       }
       else if(is.factor(X[,i]) & is.ordered(X[,i]) | is.factor(X[,i]))
       {
         minOrg <- append(minOrg, NA)
         maxOrg <- append(maxOrg, NA)
+        
         X_norm[,i] <- X[,i]
       }
       else
@@ -188,7 +195,12 @@ KNNpred <- function(KNNmodel, X)
     {
       if(is.numeric(X[,i]))
       {
-        X_znormalizowane[,i] <- ((X[,i] - as.numeric(attributes(KNNmodel$X)$minOrg[i])) / (as.numeric(attributes(KNNmodel$X)$maxOrg[i]) - as.numeric(attributes(KNNmodel$X)$minOrg[i]))) * (as.numeric(attributes(KNNmodel$X)$minmaxNew[2]) - as.numeric(attributes(KNNmodel$X)$minmaxNew[1])) + as.numeric(attributes(KNNmodel$X)$minmaxNew[1])
+        min_k <- as.numeric(attributes(KNNmodel$X)$minOrg[i])
+        max_k <- as.numeric(attributes(KNNmodel$X)$maxOrg[i])
+        newmin_k <- as.numeric(attributes(KNNmodel$X)$minmaxNew[1])
+        newmax_k <- as.numeric(attributes(KNNmodel$X)$minmaxNew[2])
+        
+        X_znormalizowane[,i] <- ((X[,i] - min_k) / (max_k - min_k)) * (newmax_k - newmin_k) + newmin_k
         kolumny_numeryczne <- kolumny_numeryczne + 1
       }
       else if(is.factor(X[,i]))
@@ -254,6 +266,7 @@ KNNpred <- function(KNNmodel, X)
             {
               max_k <- as.numeric(attributes(KNNmodel$X)$maxOrg[k])
               min_k <- as.numeric(attributes(KNNmodel$X)$minOrg[k])
+              
               temp <- temp + (abs(KNNmodel$X[i,k] - X_znormalizowane[j,k]) / (max_k -  min_k)) 
             }
             else if(is.factor(X_znormalizowane[,k]))
