@@ -106,7 +106,7 @@ Jakosc <- function(Mat){
 }
 
 
-ModelOcena <- function(y_tar, y_hat){
+ModelOcena1 <- function(y_tar, y_hat){
   if(is.numeric(y_tar)){
     regresja <- c("MAE" = MAE(y_tar, y_hat), "MSE" = MSE(y_tar, y_hat), "MAPE" = MAPE(y_tar, y_hat))
     return(regresja)
@@ -129,14 +129,13 @@ ModelOcena <- function(y_tar, y_hat){
 set.seed(123)
 y_tar_reg <- rnorm(20)
 y_hat_reg <- y_tar_reg + 0.3
-ocena_regresja <- ModelOcena(y_tar_reg,y_hat_reg)
+ocena_regresja <- ModelOcena1(y_tar_reg,y_hat_reg)
 print(ocena_regresja)
 
 #Klasyfikacja
-y_tar_klas <- c(0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0)
+y_tar_klas <- as.factor(c(0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0))
 y_hat_klas <- (length(y_tar_klas):1) / length(y_tar_klas)
-y_tar_klas <- as.factor(c(y_tar_klas))
-ocena_klasyfikacja <- ModelOcena(y_tar_klas,y_hat_klas)
+ocena_klasyfikacja <- ModelOcena1(y_tar_klas,y_hat_klas)
 print(ocena_klasyfikacja)
 
 

@@ -95,7 +95,7 @@ auc( roc( y_tar, y_hat ) )
 auc_Umww( y_tar, y_hat )
 
 # Kross-walidacja
-kFold <- 4
+kFold <- 3
 
 set.seed(123)
 (1-1/4);(1/4)
