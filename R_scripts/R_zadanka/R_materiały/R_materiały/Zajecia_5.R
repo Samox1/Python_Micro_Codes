@@ -20,12 +20,9 @@ Entropy( c(0.5,0.5) )
 Entropy( c(0.7,0.3) )
 
 Prob <- function( y ){
-  
   res <- unname( table( y ) )
   res <- res / sum( res )
-  
   return( res )
-  
 }
 Prob( zbiorD$y )
 Prob( zbiorD$y[1:6] )

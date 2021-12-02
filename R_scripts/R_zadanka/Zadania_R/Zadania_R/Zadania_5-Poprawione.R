@@ -42,31 +42,7 @@
 
 
 
-Entropy <- function( prob ){
-  
-  res <- prob * log2( prob )
-  res[ prob == 0 ] <- 0
-  res <- -sum( res )
-  return( res )
-  
-}
-
-SS <- function( n, Y ){
-  
-  res <- ( Y - ( 1 / n ) * sum ( Y ) ) ^ 2
-  res <- sum ( res )
-  return( res )
-  
-}
-
-Gini <- function( prob ){
-  
-  res <- prob^2
-  res <- sum( res )
-  return ( res )
-  
-}
-
+### Zad. 1 ###
 
 StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf ){
   
@@ -105,9 +81,9 @@ StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf ){
     message( "Zmienna 'cf' nie zawiera sie w przedziale 0.0 - 0.5")
     return ( FALSE )
   }
-  else if( type == "SS" && is.factor(Y) )
+  else if( (type == "SS" && is.factor(data[,Y])) || (type == "Gini" && !is.factor(data[,Y])) || (type == "Entropy" && !is.factor(data[,Y])))
   {
-    message( "Inny warunek nie zostal spelniony" )
+    message( "Kombinacja danych i 'type' jest nieprawidlowa" )
     return ( FALSE )
   }
   else 
@@ -116,31 +92,77 @@ StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf ){
   }
 }
 
-dane <- data.frame(Y=c(1:10), X1=c(3:12), X2=c(5:14))
+dane <- data.frame(Y=as.factor(c(1:10)), X1=c(3:12), X2=c(5:14))
 StopIfNot("Y", c("X1","X2"), dane, "Gini", 2, 5, "prune", 0.25)
+StopIfNot("Y", c("X1","X2"), dane, "Entropy", 2, 5, "prune", 0.25)
+StopIfNot("Y", c("X1","X2"), dane, "SS", 2, 5, "prune", 0.25)
 
 
+### Zad. 2 ###
 
+# Zadanie 2:
+# a) Stwórz funkcję "AssignInitialMeasures" przyjmującą nastęujące parametry: "tree", "Y", "data", "type", "depth".
+# b) Funkcja powinna na podstawie parametrów wejściowych przypisywać do obiektu "tree" (czyli korzenia) wartości początkowe:
+#    - "depth" = 0.
+#    - w zależności od "type" wartość miary Gini, Entropy, SS dla calej populacji (bo to korzeń).
 
-library( data.tree )
+Prob <- function( y ){
+  res <- unname( table( y ) )
+  res <- res / sum( res )
+  return( res )
+}
+
+Entropy <- function( prob ){
+  res <- prob * log2( prob )
+  res[ prob == 0 ] <- 0
+  res <- -sum( res )
+  return( res )
+}
+
+SS <- function( n, Y ){
+  res <- ( Y - (( 1 / n ) * sum ( Y )) ) ^ 2
+  res <- sum ( res )
+  return( res )
+}
+
+Gini <- function( prob ){
+  res <- prob^2
+  res <- sum( res )
+  return ( res )
+}
+
 
 AssignInitialMeasures <- function( tree, Y, data, type, depth ){
   
-  wynik = 0
   depth <- 0
   tree$Depth <- depth
+  
   if ( type == "Gini" ){
-    wynik = Gini( data$X )
+    probability <- Prob(data[,Y])
+    wynik <- Gini( probability )
+    tree$Gini <- wynik
   }
   else if ( type == 'Entropy' ){
-    wynik = Entropy( data$X )
+    probability <- Prob(data[,Y])
+    wynik <- Entropy( probability )
+    tree$Entropy <- wynik
   }
   else if ( type == 'SS' ){
-    wynik = SS( nrow( data$X ), data$X )
+    wynik <- SS( nrow( data[,Y] ), data[,Y] )
+    tree$SS <- wynik
   }
   
   return ( wynik )
 }
+
+
+
+### Zad. 3 ###
+
+# Zadanie 3:
+# a) Stwórz funkcję "AssignInfo" przyjmującą nastęujące parametry: "tree", "Y", "X", "data", "type", "depth", "minobs", "overfit", "cf".
+# b) Funkcja powinna na podstawie parametrów wejściowych przypisywać do obiektu "tree" (jako attrybuty obiektu) wartości owych parametrów.
+
 
 AssignInfo <- function( tree, Y, X, data, type, depth, minobs, overfit, cf){
   
@@ -152,7 +174,31 @@ AssignInfo <- function( tree, Y, X, data, type, depth, minobs, overfit, cf){
   attr(tree, 'overfit') <- overfit
   attr(tree, 'cf') <- cf
   
+  return(tree)
 }
+
+
+
+
+### Zad. 4 ###
+
+# Zadanie 4:
+# a) Stwórz funkcję "Tree" przyjmującą nastęujące parametry: "Y", "X", "data", "type", "depth", "minobs", "overfit", "cf".
+# b) Jest to rozwinięcie funkcji ze slajdu nr 19. Funckja powinna po kolei wywoływać pozostałe funkcje:
+#    - "StopIfNot", jeżeli zwracana wartość to "FALSE" to kończymy działanie całej funkcji (zwracamy obiekt niewidzialny),
+#    - tworzenie obiektu "tree",
+#    - "AssignInitialMeasures",
+#    - "BuildTree", na tę chwilę ta funkcja jest pusta BuildTree<-function(){},
+#    - "PruneTree", na tę chwilę ta funkcja jest pusta PruneTree<-function(){},
+#    - "AssignInfo".
+# c) Funkcja powwina zwracać obiekt "tree".
+
+
+
+### -------------------- TUTAJ ---------------------- ###
+
+
+library( data.tree )
 
 Tree <- function( Y, X, data, type, depth, minobs, overfit, cf ){
   
