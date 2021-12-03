@@ -85,4 +85,4 @@ Drzewko <- Tree( "y", "x2", zbiorD, 2, 2, 10 )
 
 rpart( formula = y~x2, data = zbiorD, minsplit = 1, maxdepth = 3 )
 
-print( Drzewko, "Count","Prob","Leaf")
+print( Drzewko, "Count","Prob","Leaf", "Depth")

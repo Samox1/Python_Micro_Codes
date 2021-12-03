@@ -1,5 +1,9 @@
 # Plik proszę nazwać numerem swojego indeksu.
-# 
+
+
+
+### Zad. 1 ###
+
 # Zadanie 1:
 # a) Stwórz funkcję "StopIfNot" przyjmującą nastęujące parametry: "Y", "X", "data", "type", "depth", "minobs", "overfit", "cf".
 # b) Funkcja powinna sprawdzać czy nauka modelu jest możliwa do wykonania, tj:
@@ -13,36 +17,7 @@
 #    - czy możliwe kombinacje parametrów mają sens, np. "type = SS" kiedy "Y" jest faktorem.
 # c) W przypadku niespełniania któregoś z warunków, funkcja powinna wyświetlić w konsoli, czego dotyczy problem.
 # d) Funkcja zwraca "TRUE", jeżeli nauka jest możliwa, w przeciwnym wypadku "FALSE". 
-# 
-# Zadanie 2:
-# a) Stwórz funkcję "AssignInitialMeasures" przyjmującą nastęujące parametry: "tree", "Y", "data", "type", "depth".
-# b) Funkcja powinna na podstawie parametrów wejściowych przypisywać do obiektu "tree" (czyli korzenia) wartości początkowe:
-#    - "depth" = 0.
-#    - w zależności od "type" wartość miary Gini, Entropy, SS dla calej populacji (bo to korzeń).
-#   
-# Zadanie 3:
-# a) Stwórz funkcję "AssignInfo" przyjmującą nastęujące parametry: "tree", "Y", "X", "data", "type", "depth", "minobs", "overfit", "cf".
-# b) Funkcja powinna na podstawie parametrów wejściowych przypisywać do obiektu "tree" (jako attrybuty obiektu) wartości owych parametrów.
-#   
-# Zadanie 4:
-# a) Stwórz funkcję "Tree" przyjmującą nastęujące parametry: "Y", "X", "data", "type", "depth", "minobs", "overfit", "cf".
-# b) Jest to rozwinięcie funkcji ze slajdu nr 19. Funckja powinna po kolei wywoływać pozostałe funkcje:
-#    - "StopIfNot", jeżeli zwracana wartość to "FALSE" to kończymy działanie całej funkcji (zwracamy obiekt niewidzialny),
-#    - tworzenie obiektu "tree",
-#    - "AssignInitialMeasures",
-#    - "BuildTree", na tę chwilę ta funkcja jest pusta BuildTree<-function(){},
-#    - "PruneTree", na tę chwilę ta funkcja jest pusta PruneTree<-function(){},
-#    - "AssignInfo".
-# c) Funkcja powwina zwracać obiekt "tree".
 
-
-
-
-### OCENA - 50%
-
-
-
-### Zad. 1 ###
 
 StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf ){
   
@@ -92,10 +67,13 @@ StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf ){
   }
 }
 
+# test 
 dane <- data.frame(Y=as.factor(c(1:10)), X1=c(3:12), X2=c(5:14))
 StopIfNot("Y", c("X1","X2"), dane, "Gini", 2, 5, "prune", 0.25)
 StopIfNot("Y", c("X1","X2"), dane, "Entropy", 2, 5, "prune", 0.25)
 StopIfNot("Y", c("X1","X2"), dane, "SS", 2, 5, "prune", 0.25)
+# test
+
 
 
 ### Zad. 2 ###
@@ -140,20 +118,27 @@ AssignInitialMeasures <- function( tree, Y, data, type, depth ){
   if ( type == "Gini" ){
     probability <- Prob(data[,Y])
     wynik <- Gini( probability )
-    tree$Gini <- wynik
+    tree$inf <- wynik
   }
   else if ( type == 'Entropy' ){
     probability <- Prob(data[,Y])
     wynik <- Entropy( probability )
-    tree$Entropy <- wynik
+    tree$inf <- wynik
   }
   else if ( type == 'SS' ){
     wynik <- SS( nrow( data[,Y] ), data[,Y] )
-    tree$SS <- wynik
+    tree$inf <- wynik
   }
   
-  return ( wynik )
+  return (tree)
 }
+
+# test
+tree_test <- Node$new("Root")                                # Struktura testowa
+tree_test <- AssignInitialMeasures(tree_test, "Y", dane, "Gini", 3)
+print(tree_test$Depth)
+print(tree_test$inf)
+# test
 
 
 
@@ -163,7 +148,6 @@ AssignInitialMeasures <- function( tree, Y, data, type, depth ){
 # a) Stwórz funkcję "AssignInfo" przyjmującą nastęujące parametry: "tree", "Y", "X", "data", "type", "depth", "minobs", "overfit", "cf".
 # b) Funkcja powinna na podstawie parametrów wejściowych przypisywać do obiektu "tree" (jako attrybuty obiektu) wartości owych parametrów.
 
-
 AssignInfo <- function( tree, Y, X, data, type, depth, minobs, overfit, cf){
   
   attr(tree, 'Y') <- Y
@@ -171,12 +155,17 @@ AssignInfo <- function( tree, Y, X, data, type, depth, minobs, overfit, cf){
   attr(tree, 'data') <- data
   attr(tree, 'type') <- type
   attr(tree, 'depth') <- depth
+  attr(tree, 'minobs') <- minobs
   attr(tree, 'overfit') <- overfit
   attr(tree, 'cf') <- cf
   
   return(tree)
 }
 
+# test
+tree_test <- AssignInfo(tree_test, "Y", c("X1","X2"), dane, "Gini", 2, 5, "prune", 0.25)
+print(attributes(tree_test))
+# test
 
 
 
@@ -194,30 +183,87 @@ AssignInfo <- function( tree, Y, X, data, type, depth, minobs, overfit, cf){
 # c) Funkcja powwina zwracać obiekt "tree".
 
 
+library(data.tree)
 
-### -------------------- TUTAJ ---------------------- ###
+
+# Funkcja BuildTree dla testu czy wszystko dziala
+
+# BuildTree <- function( node, Y, X, data, depth, minobs, splitP ){
+# 
+#   node$Count <- nrow( data )
+#   node$Prob <- Prob( data[,Y] )
+# 
+#   # splitP <- BestSplit()
+#   tab <- table( data[,X] <= splitP )
+#   ifStop <- dim( tab ) == 1 | any( tab < minobs )
+# 
+#   if( node$Depth == depth | ifStop | all(  node$Prob %in% c(0,1) ) ){
+# 
+#     node$Leaf <- "*"
+#     return( node )
+# 
+#   }else{
+# 
+#     split_indx <- data[,X] <= splitP
+#     child_frame <- split( data, split_indx )
+# 
+#     name <- sprintf( "%s <= %s", X, splitP )
+#     child_l <- node$AddChild( name )
+#     child_l$value <- split_indx
+#     child_l$Depth <- node$Depth + 1
+# 
+#     BuildTree( child_l, Y, X, child_frame[[1]], depth, minobs, splitP - 1 )
+# 
+#     name <- sprintf( "%s >  %s", X, splitP )
+#     child_r <- node$AddChild( name )
+#     child_r$value <- split_indx
+#     child_r$Depth <- node$Depth + 1
+# 
+#     BuildTree( child_r, Y, X, child_frame[[2]], depth, minobs, splitP - 1 )
+# 
+#   }
+# }
 
 
-library( data.tree )
+BuildTree_pass <- function(tree){return(tree)}
+
+PruneTree_pass <- function(tree){return(tree)}
+
 
 Tree <- function( Y, X, data, type, depth, minobs, overfit, cf ){
   
-  if (StopIfNot( Y, X, data, type, depth, minobs, overfit, cf ) == FALSE) {
+  if(StopIfNot(Y, X, data, type, depth, minobs, overfit, cf))
+  {
+    tree <- Node$new("Root")
     
-    StopIfNot( Y, X, data, type, depth, minobs, overfit, cf )
-    return( 0 )
+    AssignInitialMeasures(tree = tree, Y, data, type, depth)
     
+    BuildTree_pass(tree)
+    # BuildTree(tree, Y, X, data, depth, minobs, 10 )
+    
+    PruneTree_pass(tree)
+    
+    AssignInfo(tree, Y, X, data, type, depth, minobs, overfit, cf)
+    
+    return(tree)
   }
-  
   else{
-    
-    tree <- Node$new( "Root" )
-    AssignInitialMeasures( tree, Y, data, type, depth )
-    BuildTree <- function(){}
-    PruneTree<-function(){}
-    AssignInfo( tree, Y, X, data, type, depth, minobs, overfit, cf )
-    return ( tree )
-    
+    return(invisible(tree))
   }
   
 }
+
+# test
+set.seed(666)
+zbiorD <- data.frame( y = factor( c( rep(1,5), rep(2,5) ) ), x1 = rnorm(10) )
+zbiorD$x2 <- ifelse( zbiorD$y == 1, zbiorD$x1 + 1, zbiorD$x1 + 10 )
+zbiorD$x2[c(3,8)] <- c(14,2)
+zbiorD
+
+Drzewo_testowe <- Tree("y", "x2", zbiorD, "Entropy", 3, 1, "none", 0.25)
+print(Drzewo_testowe,"Count","Prob","Leaf", "Depth")
+print(attributes(Drzewo_testowe))
+# test
+
+
+
