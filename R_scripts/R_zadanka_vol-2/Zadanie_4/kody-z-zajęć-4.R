@@ -68,14 +68,14 @@ SplitVar <- function( Y, x, parentVal, minobs ){
 }
 SplitVar( Y = zbiorD$y , x = zbiorD$x2, parentVal = 1, minobs = 2 )
 
-FindBestSplit <- function( Y, Xnames, data, parentVal, minobs ){
-  res <- sapply( Xnames, function( i ){
-    SplitVar( Y = data[,Y] , x = data[,i], parentVal = parentVal, minobs = minobs )
-  }, simplify = F )
-  res <- do.call( rbind, res )
-  best <- which.max( res$InfGain )
-  res <- res[ best, , drop = F ]
-  return( res )
+FindBestSplit <- function(Y, Xnames, data, parentVal, minobs){
+  res <- sapply(Xnames, function(i){
+    SplitVar(Y = data[,Y] , x = data[,i], parentVal = parentVal, minobs = minobs)
+  }, simplify = F)
+  res <- do.call(rbind, res)
+  best <- which.max(res$InfGain)
+  res <- res[best, , drop = F]
+  return(res)
 }
 FindBestSplit( Y = "y", Xnames = c("x1","x2"), data = zbiorD, parentVal = 1, minobs = 2 )
 

@@ -25,7 +25,7 @@ StopIfNot <- function(Y, X, data, type, depth, minobs, overfit, cf){
   
   if(war2 && war3)
   { 
-    war4 <- !any(is.na(data[,Y])) 
+    war4 <- !any(is.na(data[,Y]))
     war5 <- !any(is.na(data[,X]))
     war11 <- (is.numeric(data[,Y]) && type=="SS") || (is.factor(data[,Y]) && type=="Gini") || (is.factor(data[,Y]) && type == "Entropy")
   }
@@ -82,8 +82,9 @@ StopIfNot <- function(Y, X, data, type, depth, minobs, overfit, cf){
 
 # --- Zadanie 1 - test --- #
 data(mtcars)
+mtcars[c(5,20),c("qsec","hp")] <- NA
 mtcars
-mtcars[5,"qsec"] <- NA
+
 StopIfNot("qsec", c("hp","vs","gear"), data=mtcars, type = "SS", depth = -2, minobs = 1, overfit = "nne", cf = 2)
 # --- Zadanie 1 - test --- #
 
@@ -128,35 +129,37 @@ SS <- function(y){
   return(res)
 }
 
+
 AssignInitialMeasures <- function(tree, Y, data, type, depth){
-  tree$depth <- 0
+  tree$Depth <- 0
   
   if(type == "Gini")
   {
     pr <- Prob(data[,Y])
     value <- Gini(pr)
-    tree$val <- value
+    tree$Val <- value
   }
   else if(type == "SS")
   {  
     value <- SS(data[,Y])
-    tree$val <- value
+    tree$Val <- value
   }
   else if(type == "Entropy")
   {
     pr <- Prob(data[,Y])
     value <-Entropy(pr)
-    tree$val <- value
+    tree$Val <- value
   }
   return(tree)
 }
 
-test1 <- data.frame(Y=as.factor(c(5:11)), X=c(10:16))
-tree_test <- Node$new("Root")                                # Struktura testowa
+# --- Zadanie 2 - test --- #
+test1 <- data.frame(Y=as.factor(c(0,0,0,1,1,1,1)), X=c(10:16))
+tree_test <- Node$new("Root")                                           # Struktura testowa
 tree_test <- AssignInitialMeasures(tree_test, "Y", test1, "Gini", 3)
-print(tree_test$depth)
-print(tree_test$inf)
-
+print(tree_test$Depth)
+print(tree_test$Val)
+# --- Zadanie 2 - test --- #
 
 
 # Zadanie 3:
@@ -166,7 +169,7 @@ print(tree_test$inf)
 
 # Zadanie 3: 
 
-AssignInfo <- function(tree, Y,X, data, type, depth, minobs, overfit, cf){
+AssignInfo <- function(tree, Y, X, data, type, depth, minobs, overfit, cf){
   attr(tree, "X")  <- X
   attr(tree, "Y")  <- Y
   attr(tree, "data")  <- data
@@ -177,6 +180,11 @@ AssignInfo <- function(tree, Y,X, data, type, depth, minobs, overfit, cf){
   attr(tree, "cf")  <- cf
   return(tree)
 }
+
+# --- Zadanie 3 - test --- #
+tree_test <- AssignInfo(tree_test, "Y", "X", test1, "Gini", 3, 3, "none", 0.25)
+print(attributes(tree_test))
+# --- Zadanie 3 - test --- #
 
 
 
@@ -193,55 +201,67 @@ AssignInfo <- function(tree, Y,X, data, type, depth, minobs, overfit, cf){
 
 # Zadanie 4:
 
-FindBestSplit <- function(Y, X, data, parentVal, type, minobs){
-  s <- unique( data$X )
-  if(length(data$X)==1){
-    splits <- s
-  }else{
-    splits <- head(sort(s),-1)
-  }
-  n <- length(data$X)
-  res<- data.frame(matrix(0, length(splits),6))
-  colnames( res ) <- c("InfGain","lVal","rVal","point","Ln","Rn")
-  for( i in 1:length( splits ) ){
-    partition <- data$X <= splits[ i ]
-    ln <- sum( partition )
+SplitNum <- function( Y, X, parentVal, splits, type, minobs ){
+  n <- length(X)
+  res <- data.frame(matrix(0, length(splits), 6))
+  colnames( res ) <- c("InfGain","lVal","rVal","point","ln","rn")
+  for( i in 1:length(splits)){
+    partition <- X <= splits[i]
+    ln <- sum(partition)
     rn <- n - ln
-    if( any( c(ln,rn) < minobs ) ){
+    if(any(c(ln,rn) < minobs)){
       res[i,] <- 0
-    }else {
-      prob1 <- Prob( Y[partition] )
-      prob2 <- Prob( Y[!partition] )
+    }else{
       if(type=="Entropy"){
+        prob1 <- Prob(Y[partition])
+        prob2 <- Prob(Y[!partition])
         lVal <- Entropy(prob1) 
-        rVal <- Entropy( prob2)
+        rVal <- Entropy(prob2)
       }else if(type=="Gini"){
+        prob1 <- Prob(Y[partition])
+        prob2 <- Prob(Y[!partition])
         lVal <- Gini(prob1) 
         rVal <- Gini(prob2)
       }else if(type=="SS"){
-        lVal <- Gini(Y[partition]) 
-        rVal <- Gini(Y[!partition])
+        lVal <- SS(Y[partition])
+        rVal <- SS(Y[!partition])
       }
-      
       InfGain <- parentVal - ( ln/n * lVal + rn/n * rVal )
       res[i,"InfGain"] <- InfGain
       res[i,"lVal"] <- lVal
       res[i,"rVal"] <- rVal
       res[i,"point"] <- splits[ i ]
-      res[i,"Ln"] <- ln
-      res[i,"Rn"] <- rn
+      res[i,"ln"] <- ln
+      res[i,"rn"] <- rn
     }
   }
-  incl <- res$ln >= minobs & res$rn >= minobs & res$InfGain > 0 
-  res <- res[ incl, , drop = F ]
-  best <- which.max( res$InfGain )
-  # ten, ktory  daje zbilansowany podzial
-  res <- res[ best, , drop = F ]
-  
-  return(res)
-  
+  return( res )
 }
 
+SplitVar <- function( Y, X, parentVal, type, minobs ){
+  s <- unique(X)
+  if(length(X) == 1){
+    splits <- s
+  }else{
+    splits <- head(sort(s), -1)
+  }
+  res <- SplitNum(Y, X, parentVal, splits, type, minobs )
+  incl <- res$ln >= minobs & res$rn >= minobs & res$InfGain > 0 
+  res <- res[incl, , drop = F]
+  best <- which.max( res$InfGain )
+  res <- res[best, , drop = F]
+  return( res )
+}
+
+FindBestSplit2 <- function( Y, Xnames, data, parentVal, type, minobs ){
+  res <- sapply( Xnames, function(i){
+    SplitVar(Y = data[,Y] , X = data[,i], parentVal = parentVal, type = type, minobs = minobs)
+  }, simplify = F)
+  res <- do.call(rbind, res)
+  best <- which.max(res$InfGain)
+  res <- res[ best, , drop = F]
+  return(res)
+}
 
 
 # Zadanie 5:
@@ -258,31 +278,35 @@ FindBestSplit <- function(Y, X, data, parentVal, type, minobs){
 
 # Zadanie 5:
 
-#PruneTree<-function(){}
+PruneTree<-function(tree){
+  return(tree)
+}
+
 
 Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
+  
+  # Sprawdzenie czy wszystkie dane i parametry sa OK
   war1 <- StopIfNot(Y, X, data, type, depth, minobs, overfit, cf)
   if(war1==FALSE){
+    warning("STOP = NIE MOZNA UTWORZYC DRZEWA")
     return(NULL)
   }
-  tree <- Node$new( "Root" )
-  tree$Depth <- 0
-  tree$Count <- nrow( data )
-  prob <- Prob(data[,Y]) #opcjonalnie prob <- Prob(data$Y) o ile Y to nazwa kolumny z data
-  if(type == "Entropy"){
-    tree$Val <- Entropy(prob)
-  }else if(type == "Gini"){
-    tree$Val <- Gini(prob)
-  }else if(type =="SS"){
-    tree$Val <- SS(data[,Y])
-  }
   
-  tree<- AssignInitialMeasures(tree, Y, data, type, depth)
-  #buildTree
-  tree <-BuildTree(tree, Y, X, data, type, depth, minobs)
-  #PruneTree<-function(){}
+  # Tworzenie obiektu 'tree'
+  tree <- Node$new("Root")
+  tree$Count <- nrow(data)
   
-  tree <- AssignInfo(tree, Y,X, data, type, depth, minobs, overfit, cf)
+  # Inicjowanie 'depth' i rozkladu w zaleznosci od 'type'
+  AssignInitialMeasures(tree, Y, data, type, depth)
+
+  # Budowanie drzewa - FindBestSplit
+  BuildTree(tree, Y, X, data, type, depth, minobs)
+  
+  # Prune drzewa - pusta funkcja
+  PruneTree(tree)
+  
+  # Dodanie parametrow jako atrybutow drzewa
+  AssignInfo(tree, Y, X, data, type, depth, minobs, overfit, cf)
   
   return(tree)
 }
@@ -292,14 +316,17 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
 # Zadanie 6:
 # a) Dokonaj integracji opracowanej funkcji "FindBestSplit" z funkcjami "Tree" oraz "BuildTree".
 
+library(data.tree)
 
 # Zadanie 6:
 
-BuildTree <- function( node, Y, Xnames, data,type, depth, minobs ){
+BuildTree <- function( node, Y, Xnames, data, type, depth, minobs ){
   node$Count <- nrow( data )
   node$Prob <- Prob( data[,Y] )
   node$Class <- levels( data[,Y] )[ which.max(node$Prob) ]
-  bestSplit <- FindBestSplit( Y, Xnames, data, type,node$Val, minobs )
+  
+  bestSplit <- FindBestSplit2( Y, Xnames, data, node$Val, type, minobs)
+  
   ifStop <- nrow( bestSplit ) == 0 
   if( node$Depth == depth | ifStop | all( node$Prob %in% c(0,1) ) ){
     node$Leaf <- "*"
@@ -307,14 +334,58 @@ BuildTree <- function( node, Y, Xnames, data,type, depth, minobs ){
   }
   splitIndx <- data[, rownames(bestSplit) ] <= bestSplit$point
   childFrame <- split( data, splitIndx )
+  
   namel <- sprintf( "%s <= %s",  rownames(bestSplit), bestSplit$point )
   childL <- node$AddChild( namel )
   childL$Depth <- node$Depth + 1
   childL$Val <- bestSplit$lVal
-  BuildTree( childL, Y, Xnames, childFrame[["TRUE"]], depth, minobs )
-  namer <- sprintf( "%s >  %s",  rownames(bestSplit), bestSplit$point )
+  BuildTree( childL, Y, Xnames, childFrame[["TRUE"]], type, depth, minobs)
+  
+  namer <- sprintf( "%s >  %s",  rownames(bestSplit), bestSplit$point)
   childR <- node$AddChild( namer )
   childR$Depth <- node$Depth + 1
   childR$Val <- bestSplit$rVal
-  BuildTree( childR, Y, Xnames, childFrame[["FALSE"]],type,  depth, minobs )
+  BuildTree( childR, Y, Xnames, childFrame[["FALSE"]], type,  depth, minobs)
 }
+
+
+
+# --- Zadanie 6 - test 1 (calosci) --- #
+test1 <- data.frame(Y=as.factor(c(0,0,0,1,1,1,1)), X=c(10:16))
+
+Drzewko <- Tree( Y = "Y", X = "X", data = test1, type = "Entropy", depth = 3, minobs = 1, overfit = "none", cf = 0.25)
+print( Drzewko, "Count", "Class", "Prob", "Leaf" )
+plot(Drzewko)
+# --- Zadanie 6 - test 1 (calosci) --- #
+
+
+# --- Zadanie 6 - porownanie --- #
+library(rpart)
+library(rpart.plot)
+Drzewko_RPART <- rpart( formula = Y~X, data = test1, minsplit = 1, maxdepth = 3, cp = 0 )
+Drzewko_RPART
+rpart.plot(Drzewko_RPART)
+# --- Zadanie 6 - porownanie --- #
+
+
+
+# --- Zadanie 6 - test 2 (calosci) --- #
+test2 <- data.frame(Y=as.factor(c(rep(1,5),rep(2,5),rep(1,5),rep(2,10))), X1=c(1:25), X2=rnorm(25))
+
+Drzewko <- Tree( Y = "Y", X = c("X1"), data = test2, type = "Gini", depth = 5, minobs = 1, overfit = "none", cf = 0.25)
+print( Drzewko, "Count", "Class", "Prob", "Leaf" )
+plot(Drzewko)
+
+Drzewko <- Tree( Y = "Y", X = c("X1","X2"), data = test2, type = "Gini", depth = 5, minobs = 1, overfit = "none", cf = 0.25)
+print( Drzewko, "Count", "Class", "Prob", "Leaf" )
+plot(Drzewko)
+# --- Zadanie 6 - test 2 (calosci) --- #
+
+
+# --- Zadanie 6 - porownanie 2 --- #
+Drzewko_RPART <- rpart( formula = Y~X1+X2, data = test2, minsplit = 1, maxdepth = 5, cp = 0 )
+Drzewko_RPART
+rpart.plot(Drzewko_RPART)
+# --- Zadanie 6 - porownanie 2 --- #
+
+
