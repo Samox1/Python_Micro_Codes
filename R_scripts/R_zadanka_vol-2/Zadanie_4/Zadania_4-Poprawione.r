@@ -156,7 +156,7 @@ AssignInitialMeasures <- function(tree, Y, data, type, depth){
 # --- Zadanie 2 - test --- #
 test1 <- data.frame(Y=as.factor(c(0,0,0,1,1,1,1)), X=c(10:16))
 tree_test <- Node$new("Root")                                           # Struktura testowa
-tree_test <- AssignInitialMeasures(tree_test, "Y", test1, "Gini", 3)
+AssignInitialMeasures(tree_test, "Y", test1, "Gini", 3)
 print(tree_test$Depth)
 print(tree_test$Val)
 # --- Zadanie 2 - test --- #
@@ -182,7 +182,7 @@ AssignInfo <- function(tree, Y, X, data, type, depth, minobs, overfit, cf){
 }
 
 # --- Zadanie 3 - test --- #
-tree_test <- AssignInfo(tree_test, "Y", "X", test1, "Gini", 3, 3, "none", 0.25)
+AssignInfo(tree_test, "Y", "X", test1, "Gini", 3, 3, "none", 0.25)
 print(attributes(tree_test))
 # --- Zadanie 3 - test --- #
 
