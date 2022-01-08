@@ -336,6 +336,18 @@ rpart( formula = Species~., data = iris_zmodyfikowane, minsplit = 5, maxdepth = 
 
 
 
+# iris_y_reg = iris[,]
+# iris_y_reg$Species = as.numeric(as.character(as.numeric(iris_y_reg$Species)))
+# Drzewko_y_reg <- Tree( Y = "Species", X = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"), 
+#                                data = iris_y_reg, type = "SS", depth = 6, minobs = 5, overfit = 'none', cf = 0.3 )
+# print(Drzewko_y_reg, "Count", "Class", "Prob", "Leaf" )
+# 
+# Drzewko_RPART <- rpart( formula = Species~., data = iris_y_reg, minsplit = 5, maxdepth = 6, cp = 0 )
+# numer = 120
+# strzal = iris[numer,-5]
+# predict(Drzewko_RPART, strzal, type = "vector")
+
+
 
 
 # Zadanie 3:
