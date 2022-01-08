@@ -149,41 +149,42 @@ AssignInfo <- function(tree, Y, X, data, type, depth, minobs, overfit, cf){
 SplitNum <- function( Y, X, parentVal, splits, type, minobs ){
   n <- length(X)
   res <- data.frame(matrix(0, length(splits), 6))
-  
+
   colnames( res ) <- c("InfGain","lVal","rVal","point","ln","rn")
-  
+
   for( i in 1:length(splits)){
-    
+
     partition <- X <= splits[i]
     ln <- sum(partition)
     rn <- n - ln
-    
+
     if(any(c(ln,rn) < minobs)){
       res[i,] <- 0
     }else{
       if(type=="Entropy"){
-        lVal <- Entropy(Prob(Y[partition])) 
+        lVal <- Entropy(Prob(Y[partition]))
         rVal <- Entropy(Prob(Y[!partition]))
       }else if(type=="Gini"){
-        lVal <- Gini(Prob(Y[partition])) 
+        lVal <- Gini(Prob(Y[partition]))
         rVal <- Gini(Prob(Y[!partition]))
       }else if(type=="SS"){
         lVal <- SS(nrow(Y[partition]),Y[partition])
         rVal <- SS(nrow(Y[!partition]),Y[!partition])
       }
-      
+
       InfGain <- parentVal - ( ln/n * lVal + rn/n * rVal )
-      
+
       res[i,"InfGain"] <- InfGain
       res[i,"lVal"] <- lVal
       res[i,"rVal"] <- rVal
-      res[i,"point"] <- splits[i]
+      res[i,"point"] <- ifelse(is.numeric(splits[i]), splits[i], as.character(splits[i]))
       res[i,"ln"] <- ln
       res[i,"rn"] <- rn
     }
   }
   return( res )
 }
+
 
 SplitVar <- function( Y, X, parentVal, type, minobs ){
   
@@ -204,24 +205,16 @@ SplitVar <- function( Y, X, parentVal, type, minobs ){
 }
 
 
-# Zadanie 1:
-# a) Stwórz funkcję "FindBestSplit" przyjmującą nastęujące parametry: "Y", "X", "data", "parentVal", "type", "minobs".
-# b) Funkcja powinna zwracać tabelę z wynikami najlepszego możliwego podziału, zawierjącą:
-#    - "infGain" - zysk informacyjny dla podziału, 
-#    - "lVal" - miarę niejednorodności dla lewego węzła, 
-#    - "rVal" - miarę niejednorodności dla prawego węzła,
-#    - "point" - punkt (lub zbiór punktów dla zmiennych kategorycznych) podzału,
-#    - "Ln" - liczbę obserwacji w lewym węźle, 
-#    - "Rn" - liczbę obserwacji w prawym węźle.
-# c) Funkcja powinna akceptować zmienne ciagłe, porządkowe oraz nominalne. Dwa ostatnie typy reprezentpwane są jako factor.
 
+
+### Zadanie 1:
 
 FindBestSplit <- function( Y, Xnames, data, parentVal, type, minobs ){
   
   if(is.numeric(data[,Y])){ 
     for(col_var in Xnames){
       if(!is.numeric(data[,col_var]) & !is.ordered(data[,col_var])){ 
-        tmp <- tapply(data[,Y], data[,col_var], mean)
+        tmp <- tapply(data[,Y], data[,col_var], mean)                                  
         tmp <- sort(tmp)
         data[,col_var] <- factor(data[,col_var], levels = names(tmp), ordered = TRUE)
       }
@@ -229,7 +222,7 @@ FindBestSplit <- function( Y, Xnames, data, parentVal, type, minobs ){
   }else{ 
     for(col_var in Xnames){
       if(!is.numeric(data[,col_var]) & !is.ordered(data[,col_var])){ 
-        positive_class <- 1 
+        positive_class <- levels(data[,Y])[-1]                                          # klasa pozytywna - klasyfikacja binarna
         positive_rows <- data[data[,Y]==positive_class,] 
         tmp <- prop.table(table(positive_rows[,col_var]))
         tmp <- sort(tmp)
@@ -251,8 +244,8 @@ FindBestSplit <- function( Y, Xnames, data, parentVal, type, minobs ){
 
 
 
-# Zadanie 2:
-# a) Dokonaj integracji opracowanej funkcji "FindBestSplit" z funkcjami "Tree" oraz "BuildTree".
+
+### Zadanie 2:
 
 library( data.tree )
 
@@ -261,26 +254,31 @@ BuildTree <- function( node, Y, Xnames, data, type, depth, minobs ){
   node$Count <- nrow( data )
   node$Prob <- Prob( data[,Y] )
   node$Class <- levels( data[,Y] )[ which.max(node$Prob) ]
-  
+
   bestSplit <- FindBestSplit( Y, Xnames, data, node$Val, type, minobs )
-  
-  ifStop <- nrow( bestSplit ) == 0 
+
+  ifStop <- nrow( bestSplit ) == 0
   if( node$Depth == depth | ifStop | all( node$Prob %in% c(0,1) ) ){
     node$Leaf <- "*"
     return( node )
   }
-  
+
   splitIndx <- data[, rownames(bestSplit) ] <= bestSplit$point
-  childFrame <- split( data, splitIndx )
   
+  node$BestAtr <- rownames(bestSplit)
+  node$SplitPoint <- bestSplit$point
+  
+  childFrame <- split( data, splitIndx )
+
   namel <- sprintf( "%s <= %s",  rownames(bestSplit), bestSplit$point )
+
   childL <- node$AddChild( namel )
   childL$Depth <- node$Depth + 1
   childL$Val <- bestSplit$lVal
   BuildTree( childL, Y, Xnames, childFrame[["TRUE"]], type, depth, minobs )
-  
+
   namer <- sprintf( "%s >  %s",  rownames(bestSplit), bestSplit$point )
-  
+
   childR <- node$AddChild( namer )
   childR$Depth <- node$Depth + 1
   childR$Val <- bestSplit$rVal
@@ -297,11 +295,11 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
   tree <- Node$new("Root")
   tree$Count <- nrow(data)
   
+  AssignInfo(tree, Y=Y, X=X, data=data, type=type, depth=depth, minobs=minobs, overfit=overfit, cf=cf)
+  
   AssignInitialMeasures(tree, Y=Y, data=data, type=type, depth=0)
   
   BuildTree(tree, Y, X, data, type, depth, minobs)
-  
-  AssignInfo(tree, Y=Y, X=X, data=data, type=type, depth=depth, minobs=minobs, overfit=overfit, cf=cf)
   
   return(tree)
 }
@@ -309,120 +307,114 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
 
 ### testy na zbiorze - iris
 
-library(rpart)
-
-rm(iris)
 iris = datasets::iris
 
 Drzewko <- Tree( Y = "Species", X = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"), 
-                 data = iris, type = "Entropy", depth = 6, minobs = 5, overfit = 'none', cf = 0.3 )
-print(Drzewko, "Count", "Class", "Prob", "Leaf" )
-
-rpart( formula = Species~., data = iris, minsplit = 5, maxdepth = 6, cp = 0 )
-
-
-# modyfikacja 'iris' = jedna z kolumn jest 'factor'
-iris_zmodyfikowane = iris[,]
-iris_zmodyfikowane[(iris_zmodyfikowane$Petal.Width > 1.6 & iris_zmodyfikowane$Petal.Width <= 3.0),'Petal.Width'] = '3-3'
-iris_zmodyfikowane[(iris_zmodyfikowane$Petal.Width > 1.0 & iris_zmodyfikowane$Petal.Width <= 1.6),'Petal.Width'] = '2-2'
-iris_zmodyfikowane[iris_zmodyfikowane$Petal.Width <= 1.0,'Petal.Width'] = '1-1'
-iris_zmodyfikowane$Petal.Width <- factor(iris_zmodyfikowane$Petal.Width, ordered = FALSE)
-
-Drzewko_zmodyfikowane <- Tree( Y = "Species", X = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"), 
-                 data = iris_zmodyfikowane, type = "Entropy", depth = 6, minobs = 5, overfit = 'none', cf = 0.3 )
-print(Drzewko, "Count", "Class", "Prob", "Leaf" )
-
-rpart( formula = Species~., data = iris_zmodyfikowane, minsplit = 5, maxdepth = 6, cp = 0 )
-
-
-
-# iris_y_reg = iris[,]
-# iris_y_reg$Species = as.numeric(as.character(as.numeric(iris_y_reg$Species)))
-# Drzewko_y_reg <- Tree( Y = "Species", X = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"), 
-#                                data = iris_y_reg, type = "SS", depth = 6, minobs = 5, overfit = 'none', cf = 0.3 )
-# print(Drzewko_y_reg, "Count", "Class", "Prob", "Leaf" )
-# 
-# Drzewko_RPART <- rpart( formula = Species~., data = iris_y_reg, minsplit = 5, maxdepth = 6, cp = 0 )
-# numer = 120
-# strzal = iris[numer,-5]
-# predict(Drzewko_RPART, strzal, type = "vector")
+                 data = iris, type = "Entropy", depth = 6, minobs = 4, overfit = 'none', cf = 0.3)
+print(Drzewko, "Count", "Class", "Prob", "Leaf", "Depth")
 
 
 
 
-# Zadanie 3:
-# a) Stwórz funkcję "PredictTree" przyjmującą nastęujące parametry: "tree", "data".
-# b) Funkcja w pierwszym kroku powinna sprawdzać czy przewidywanie zmiennej celu dla nowego zbioru danych jest możliwe do wykonania,
-#    tj. czy wszystkie zmienne, które budują strukturę drzewa istnieją w nowym zbiorze danych 
-#        oraz czy wszystkie kategorie dla zmiennych porządkowych i nominalnych istnieją w nowym zbiorze danych.
-# c) Funkcja powinna rekurencyjnie przechodzić po strukturze drzewa i wykonywać testy w każdym węźle dla danego atrybutu i punktu podziału.
-#    Przechodząc do finalnego liścia funkcja powinna odczytywać wartość prognozowaną.
-# d) Funkcja powinna zwracać:
-#    - dla regresji: wektor z wartościami przewidywanymi.
-#    - dla klasyfikacji: nazwaną ramkę danych o rozmiarze "n x k+1", np. dla wersji binarnej o etykietach "P", "N",
-#      tabela wygląda następująco: data.frame( P = c(0.3,0.6), N = c(0.7,0.4), Klasa = c("N","P") ), 
-#      tj. pierwsze dwie kolumny zawierają prawdopodobieństwo przynależności danej obserwacji do danej klasy (nazwy kolumn są ważne),
+
+### Zadanie 3:
+
+Predykcja <- function(tree, data)
+{
+  if(tree$isLeaf){
+    return(c(tree$Prob, tree$Class))
+  }
+  
+  if(data[,tree$BestAtr] <= tree$SplitPoint){
+    return(Predykcja(tree$children[[1]], data))
+  }else{
+    return(Predykcja(tree$children[[2]], data))
+  }
+}
 
 
 PredictTree<-function(tree, new_data)
 { 
 
-  if(all(attributes(tree)$Y %in% colnames(data)) == FALSE || all(attributes(tree)$X %in% colnames(data)) == FALSE )
+  if(all(colnames(new_data) %in% attributes(tree)$X) == FALSE )
   {
-    warning("kolumny 'Y' lub 'X' nie wystepuja w tabeli")
+    stop("Kolumny 'Y' lub 'X' nie wystepuja w tabeli")
   }
   
-  if(all(levels(attributes(tree)$data$y) %in% tree$Class)==FALSE)
-  {
-    warning("Brakuje kategori w danych")
-  }
-  else
-  {
-    TRUE
+  for(i in colnames(new_data)){
+    if(is.factor(new_data[,i]) || is.ordered(new_data[,i])){
+      if(all(levels(new_data[,i]) %in% levels(attributes(tree)$data[,i])) == FALSE){
+        stop("Nieznane poziomy w nowych danych")
+      }
+    }
   }
   
-  if(is.numeric(data$y))
-  {
   
-  }
-   
-  if(is.factor(data$y))
+  if(is.numeric(attributes(tree)$data[,attributes(tree)$Y]))
   {
-     
-  }
-  else 
+    return("REGRESJA = w toku...")
+  
+  }else if(is.factor(attributes(tree)$data[,attributes(tree)$Y]))
   {
-    return(1)
+    Klasy_Nowe <- c()
+    
+    for(i in 1:nrow(new_data))
+    {
+      probability <- Predykcja(tree, new_data[i,])
+      Klasy_Nowe <- rbind(Klasy_Nowe, probability)
+    }
+    
+    Klasy_Nowe <- data.frame(Klasy_Nowe)
+    col_names <- c(levels(attributes(tree)$data[,attributes(tree)$Y]), "Klasa")
+    colnames(Klasy_Nowe) <- col_names
+    
+    return(Klasy_Nowe)
   }
 }
 
 
+# testy na zbiorze losowym
 
-PredictTree(Drzewko,iris[51:100,])
+set.seed( 666 )
+zbiorD <- data.frame( y = factor( c(rep(1,5), rep(2,5) ) ), x1 = rnorm(10) )
+zbiorD$x2 <- ifelse( zbiorD$y == 1, zbiorD$x1 + 1, zbiorD$x1 + 10 )
+zbiorD$x2[c(3,8)] <- c(14,2)
+zbiorD
 
-# Drzewko <- Tree( Y = "y", Xnames = c("x1","x2"), data = zbiorD, depth = 3, minobs = 1)
+Drzewko_inne <- Tree( Y = "y", X = c("x1","x2"), 
+                      data = zbiorD, type = "Gini", depth = 6, minobs = 1, overfit = 'none', cf = 0.3)
+print(Drzewko_inne, "Count", "Class", "Prob", "Leaf", "Depth")
+
+punkt_ze_zbioru <- zbiorD[6,]
+punkt_ze_zbioru
+PredictTree(Drzewko_inne, punkt_ze_zbioru[,-1])
+
+punkt_nowy <- zbiorD[6,]
+punkt_nowy$x1 <- punkt_nowy$x1 + 0.25
+punkt_nowy$x2 <- punkt_nowy$x2 - 0.25
+punkt_nowy
+PredictTree(Drzewko_inne, punkt_nowy[,-1])
 
 
+# predykcja na zbiorze 'iris'
+
+numer1 = 77
+iris[numer1,]
+
+PredictTree(Drzewko, iris[numer1,-5])
+
+numer2 = c(70,115,15)
+iris[numer2,]
+
+PredictTree(Drzewko, iris[numer2,-5])
+
+print("Porownanie predykcji do klas oryginalnych")
+cbind(iris[numer2,-5], PredictTree(Drzewko, iris[numer2,-5]))
 
 
+print("CALY ZBIOR IRIS = Porownanie predykcji do klas oryginalnych")
+(cbind(iris, PredictTree(Drzewko, iris[,-5])))
 
-Drzewko <- Tree( Y = "Species", X = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"), 
-                 data = iris, type = "Entropy", depth = 6, minobs = 5, overfit = 'none', cf = 0.3 )
-print(Drzewko, "Count", "Class", "Prob", "Leaf" )
-
-# Proby z predykcja
-
-Predict <- function(tree, features) {
-  if (tree$children[[1]]$isLeaf) return (c(tree$children[[1]]$name, tree$children[[1]]$Class))
-  child <- tree$children[[features[[tree$feature]]]]
-  return ( Predict(child, features))
-}
-
-numer = 120
-strzal = iris[numer,-5]
-
-Predict(Drzewko, strzal)
-
-eval(parse(Drzewko$children[[1]]))
-
+print("Blednie dopasowane klasy:")
+sum(!(iris[,5] == PredictTree(Drzewko, iris[,-5])$Klasa))
 

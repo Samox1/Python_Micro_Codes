@@ -382,6 +382,9 @@ SpliNum <- function(Y, x, parentVal, splits, minobs, type) {
     ln <- sum(partition)
     rn <- n - ln
     
+    if(any(c(ln,rn) < minobs)){
+      res[i,] <- 0
+    }else{
     lVal <- 
       if (type=="Gini") {
         Gini(Prob(Y[partition]))
@@ -398,7 +401,8 @@ SpliNum <- function(Y, x, parentVal, splits, minobs, type) {
         Entropy(Prob(Y[!partition]))
       } else {
         SS(Y[!partition])
-      }  
+      } 
+    
     
     InfGain <- parentVal - (lVal * ln / n  + rVal * rn / n)
     
@@ -408,6 +412,7 @@ SpliNum <- function(Y, x, parentVal, splits, minobs, type) {
     res[i, "point"] <- ifelse(is.numeric(splits[i]), splits[i], as.character(splits[i]))
     res[i, "ln"] <- ln
     res[i, "rn"] <- rn
+    }
   }
   
   return(res)
@@ -526,6 +531,14 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
   return(tree)
   
 }
+
+
+
+Drzewko <- Tree( Y = "Species", X = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"), 
+                 data = iris[,], type = "Entropy", depth = 6, minobs = 2, overfit = 'none', cf = 0.3 )
+print(Drzewko, "Count", "Class", "Prob", "Leaf", "Depth")
+
+
 
 ######## Maszyna wektorow nosnych ########
 
