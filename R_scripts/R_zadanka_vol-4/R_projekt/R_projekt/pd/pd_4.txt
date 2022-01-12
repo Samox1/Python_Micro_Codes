@@ -1,0 +1,148 @@
+#Zadanie 1 
+# a) Stwórz funkcjê "KNNtrain" przyjmuj¹c¹ nastêuj¹ce parametry: "X", "y_tar", "k", "XminNew", "XmaxNew".
+# b) Funkcja w pierwszym kroku powinna sprawdzaæ czy analiza jest mo¿liwa do wykonania tj:
+#    czy "X" oraz "y_tar" nie maj¹ braków danych, czy "k" jest wiêksze od 0, czy "X" jest macierz¹ lub ramk¹ danych.
+# c) W drugim kroku funkcja dokonuje normalizacji zmiennych z "X" do przedzia³u "XminNew", "XmaxNew". Jest to mo¿liwe dla zmiennych na skali ilorazowej.
+#    Nowa tabela powinna posiadaæ 3 atrubuty informuj¹ce o (ka¿dy jest wektorem):
+#      - wartoœciach minimalnych attr(*,"minOrg") dla ka¿dej zmiennej,
+#      - wartoœciach maksymalnych attr(*,"maxOrg") dla ka¿dej zmiennej,
+#      - nowych wartoœcich minimalnych i maksymalnych attr(*,"minmaxNew").
+# d) W kolejnym kroku w obiekcie typu lista o trzech elementach "X","y","k", funkcja umieszcza odpowiednie obiekty.
+# e) Funkcja powinna zwracaæ listê z pkt d).
+# f) Funkcja bêdzie testowana tylko dla klasyfikacji binarnej i regresji.
+# ***) Dla ambitnych: Funkcja mo¿e przyjmowaæ dodatkowo parametr "metoda = brute". Oznacza to, ¿e domyœlnie nie nastêpuje faza treningowa, 
+#      lecz w przypadku przekazania argumentu "kdtree", funkcja przeorganizujê tabelê "X" w pomocnicz¹ strukturê k-d tree. 
+#      Taki zabieg bêdzie wp³ywa³ na sposób wykonania Zadania 2. Ta czêœæ mo¿e byæ napisana w C/C++. 
+#      Struktura k-d tree jest mo¿liwa do stworzenia dla zmiennych na skali ilorazowej.
+
+KNNtrain <- function(X,y_tar,k,XminNew, XmaxNew)
+  {
+    if(all(is.na(X) == FALSE) && all(is.na(y_tar) == FALSE) #bez braków danych 
+       && k>0 #k ma byæ wiêksze od 0
+       && (is.data.frame(X) == TRUE | is.matrix(X) == TRUE )) #czy "X" jest macierz¹ lub ramk¹ danych
+      
+      {
+        X_n <- matrix(0,nrow(X),ncol(X)) 
+              
+       minOrg <- c()
+       maxOrg <- c()
+       minmaxNew <- c(XminNew, XmaxNew)
+       
+        for (i in 1:ncol(X)) 
+          {
+          if(is.numeric(X[,i])){#dla wektora numerycznego 
+            
+            for (j in 1:nrow(X)){ 
+              #normalizacja MinMax
+              X_n[j,i] <- ( ( X[j,i] - min(X[,i]) ) / ( max(X[,i]) - min(X[,i]) ) ) * ( XmaxNew - XminNew ) + XminNew
+              
+              minOrg[i] <- min(X[,i])
+              maxOrg[i] <- max(X[,i])}}
+          
+          else if(is.factor(X[,i])) #dla wektora nienumerycznego 
+            {
+              X_n[,i] <- X[,i]
+              
+              minOrg[i] <- NA
+              maxOrg[i] <- NA
+          }
+          else{
+              print("Nieprawid³owe dane")}}
+      
+        attr(X_n,"minOrg") <- minOrg
+        attr(X_n,"maxOrg") <- maxOrg
+        attr(X_n,"minmaxNew") <- minmaxNew }
+  
+     else{
+        print("Niepoprawne dane!")}
+     
+  knn <- list()
+  knn[["X"]] <- X
+  knn[["y"]] <- y_tar
+  knn[["k"]] <- k
+  
+  return(knn)
+  
+}
+
+##Zadanie 2
+# Zadanie 2:
+# a) Stwórz funkcjê "KNNpred" przyjmuj¹c¹ nastêuj¹ce parametry: "KNNmodel", "X".
+# b) Funkcja w pierwszym kroku powinna sprawdzaæ czy predykcja jest mo¿liwa do wykonania tj:
+#    czy "X" nie ma braków danych, czy wszystkie potrzebne zmienne/kolumny istniej¹ zarówno w "KNNmodel$X" jak i w "X".
+# c) Nastêpnie funkcja powinna normalizaowæ dane z "X" uwzglêdniaj¹c informacje zawarte w atrybutach obiektu "KNNmodel$X".
+# d) W zale¿noœci od typu zmiennych w obiektach "KNNmodel$X" i "X" odleg³oœæ pomiêdzy obserwacjami powinna byæ liczona odleg³oœci¹:
+#    Euklidesa, Hamminga lub Gowera.
+# e) Funkcja powinna nastêpnie rozpoznawaæ czy mamy do czynienia z problemem regresji czy klasyfikacji, 
+#    a nastêpnie dokonywaæ odpowiedniej agregacji wyników (œrednia lub g³osowanie wiêkszoœciowe).
+# f) Funkcja powinna zwracaæ:
+#    - dla regresji: wektor z wartoœciami przewidywanymi.
+#    - dla klasyfikacji: nazwan¹ ramkê danych o rozmiarze "n x k+1", np. dla wersji binarnej o etykietach "P", "N",
+#      tabela wygl¹da nastêpuj¹co: data.frame( P = c(0.3,0.6), N = c(0.7,0.4), Klasa = c("N","P") ), 
+#      tj. pierwsze dwie kolumny zawieraj¹ prawdopodobieñstwo przynale¿noœci danej obserwacji do danej klasy (nazwy kolumn s¹ wa¿ne),
+#      ostatnia kolumna wskazujê klasê - jest to factor o poziomach takich jak originalna zmienna "y_tar" z Zadania 1. 
+# g) Funkcja bêdzie testowana dla problemu regresji i klasyfikacji binarnej na zbiorze danych zawieraj¹cym:
+#    - tylko zmienne na skali ilorazowej.
+#    - tylko zmienne na skali porz¹dkowej.
+#    - tylko zmienne na skali nominalnej.
+#    - zmienne na skali mieszanej.
+# ***) Dla ambitnych: W zale¿noœci od sposoby wykonania Zadania 1, funkcja wyszukuje najbli¿szych s¹siadów na podstawie struktury k-d tree.
+
+KNNpred <- function(KNNmodel,X)
+{
+  if(all(is.na(X)==FALSE)#sprawdzenie braki danych 
+     && ncol(KNNmodel$X)==ncol(X))#sprawdzenie liczby kolumn
+    
+    {
+    X_n <- matrix(0,nrow(X),ncol(X))
+    
+    for (i in 1:ncol(X)) {
+      if(is.numeric(X[,i]))#dla wektora numerycznego 
+        {
+        for (j in 1:nrow(X)) {
+          #normalizacja MinMax
+          
+          X_n[j,i] <- ((X[j,i] - attr(KNNmodel$X,"minOrg")[i]) / 
+                            (attr(KNNmodel$X,"maxOrg")[i] - attr(KNNmodel$X,"minOrg")[i]))  * 
+            (attr(KNNmodel$X,"minmaxNew")[2] - attr(KNNmodel$X,"minmaxNew")[1]) + 
+            attr(KNNmodel$X,"minmaxNew")[1]
+        }}
+      else if(is.factor(X[,i]))#dla wektora nienumerycznego
+        {
+        X_norm[,i] <- X[,i]
+      }
+      else{print("Niepoprawne dane")}}
+    
+    if(ncol(KNNmodel$X)==ncol(X)){
+    nTrain <- nrow( KNNmodel$X )
+    nPred <- nrow( X_n )
+    odl <- matrix( 0, nTrain, nPred )
+    for( i in 1:nTrain ){
+      for( j in 1:nPred ){
+        odl[i,j] <- sqrt(sum( (KNNmodel$X[i,] - X_norm[j,])^2 )) #ilorazowa
+      }}}
+    
+    
+    if(is.numeric(KNNmodel$y)){
+      
+    nPred <- nrow( X_n )  
+    pred <- double( nPred )
+    
+    for( i in 1:nPred ){
+      kNaj <- order( odl[,i] )
+      kNaj <- kNaj[1:KNNmodel$k]
+      y_hat <- mean(KNNmodel$y[ kNaj ] )
+      pred[ i ] <- y_hat
+    }}
+    
+    else if(is.factor(KNNmodel$y)){
+      pred <- print("Klasyfikacja")
+    }
+    
+    return( pred )
+    
+  }
+  else
+  {print("Niepoprawne dane")}
+}
+

@@ -1,0 +1,102 @@
+#Zadanie 0
+# a) Stwórz macierz rozmiaru "1000x1001". 
+#    Przypisz nazwê "Y" do pierwszej kolumny. Przypisz nazwy od "x_1" do "x_1000" do nastêpnych kolumn.
+# b) Wstaw losowe wartoœci z wektora od 1 do 100 w kolumnê "Y". set.seed = (555).
+# c) Wstaw do kolumn od "x_1" do "x_1000" wartoœci zgodne z nastepujacym schematem 
+#    "x_i = Y + wartoœæ losowa z rozk³adu normalnego". set.seed = (555).
+
+
+macierz<- matrix(NA,1000,1001)
+colnames(macierz) <- c("Y",paste("x",1:1000, sep=""))
+
+set.seed(555)
+
+for(i in 1:1001){
+  if(i==1) macierz[,i]<- sample(x = 1:100,size = 1000,replace = T)
+  else macierz[,i] <-   macierz[,1]+rnorm(1)
+}
+macierz
+
+
+#Zadanie 1
+# a) Stwórz funkcjê przyjmuj¹c¹ nastêuj¹ce parametry: "dane", "Ynazwa", "XnazwyList", "Nrdzeni", "metoda".
+# b) Funkcja operuj¹c na zbiorze "dane" powinna tworzyæ model regresji liniowej dla Ynazwa w odniesieniu do zmiennych XnazwyList.
+#    W najprostszej postaci dla danych z "Zadanie 0" s¹ to modele: ("Y~x1", "Y~x2", "Y~x3" etc.).
+#    To jakiej postaci model powinien byæ zbudowany, definiowane jest przez parametr "XnazwyList", przyjmuj¹cy obiekt typu lista.
+#    Lista ma tyle elementów, ile modeli bêdzie zbudowanych. Ka¿dy element listy jest wektorem nazw zmiennych "x".
+#    Przyk³ad: "list(x1,c(x1,x5,x7))" buduje dwa modele 1) "Y~x1" oraz 2) "Y~x1+x5+x7".
+# c) Funkcja powinna budowaæ ka¿d¹ kombinacjê modeli równolegle.
+# d) W zale¿noœci od przekazanego argumentu do "metoda", funkcja wykorzystywaæ powinna albo równolegl¹ wersjê "lapply",
+#    albo równolegl¹ wersjê pêtli "for".
+# e) Ka¿da równoleg³a pêtla powinna zwracaæ informacje o nazwach zmiennej/zmiennych (pierwsza kolumna tekstowa) 
+#    i oszacowaniach parametrów (druga kolumna numeryczna).
+# f) Funkja powinna zwracaæ wyniki w formie listy.
+# g) Nazwa funkcji to "ModelParallel".
+
+library("parallel")
+library("doParallel")
+library("foreach") 
+ 
+ModelParallel <- function(dane, Ynazwa, XnazwyList, Nrdzeni, metoda)
+{
+  if(metoda == 'for')
+  {
+    cores <- detectCores()
+    klaster <- makeCluster(cores)
+    y <- subset(dane, select = Ynazwa)
+    registerDoParallel(klaster)
+    
+    wynik <- (foreach(i=1:length(XnazwyList))%:% 
+                foreach(j=1:length(XnazwyList[i]))%dopar%{
+                  x <- subset(dane, select = unlist(XnazwyList[i][j]))
+                  ww <- rep(1, rep = nrow(x))
+                  x <- cbind(ww,x)
+                  model <- round((solve(t(x) %*% x)) %*% (t(x) %*% y),5)
+                }
+              )
+    stopCluster(klaster)
+    return (wynik)
+    
+  }
+  else if(metoda == 'lapply')
+  {
+    y <- subset(dane,select = Ynazwa)
+    cores <- detectCores()
+    klaster <- makeCluster(Nrdzeni)
+    registerDoParallel(klaster)
+    
+    clusterExport(klaster,"y",envir=environment())
+    
+    wynik <- parLapply(klaster,1:length(XnazwyList),#(X^T*X)-1*(X^T*Y)
+                       function(i)
+                         round(solve((t(cbind(rep(1,time=nrow(subset(dane,select=unlist(XnazwyList[i])))),
+                                              subset(dane,select=unlist(XnazwyList[i])))) %*%
+                                        cbind(rep(1,time=nrow(subset(dane,select=unlist(XnazwyList[i])))),
+                                              subset(dane,select=unlist(XnazwyList[i]))))) %*%
+                                 (t(cbind(rep(1,time=nrow(subset(dane,select=unlist(XnazwyList[i])))),
+                                          subset(dane,select=unlist(XnazwyList[i])))) %*% y),5))
+    
+    stopCluster( klaster )
+    return(wynik)
+  }
+  else
+  {
+    print("Niepoprawne dane")
+  }
+}
+
+#Zadanie 2
+# a) Przetestuj dzia³anie opracowanej funkcji na tabeli z "Zadanie 0".
+
+ModelParallel(macierz, 'Y', list("x1",c("x1","x5","x7")),4,'for')
+ModelParallel(macierz, 'Y', list("x1",c("x1","x5","x7")),4,'lapply')
+Regresja <- lm(subset(macierz, select = c("Y"))~subset(macierz,select = c("x1")))
+Regresja1 <- cbind(c("ww","x1"),round(Regresja$coefficients,5))
+Regresja1
+
+library(microbenchmark)
+
+ModelParallel_for <- ModelParallel(macierz, 'Y', list("x1",c("x1","x5","x7")),4,'for')
+ModelParallel_lapply <- ModelParallel(macierz, 'Y', list("x1",c("x1","x5","x7")),4,'lapply')
+microbenchmark(ModelParallel_for, ModelParallel_lapply, Regresja1)
+

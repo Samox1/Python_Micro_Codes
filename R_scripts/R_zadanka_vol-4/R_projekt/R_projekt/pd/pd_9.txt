@@ -1,0 +1,345 @@
+# Plik proszê nazwaæ numerem swojego indeksu.
+#
+
+
+StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf){
+  
+  
+  if (is.data.frame(data)==FALSE){
+    print("Typem parametru data nie jest ramka danych.")
+    return(FALSE)}
+  
+  if(!all(c(X) %in% names(data))){
+    print("Nie wszystkie zmienne X istnieja w data.")
+    return(FALSE)}
+  
+  if(!all(c(Y) %in% names(data))){
+    print("Zmienna Y nie istnieja w data.")
+    return(FALSE)}
+  
+  if(any(is.na(data[,X]) == TRUE)){
+    print("Wystepuja braki danych w zmiennych X.")
+    return(FALSE)}
+  
+  if(any(is.na(data[,Y]) == TRUE)){
+    print("WystÄ™pujÄ… braki danych w zmiennej Y.")
+    return(FALSE)}
+  
+  if(depth  == 0 || depth  < 0){
+    print("depth nie jest wieksze od 0")
+    return(FALSE)}
+  
+  if(minobs  == 0 || minobs < 0){
+    print("minobs nie jest wieksze od 0")
+    return(FALSE)}
+  
+  if(type != 'Gini' && type != 'Entropy' && type != 'SS'){
+    print("Niepoprawna wartosc typu!")
+    return(FALSE)}
+  
+  if(overfit != 'none' && overfit != 'prune' ){
+    print("Niepoprawna wartosc overfit!")
+    return(FALSE)}
+  
+  if(cf <= 0 || cf > 0.5 ){
+    print("Wartosc cf nie jest z przedzialu (0, 0.5]!")
+    return(FALSE)}
+  
+  if((is.factor(data[,Y])== TRUE && type=="SS") || 
+     (is.numeric(data[,Y])==TRUE &&( type == "Entropy" || type == "Gini"))){
+    print("Wybrana kombinacja parametrow type i data nie jest mozliwa.")
+    return(FALSE)}
+  
+  return(TRUE)
+}
+
+library(rpart)
+library(data.tree)
+
+#PrawdopodobieÅ„stwo 
+Prob <- function( y_tar ){
+  res <- unname( table( y_tar ) )
+  res <- res / sum( res )
+  return(res)
+}
+
+#Entropy
+
+Entropy <- function( prob ){
+  res <- prob * log2( prob )
+  res[ prob == 0 ] <- 0
+  res <- -sum( res )
+  return( res )
+}
+
+#Gini
+
+Gini <- function(prob){
+  res <- prob^2
+  res <- 1-sum(res)
+  return(res)
+}
+
+#SS
+
+SS <- function(y){
+  res <- (y-mean(y))^2
+  res <- sum(res)
+  return(res)
+}
+
+
+AssignInitialMeasures <- function(tree, Y, data, type, depth){
+  
+  tree$Depth <- 0
+  if(type=='Entropy'){
+    tree$inf <- Entropy(Prob(data[,Y]))}
+  else if(type == 'Gini'){
+    tree$inf <- Gini(Prob(data[,Y]))
+  }
+  else{
+    tree$inf <- SS(data[,Y])
+  }
+}
+
+AssignInfo <- function(tree,Y,X,data,type,depth, minobs, overfit, cf )
+{
+  tree$Y <- data[,Y]
+  tree$X <- data[,X]
+  tree$data <- data
+  tree$type <- type
+  tree$Depth <- depth
+  tree$minobs <- minobs
+  tree$overfit <- overfit
+  tree$cf <- cf
+}
+
+Entropy <- function( prob ){
+  
+  res <- prob * log2( prob )
+  res[ prob == 0 ] <- 0
+  res <- -sum( res )
+  return( res )
+  
+}
+
+Prob <- function( y ){
+  
+  res <- unname( table( y ) )
+  res <- res / sum( res )
+  
+  return( round(res,2) )
+  
+}
+
+# Zadanie 1:
+# a) Stwórz funkcjê "FindBestSplit" przyjmuj¹c¹ nastêuj¹ce parametry: "Y", "X", "data", "parentVal", "type", "minobs".
+# b) Funkcja powinna zwracaæ tabelê z wynikami najlepszego mo¿liwego podzia³u, zawierj¹c¹:
+#    - "infGain" - zysk informacyjny dla podzia³u, 
+#    - "lVal" - miarê niejednorodnoœci dla lewego wêz³a, 
+#    - "rVal" - miarê niejednorodnoœci dla prawego wêz³a,
+#    - "point" - punkt (lub zbiór punktów dla zmiennych kategorycznych) podza³u,
+#    - "Ln" - liczbê obserwacji w lewym wêŸle, 
+#    - "Rn" - liczbê obserwacji w prawym wêŸle.
+# c) Funkcja powinna akceptowaæ zmienne ciag³e, porz¹dkowe oraz nominalne. Dwa ostatnie typy reprezentpwane s¹ jako factor.
+# 
+
+SpliNum <- function( Y, x, parentVal, splits, minobs, type){
+  
+  n <- length( x )
+  res <- data.frame( matrix( 0, length(splits), 6 ) )
+  colnames( res ) <- c("InfGain","lVal","rVal","point","ln","rn")
+  
+  for( i in 1:length(splits) ){
+    
+    partition <- x <= splits[i] 
+    ln <- sum( partition )
+    rn <- n - ln
+    
+    if( any((c(ln,rn) < minobs ) )){ #, na.rm = TRUE
+      
+      res[i,] <- 0
+      
+    }else{
+      
+      lVal <- if (type=="Gini") {
+          Gini(Prob(Y[partition]))
+        } else if (type=="Entropy") {
+          Entropy(Prob(Y[partition]))
+        } else {
+          SS(Y[partition])
+        }   
+      
+      rVal <- if (type=="Gini") {
+        Gini(Prob(Y[!partition]))
+      } else if (type=="Entropy") {
+        Entropy(Prob(Y[!partition]))
+      } else {
+        SS(Y[!partition])
+      } 
+      
+      InfGain <- parentVal - ( lVal * ln/n  + rVal * rn/n )
+      
+      res[i,"InfGain"] <- InfGain
+      res[i,"lVal"] <- lVal
+      res[i,"rVal"] <- rVal
+      res[i,"point"] <- splits[i]
+      res[i,"ln"] <- ln
+      res[i,"rn"] <- rn
+      
+    }
+    
+  }
+  
+  return( res )
+  
+}
+
+
+SplitVar <- function( Y, x, parentVal, minobs, type ){
+  
+  s <- unique( x )
+  if( length(x) == 1 ){
+    
+    splits <- s
+    
+  }else{
+    
+    splits <- head( sort( s ), -1 )
+    
+  }
+  
+  res <- SpliNum( Y, x, parentVal, splits, minobs, type)
+  
+  incl <- res$ln >= minobs & res$rn >= minobs & res$InfGain > 0
+  res <- res[ incl, , drop = F ]
+  
+  best <- which.max( res$InfGain )
+  
+  res <- res[ best, , drop = F ]
+  
+  return( res )
+  
+}
+
+
+
+FindBestSplit <- function( Y, X, data, parentVal, type, minobs ){
+  
+  # zamiana nominalnej na porzadkowa
+  if (is.numeric(data[,Y])) { 
+    for (i in X) {
+      if (!is.numeric(data[,i]) & !is.ordered(data[,i])) { 
+        a <- tapply(data[,Y], data[,i], mean)
+        a <- sort(a)
+        data[,i] <- factor(data[,i], levels = names(a), ordered = TRUE)
+      }
+    }
+    
+  } else { # klasyfikacja 
+    for (i in X ) {
+      if (!is.numeric(data[,i]) & !is.ordered(data[,i])) { 
+        pos <- 1
+        # pos - pos(positive) -  kategoria pozytywna zmiennej Y
+        temp <- data[data[,Y]== pos,] 
+        a <- prop.table(table(temp[,i]))
+        a <- sort(a)
+        data[,i] <- factor(data[,i], levels = names(a), ordered = TRUE)
+      }
+    }
+  }
+  
+  res <- sapply( X, function(i){
+    
+    SplitVar( data[,Y], data[,i], parentVal, minobs, type )
+    
+  }, simplify = F )
+  
+  res <- do.call( "rbind", res )
+  
+  best <- which.max( res$InfGain )
+  res <- res[ best, , drop = F ]
+  
+  return( res )
+  
+}
+
+
+# Zadanie 2:
+# a) Dokonaj integracji opracowanej funkcji "FindBestSplit" z funkcjami "Tree" oraz "BuildTree".
+# 
+
+BuildTree <- function(node, Y, X, data, depth, type , minobs){
+  
+  node$Count <- nrow( data )
+  # za kazdym razem mamy dostep do wszystkich kolumn ale tylko do tych obserwacji kt potrzebujemy 
+  node$Prob <- Prob( data[,Y] )
+  node$Class <- levels(data[,Y])[which.max( node$Prob )]
+  
+  bestSplit <- FindBestSplit(Y, X, data, node$inf, type, minobs) 
+  
+  ifStop <- nrow(bestSplit) == 0
+  
+  if( ifStop| node$Depth == depth | all( node$Prob %in% c(0,1) )){
+    
+    node$Leaf <- "*"
+    return( node )
+    
+  }else{
+    
+    split_indx <- data[,rownames(bestSplit)] <= bestSplit$point
+    child_frame <- split( data, split_indx )
+    
+    name_l <- sprintf( "%s <= %s", rownames(bestSplit), bestSplit$point ) 
+    child_l <- node$AddChild( name_l )
+    child_l$value <- split_indx
+    child_l$Depth <- node$Depth + 1
+    child_l$inf <- bestSplit$lVal
+    
+    BuildTree( child_l, Y, X, child_frame[["TRUE"]], depth, type, minobs)
+    
+    
+    name_r <- sprintf( "%s >  %s", rownames(bestSplit), bestSplit$point )
+    child_r <- node$AddChild( name_r )
+    child_r$value <- split_indx
+    child_r$Depth <- node$Depth + 1
+    child_r$inf <- bestSplit$rVal
+    
+    BuildTree( child_r, Y, X, child_frame[["FALSE"]], depth, type, minobs ) 
+    
+  }
+  
+}
+
+
+library( data.tree )
+Tree<- function(Y, X, data, type, depth, minobs, overfit,cf){
+  
+  if(StopIfNot(Y, X, data, type, depth, minobs, overfit,cf) == FALSE)
+  {return(FALSE)}
+  
+  
+  tree<- Node$new("Root")
+  #tree$Count <- nrow(data)
+
+  
+  AssignInitialMeasures(tree, Y, data, type, depth)
+  BuildTree( tree, Y, X, data, depth, type, minobs)  
+  PruneTree <- function(){}
+  AssignInfo(tree,Y,X,data,type,depth, minobs, overfit, cf )
+  
+  return( tree )
+}
+
+# Zadanie 3:
+# a) Stwórz funkcjê "PredictTree" przyjmuj¹c¹ nastêuj¹ce parametry: "tree", "data".
+# b) Funkcja w pierwszym kroku powinna sprawdzaæ czy przewidywanie zmiennej celu dla nowego zbioru danych jest mo¿liwe do wykonania,
+#    tj. czy wszystkie zmienne, które buduj¹ strukturê drzewa istniej¹ w nowym zbiorze danych 
+#        oraz czy wszystkie kategorie dla zmiennych porz¹dkowych i nominalnych istniej¹ w nowym zbiorze danych.
+# c) Funkcja powinna rekurencyjnie przechodziæ po strukturze drzewa i wykonywaæ testy w ka¿dym wêŸle dla danego atrybutu i punktu podzia³u.
+#    Przechodz¹c do finalnego liœcia funkcja powinna odczytywaæ wartoœæ prognozowan¹.
+# d) Funkcja powinna zwracaæ:
+#    - dla regresji: wektor z wartoœciami przewidywanymi.
+#    - dla klasyfikacji: nazwan¹ ramkê danych o rozmiarze "n x k+1", np. dla wersji binarnej o etykietach "P", "N",
+#      tabela wygl¹da nastêpuj¹co: data.frame( P = c(0.3,0.6), N = c(0.7,0.4), Klasa = c("N","P") ), 
+#      tj. pierwsze dwie kolumny zawieraj¹ prawdopodobieñstwo przynale¿noœci danej obserwacji do danej klasy (nazwy kolumn s¹ wa¿ne),

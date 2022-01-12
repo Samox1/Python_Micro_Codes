@@ -1,0 +1,178 @@
+# Plik proszê nazwaæ numerem swojego indeksu.
+# 
+# 
+# Zadanie 1:
+# a) Stwórz funkcjê "ModelOcena" przyjmuj¹c¹ nastêuj¹ce parametry: "y_tar" (rzeczywista), "y_hat" (prognoza).
+# b) Funkcja w pierwszym kroku powinna rozpoznawaæ czy mamy do czynienia z problemem regresji czy klasyfikacji. 
+#    y_tar: regresja -> numeric, klasyfikacja -> factor.
+# c) W zale¿noœci od problemu funkcja szacowaæ powinna ró¿nego rodzaju b³êdy:
+#    Regresja: MAE, MSE, MAPE.
+#    Klasyfikacja: AUC (szacowanie metod¹ trapezów), macierz klasyfikacji (punkt odciêcia wyznaczany jest poprzez index Youdena), 
+#                  Czu³oœæ, Specyficznoœæ, Jakoœæ.
+# d) Dla czytelnoœci kodu, wszystkie miary powinny byæ liczone w oparciu o zewnêtrzne funkcje (dowolne nazwy), 
+#    których definicje znajdowaæ siê powinny przed definicj¹ funkcji "ModelOcena". 
+# e) Funkja powinna zwracaæ wyniki w formie: 
+#    Regresja: nazwany wektor (MAE, MSE, MAPE) o trzech elementach.
+#    Klasyfikacja: nazwana lista (Mat, J, Miary) o trzech elementach:
+#                  Mat = macierz klasyfikacji, w wierszach znajduj¹ siê wartoœci "y_tar" a w kolumnach wartoœci "y_hat",
+#                        nazwy wierszy i kolumn musz¹ byæ zgodne z dostêpnymi etykietami klas.
+#                  J = wartoœæ indexu Youdena,
+#                  Miary = nazwany wektor o elementach AUC, Czu³oœæ, Specyficznoœæ, Jakoœæ.
+# f) Funkcja bêdzie testowana tylko dla klasyfikacji binarnej i regresji.
+
+
+install.packages( "pROC" )
+library( "pROC" )
+
+MAE <- function( y_tar, y_hat ){
+  return( mean( abs( y_tar - y_hat ) ) )
+}
+
+MSE <- function(y_tar, y_hat ){
+  return(mean((y_tar- y_hat)^2))
+}
+
+MAPE <- function(y_tar, y_hat ){
+  return(mean(abs((y_tar-y_hat)/y_tar)))
+}
+
+
+AUC <- function(y_tar, y_hat){
+  krzywa_roc <- roc(y_tar, y_hat)
+  czulosc <- rev(krzywa_roc$sensitivities)
+  specyficznosc <- rev(1 - krzywa_roc$specificities)
+  czulosc_op <- c(diff(czulosc), 0)
+  specyficznosc_op <- c(diff(specyficznosc), 0)
+  wynik <- sum(czulosc * specyficznosc_op) + sum(czulosc_op * specyficznosc_op)/2
+  return(round(wynik,4))
+}
+
+
+Youden <- function(y_tar, y_hat)
+{
+  krzywa_roc <- roc(y_tar, y_hat)
+  czulosc <- krzywa_roc$sensitivities 
+  specyficznosc <- krzywa_roc$specificities 
+  max <- 0
+  for (i in 1:length(czulosc))
+    {
+    J <- (czulosc[i] + specyficznosc[i]-1)
+    if(J > max)
+      {
+      max=J
+      }
+    }
+  return(max)
+}
+
+
+
+Czulosc <- function(Mat)
+{
+  
+  return(round((Mat[4] / (Mat[4] + Mat[2])),4))
+}
+
+Specyficznosc <- function(Mat)
+{
+  return(round((Mat[1] / (Mat[1] + Mat[3])),4))
+}
+
+Jakosc <- function(Mat)
+{
+  return(round(((Mat[1] + Mat[4]) / (Mat[1] + Mat[2] + Mat[3] + Mat[4])),4))
+}
+
+ModelOcena <- function(y_tar, y_hat)
+{
+  Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden(y_tar, y_hat), 0, 1))
+  if(is.numeric(y_tar))
+  {
+    regresja <- c("MAE" = MAE(y_tar, y_hat), "MSE" = MSE(y_tar, y_hat), "MAPE" = MAPE(y_tar, y_hat))
+    return(regresja)
+  }
+  else if(is.factor(y_tar))
+  {
+    miary <- c( "AUC" = AUC(y_tar, y_hat), "Czulosc" = Czulosc(Mat), "Specyficznosc" = Specyficznosc(Mat), "Jakosc" = Jakosc(Mat))
+    klasyfikacja <- list(Mat, Youden(y_tar, y_hat), miary)
+    return(klasyfikacja)
+  }
+  else
+  {
+    print("Niepoprawne dane")
+  }
+}
+
+
+# 
+# Zadanie 2:
+# a) Stwórz funkcjê "CrossValidTune" przyjmuj¹c¹ nastêuj¹ce parametry: "dane", "kFold", "parTune", "seed". 
+#    W skrócie: funkcja powinna krosswalidacyjnie tunowaæ parametry danego algorytu. 
+# b) Funkcja powinna w pierwszym kroku stworzyæ listê przechowuj¹c¹ informacjê, które obserwacje pos³u¿¹ jako zbiór treningowy,
+#    a które wejd¹ do zbioru walidacyjnego. Iloœæ elementów listy zdefiniowana jest przez parametr "kFold" (liczba podzbiorów walidacyjnych).
+#    Ka¿dy element listy jest wektorem o tej samej d³ugoœci, równej nrow("dane").
+#    Ka¿dy z wektorów zawiera albo liczbê 1 (obserwacja jest w zbiorze treningowym) albo 2 (obserwacja jest w zbiorze walidacyjnym). 
+#    Przyk³ad: list( c(1,2,1,1), c(2,1,1,2) ) - oznacza, ¿e mamy doczynienia z 2-krotn¹ walidacj¹ na zbiorze z 4 obserwacjami, 
+#    gdzie dla pierwszej iteracji tylko jeden element jest w podzbiorze walidacyjnym.
+#    Losowanie rozpoczyna siê od ustawienia ziarna na wartoœæ "seed".
+# c) W kolejnym kroku funkcja powinna stworzyæ ramkê danych, w której przechowywane bêd¹ wyniki oraz kombinacje parametrów.
+#    Liczba wierszy i kolumn zale¿y od zagadnienia (klasyfikacja, regresja) oraz od liczby tunowanych parametrów "parTune" i "kFold":
+#    Przyk³ad: "parTune" = data.frame( a = c(1,2), b = c(1,1) ) - oznacza, ¿e algorytm ma 2 parametry do tunowania,
+#              Dla "kFold" = 2 oraz "parTune", kombinacja parametrów to data.frame( "kFold" = c(1,2,1,2), a = c(1,2), b = c(1,1) ).
+#              Kolejne kolumny tabeli wynikowej powinny stanowiæ miary uzyskane dziêki funkcji "ModelOcena".
+#              Regresja: MAEt, MSEt, MAPEt, MAEw, MSEw, MAPEw - ozanczaj¹ miary dla zbioru treningowego i walidacyjnego.
+#                        Finalnie tabele jest rozmiaru 4x9.
+#              Klasyfikacja: AUCT, Czu³oœæT, SpecyficznoœæT, JakoœæT, AUCW, SpecyficznoœæW, MAPEW, JakoœæW - j.w.
+#                            Finalnie tabele jest rozmiaru 4x11.
+# d) W ostatnim kroku funkcja powinna budowaæ w pêtli model predykcyjny dla danej kombincaji parametrów i uzupe³niaæ tabelê wynikow¹.      
+#    Z racji tego, ¿e nie stworzyliœmy na razie ¿adnego algorytmu ta czêœæ powinna dzia³aæ nastêpuj¹co:
+#    Ka¿da pêtla tworzy dwa podzbiory zdefiniowane przez wektor znajduj¹cy siê w liœcie z pkt b) dla danej kombinacji.
+#    Do kolumn z miarami jakoœci wstawiane s¹ wartoœci równe 0.
+# e) Funkcja zwraca tabelê wynikow¹.
+
+CrossValidTune <- function(dane, kFold, parTune, seed)
+{
+  set.seed(seed)
+  dl_wektora = nrow(dane)
+  lista = list()
+  for(i in 1:kFold)
+  { 
+    lista[[i]] <- sample(1:dl_wektora, size = dl_wektora, replace = F)
+    indeks_U <- sample( x = 1:dl_wektora, size = (1-1/kFold)*dl_wektora, replace = F )
+    
+    for( j in 1:dl_wektora)
+    {
+      for(k in 1:length(indeks_U))
+      {
+        if(indeks_U == j)
+        {
+          lista[[i]][[j]]==1
+        }
+        else
+        {
+          lista[[i]][[j]]==2
+        }
+      }
+    }
+  }
+  n <-rep(c(1:kFold), times=length(parTune))
+  ramka <- data.frame(n, parTune)
+  
+  if(is.numeric(dane[,1]))
+  {
+    regresja <- data.frame(ramka, MAEt=0, MSEt=0, MAPEt=0, MAEw=0, MSEw=0, MAPEw=0  )
+    return(regresja)
+  }
+  else if(is.factor(dane[,1]))
+  {
+    klasyfikacja <- data.frame(ramka, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0,
+                                      AUCW=0, SpecyficznoscW=0, MAPEW=0, JakoscW=0)
+    return(klasyfikacja)
+  }
+  else
+  {
+    print("Niepoprawne dane")
+  }
+}
+
+
