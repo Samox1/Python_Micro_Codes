@@ -11,7 +11,7 @@ nazwy_kolumn <- colnames(dane)
 X <- nazwy_kolumn[-5]
 Y <- nazwy_kolumn[5]
 
-parTune <- expand.grid(depth=c(3:4), minobs=c(2:3))
+parTune <- expand.grid(depth=c(3:4), minobs=c(2:3), type=c('Gini', 'Entropy'), cf=0.2)
 
 
 CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed = 123)
@@ -31,10 +31,20 @@ CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed 
   }
   
   
+  print(podzial_zbioru)
+  print(ramka)
   
   for(id_modele in 1:nrow(ramka))
   {
-    Drzewo1 <- Tree(Y, X, dane, 'Gini', parTune$depth, parTune$minobs, 'none', 0.2)
+    dane_treningowe <- dane[podzial_zbioru[,ramka$k[id_modele]] == 1,]
+    dane_walidacyjne <- dane[podzial_zbioru[,ramka$k[id_modele]] == 2,]
+    
+    Drzewo1 <- Tree(Y, X, dane_treningowe, ramka$type[id_modele], ramka$depth[id_modele], ramka$minobs[id_modele], 'none', ramka$cf[id_modele])
+    Test_treningowy <- ObsPred(Drzewo1, dane_treningowe)
+    Test_walidacyjny <- ObsPred(Drzewo1, dane_walidacyjne)
+    
+    print(Test_treningowy)
+    print(Test_walidacyjny)
   }
   
   
@@ -58,6 +68,6 @@ CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed 
 }
 
 
-kappa <- CrossValidTune(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed = 123)
+kappa <- CrossValidTune(dane, X, Y, kFold = 2, parTune, algorytm="KNN", seed = 123)
 
 

@@ -479,6 +479,12 @@ BuildTree <- function(node, Y, X, data, depth, type , minobs){
 }
 
 
+PE <- function( p, n, z ){
+  
+  return( ( p + (z^2)/(2*n) + z*sqrt( p/n - (p^2)/(n) + (z^2)/(4*n^2) ) ) / ( 1 + z^2/n ) )
+  
+}
+
 PruneTree <- function( tree, cf){
   errcf <- qnorm( 1 - cf )
 
