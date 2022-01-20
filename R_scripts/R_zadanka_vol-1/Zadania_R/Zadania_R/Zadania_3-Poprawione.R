@@ -106,7 +106,7 @@ Jakosc <- function(Mat){
 }
 
 
-ModelOcena1 <- function(y_tar, y_hat){
+ModelOcena <- function(y_tar, y_hat){
   if(is.numeric(y_tar)){
     regresja <- c("MAE" = MAE(y_tar, y_hat), "MSE" = MSE(y_tar, y_hat), "MAPE" = MAPE(y_tar, y_hat))
     return(regresja)

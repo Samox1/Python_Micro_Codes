@@ -1,0 +1,61 @@
+iris
+
+Drzewko <- Tree( "Species", c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width"), iris, "Entropy", 6, 2, 'none', 0.25 )
+# function(Y, X, data, type, depth, minobs, overfit ,cf)
+print( Drzewko, "Count","Prob","Class","Leaf")
+
+rpart( formula = Species ~ ., data = iris, minsplit = 2, maxdepth = 6, cp = 0 )
+
+PE <- function( p, n, z ){
+  
+  return( ( p + (z^2)/(2*n) + z*sqrt( p/n - (p^2)/(n) + (z^2)/(4*n^2) ) ) / ( 1 + z^2/n ) )
+  
+}
+PE( 1 - 0.98, 48, qnorm( 1-0.25 ) )
+qnorm( 1-0.25 )
+
+library(data.tree)
+PEP <- function( tree, cf = 0.25 ){
+  errcf <- qnorm( 1 - cf )
+  # Czy korzeń - ROOT
+  if( length( tree$Get("pathString") ) == 1 ) return( NULL ) 
+  # Ktore liscie byly przejrzane
+  liscie_byly <- c()
+  repeat{
+    sciezka_lisci <- tree$Get("pathString", filterFun = isLeaf )
+    if( all( sciezka_lisci %in% liscie_byly) | sciezka_lisci[1] == "Root" ) break
+    temp <- strsplit( sciezka_lisci[ !sciezka_lisci %in% liscie_byly ][1], "/")[[1]]
+    leaf <- eval( parse( text = paste( "tree", paste0( paste0( "'", temp[-1] ), "'", collapse = "$" ), sep = "$" ) ) )
+    parent <- leaf$parent
+    sibling <- leaf$siblings[[1]]
+    leaf_class <- leaf$Class
+    sibling_class <- sibling$Class
+    parent_class <- parent$Class
+    leaf_prob <- leaf$Prob
+    sibling_prob <- sibling$Prob
+    parent_prob <- parent$Prob
+    leaf_count <- leaf$Count
+    sibling_count <- sibling$Count
+    parent_count <- parent$Count
+    leaf_isLeaf <- leaf$isLeaf
+    sibling_isLeaf <- sibling$isLeaf
+    
+    leaf_PE <- PE( 1 - max(leaf_prob), leaf_count, errcf )
+    sibling_PE <- PE( 1 - max(sibling_prob), sibling_count, errcf )
+    parent_PE <- PE( 1 - max(parent_prob), parent_count, errcf )
+    
+    if_prune <- parent_PE <= leaf_count / parent_count * leaf_PE + sibling_count / parent_count * sibling_PE
+    
+    if( if_prune & leaf_isLeaf == sibling_isLeaf ){
+      parent$RemoveChild( sibling$name )
+      parent$RemoveChild( leaf$name )
+      parent$Leaf <- "*"
+    }else{
+      liscie_byly <- c( liscie_byly, leaf$pathString )
+    }
+  }
+}
+
+print( Drzewko, "Count","Prob","Class","Leaf")
+PEP( Drzewko, cf = 0.05 )
+print( Drzewko, "Count","Prob","Class","Leaf")

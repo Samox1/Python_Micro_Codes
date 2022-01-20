@@ -1,0 +1,172 @@
+set.seed( 666 )
+zbiorD <- data.frame( y = factor( c( rep(1,5), rep(2,5) ) ), x1 = rnorm(10) )
+zbiorD$x2 <- ifelse( zbiorD$y == 1, zbiorD$x1 + 1, zbiorD$x1 + 10 )
+zbiorD$x2[c(3,8)] <- c(14,2)
+zbiorD
+
+Entropy <- function( prob ){
+  
+  res <- prob * log2( prob )
+  res[ prob == 0 ] <- 0
+  res <- -sum( res )
+  return( res )
+  
+}
+
+Prob <- function( y ){
+  
+  res <- unname( table( y ) )
+  res <- res / sum( res )
+  
+  return( round(res,2) )
+  
+}
+
+SpliNum <- function( Y, x, parentVal, splits, minobs ){
+  
+  n <- length( x )
+  res <- data.frame( matrix( 0, length(splits), 6 ) )
+  colnames( res ) <- c("InfGain","lVal","rVal","point","ln","rn")
+  
+  for( i in 1:length(splits) ){
+    
+    partition <- x <= splits[i] # %in%: x %in% c("wyzsze","podstawowe")
+    ln <- sum( partition )
+    rn <- n - ln
+
+    if( any( c(ln,rn) < minobs ) ){
+      
+      res[i,] <- 0
+      
+    }else{
+      
+      lVal <- Entropy( Prob( Y[partition] ) )
+      rVal <- Entropy( Prob( Y[!partition] ) )
+      InfGain <- parentVal - ( lVal * ln/n  + rVal * rn/n )
+      
+      res[i,"InfGain"] <- InfGain
+      res[i,"lVal"] <- lVal
+      res[i,"rVal"] <- rVal
+      res[i,"point"] <- splits[i]
+      res[i,"ln"] <- ln
+      res[i,"rn"] <- rn
+      
+    }
+    
+  }
+  
+  return( res )
+  
+}
+SpliNum( zbiorD$y, zbiorD$x1, 1, head(sort(unique(zbiorD$x1)),-1), 2 )
+
+SplitVar <- function( Y, x, parentVal, minobs ){
+  
+  s <- unique( x )
+  if( length(x) == 1 ){
+    
+    splits <- s
+    
+  }else{
+    
+    splits <- head( sort( s ), -1 )
+    
+  }
+  
+  res <- SpliNum( Y, x, parentVal, splits, minobs )
+
+  incl <- res$ln >= minobs & res$rn >= minobs & res$InfGain > 0
+  res <- res[ incl, , drop = F ]
+  
+  best <- which.max( res$InfGain )
+  # ten który daje zbilansowany podzial
+  res <- res[ best, , drop = F ]
+  
+  return( res )
+  
+}
+SplitVar( zbiorD$y, zbiorD$x1, 1, 2 )
+
+FindBestSplit <- function( Y, data, parentVal, minobs ){
+  
+  X <- !colnames( data ) %in% Y
+  
+  res <- sapply( colnames( data )[X], function(i){
+    
+    SplitVar( data[,Y], data[,i], parentVal, minobs )
+    
+  }, simplify = F )
+  
+  res <- do.call( "rbind", res )
+
+  best <- which.max( res$InfGain )
+  res <- res[ best, , drop = F ]
+  
+  return( res )
+  
+}
+FindBestSplit( "y", zbiorD, 1, 2 )
+
+library( data.tree )
+Tree <- function( Y, X, data, depth, minobs ){
+  
+  # Tworzenie korzenia
+  tree <- Node$new( "Root" )
+  tree$Depth <- 0
+  tree$Count <- nrow( data )
+  tree$inf <- Entropy( Prob( data[,Y] ) )
+  
+  # Funkcja budująca drzewo
+  BuildTree( tree, Y, X, data, depth, minobs )
+  
+  return( tree )
+  
+}
+
+BuildTree <- function( node, Y, X, data, depth, minobs ){
+  
+  node$Count <- nrow( data )
+  node$Prob <- Prob( data[,Y] )
+  node$Class <- levels(data[,Y])[which.max( node$Prob )]
+  
+  bestSplit <- FindBestSplit( Y, data, node$inf, minobs )
+
+  ifStop <- nrow( bestSplit ) == 0 
+  
+  if( node$Depth == depth | ifStop | all(  node$Prob %in% c(0,1) ) ){
+    
+    node$Leaf <- "*"
+
+    return( node )
+    
+  }else{
+    
+    split_indx <- data[,rownames(bestSplit)] <= bestSplit$point
+    child_frame <- split( data, split_indx )
+    
+    name <- sprintf( "%s <= %s", rownames(bestSplit), bestSplit$point )
+    child_l <- node$AddChild( name )
+    child_l$value <- split_indx
+    child_l$Depth <- node$Depth + 1
+    child_l$inf <- bestSplit$lVal
+    
+    BuildTree( child_l, Y, X, child_frame[["TRUE"]], depth, minobs )
+    
+    name <- sprintf( "%s >  %s", rownames(bestSplit), bestSplit$point )
+    child_r <- node$AddChild( name )
+    child_r$value <- split_indx
+    child_r$Depth <- node$Depth + 1
+    child_r$inf <- bestSplit$rVal
+    
+    BuildTree( child_r, Y, X, child_frame[["FALSE"]], depth, minobs )
+    
+  }
+  
+}
+
+Drzewko <- Tree( "y", c("x2"), zbiorD, 3, 1 )
+print( Drzewko, "Count","Prob","Class","Leaf")
+
+library(rpart)
+rpart( formula = y~x2, data = zbiorD, minsplit = 1, maxdepth = 3 )
+

@@ -1,0 +1,62 @@
+sigmoid <- function( x ){
+  return( 1 / (1 + exp(-x) ) )
+}
+
+wprzod <- function( X, Win, Wout ){
+  # W_ile <- length( list( W1, W2 ) )
+  # 
+  H <- sigmoid( cbind( 1, X ) %*% Win )
+  y_hat <- sigmoid( cbind( 1, H ) %*% Wout )
+  return( list( y_hat = y_hat, H = H ) )
+}
+
+wstecz <- function( X, y_tar, y_hat, Win, Wout, H, lr ){
+  # function( X, y_tar, y_hat, list( W1, W2 ), list( H1, H2 ), lr )
+  dWout <- t( cbind( 1, H ) ) %*% ( y_hat - y_tar )
+  dH <- ( y_hat - y_tar ) %*% ( t( Wout[-1, ,drop=F] ) )
+  dWin <- t( cbind( 1, X ) ) %*% ( H * (1-H) * dH )
+  Win <- Win - lr * dWin
+  Wout <- Wout - lr * dWout
+  return( list( Win = Win, Wout = Wout ) )
+}
+
+trainNN <- function( X, Y, h = 5, lr = 0.01, MaxIter = 1000 ){
+  p <- ncol( X )
+  Win <- matrix( rnorm( (p+1) * h ), p+1, h )
+  Wout <- matrix( rnorm( (h+1) ), h+1, 1 )
+  # for( i in 1:length(h)+1 ) list[i] <- W_&i
+  for( i in 1:MaxIter ){
+    SygnalWprzod <- wprzod( X, Win, Wout )# wprzod( X, list( W1, W2 ) )#
+    SygnalWtyl <- wstecz( X, Y, SygnalWprzod$y_hat, Win, Wout, SygnalWprzod$H, lr )
+    Win <- SygnalWtyl$Win
+    Wout <- SygnalWtyl$Wout
+    print( i )
+  }
+  return( list( y_hat = SygnalWprzod$y_hat, Win = Win, Wout = Wout ) )
+}
+
+predNN <- function( Xnew, NN ){
+  H <- sigmoid( cbind( 1, Xnew ) %*% NN$Win )
+  y_hat <- sigmoid( cbind( 1, H ) %*% NN$Wout )
+  return( y_hat )
+}
+
+head(iris)
+table( iris$Species )
+Xiris <- iris[ iris$Species != "setosa", ]
+Yiris <- ifelse( Xiris$Species == "versicolor", 1, 0 )
+table( Yiris )
+Xiris <- Xiris[,-5]
+
+MinMax <- function( x ){
+  return( (x-min(x))/(max(x)-min(x)) )
+}
+
+Xiris <- sapply( Xiris, MinMax )
+summary( Xiris )
+
+Siec <- trainNN( Xiris, Yiris, h = 5, lr = 0.01, MaxIter = 10000 )
+str(Siec)
+
+table( Yiris, ifelse( Siec$y_hat < 0.5, 0, 1 )  )
+table( Yiris, ifelse( predNN( Xiris, Siec ) < 0.5, 0, 1 )  )

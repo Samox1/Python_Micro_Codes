@@ -239,9 +239,17 @@ library( data.tree )
 
 
 BuildTree <- function( node, Y, Xnames, data, type, depth, minobs ){
+  
   node$Count <- nrow( data )
-  node$Prob <- Prob( data[,Y] )
-  node$Class <- levels( data[,Y] )[ which.max(node$Prob) ]
+  
+  if (is.factor(data[,Y])){
+    node$Prob <- Prob(data[,Y])
+    node$Class <- levels(data[,Y])[which.max(node$Prob)]
+  }
+  else{
+    node$Prob <- SS(data[,Y])
+    node$Class <- mean(data[,Y])
+  }
   
   bestSplit <- FindBestSplit( Y, Xnames, data, node$Val, type, minobs )
   
@@ -272,6 +280,62 @@ BuildTree <- function( node, Y, Xnames, data, type, depth, minobs ){
   childR$Val <- bestSplit$rVal
   BuildTree( childR, Y, Xnames, childFrame[["FALSE"]], type, depth, minobs )
 }
+
+
+############### Dzialajace BUILD TREE od vol.4 ###########################
+BuildTree <- function(node, Y, X, data, depth, type , minobs){
+  
+  node$Count <- nrow( data )
+  # za kazdym razem mamy dostep do wszystkich kolumn ale tylko do tych obserwacji kt potrzebujemy 
+  
+  if (is.factor(data[,Y])) {
+    node$Prob <- Prob(data[,Y])
+    node$Class <- levels(data[,Y])[which.max(node$Prob)]
+  }
+  else {
+    node$Prob <- SS(data[,Y])
+    node$Class <- mean(data[,Y])
+  }
+  
+  bestSplit <- FindBestSplit(Y, X, data, node$inf, type, minobs) 
+  
+  ifStop <- nrow(bestSplit) == 0
+  
+  if( ifStop| node$Depth == depth | all( node$Prob %in% c(0,1) )){
+    
+    node$Leaf <- "*"
+    return( node )
+    
+  }else{
+    
+    split_indx <- data[,rownames(bestSplit)] <= bestSplit$point
+    child_frame <- split( data, split_indx )
+    
+    name_l <- sprintf( "%s <= %s", rownames(bestSplit), bestSplit$point ) 
+    child_l <- node$AddChild( name_l )
+    child_l$value <- split_indx
+    child_l$Depth <- node$Depth + 1
+    child_l$inf <- bestSplit$lVal
+    child_l$feature <- rownames(bestSplit)
+    child_l$BestSplit <- bestSplit$point
+    
+    BuildTree( child_l, Y, X, child_frame[["TRUE"]], depth, type, minobs)
+    
+    
+    name_r <- sprintf( "%s >  %s", rownames(bestSplit), bestSplit$point )
+    child_r <- node$AddChild( name_r )
+    child_r$value <- split_indx
+    child_r$Depth <- node$Depth + 1
+    child_r$inf <- bestSplit$rVal
+    child_r$feature <- rownames(bestSplit)
+    child_r$BestSplit <- bestSplit$point
+    
+    BuildTree( child_r, Y, X, child_frame[["FALSE"]], depth, type, minobs ) 
+    
+  }
+  
+}
+############### Dzialajace BUILD TREE od vol.4 ###########################
 
 
 Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
@@ -397,3 +461,15 @@ cbind(wine[!(wine[,1] == PredictTree(Tree_Wina, wine[,-1])$Klasa),], Test_Wina[b
 
 
 
+
+iris
+head(iris)
+iris[,5] <- as.numeric(iris[,5])
+is.factor(iris[,5])
+iris
+
+Tree1 <- Tree("Species", c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width") , iris, 'SS', 6, 2, 'none', 0.1)
+print(Tree1)
+
+PredictTree(Tree1, iris[78,-5])
+print(Tree1, "Count", "Class", "Prob", "Leaf", "Depth")
