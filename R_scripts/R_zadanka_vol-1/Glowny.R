@@ -17,17 +17,17 @@ source("funkcje.R")
 
 ### DANE ###
 
-# Klasyfikacja Binarna      = https://archive.ics.uci.edu/ml/datasets/Wholesale+customers
+# Klasyfikacja Binarna      = 
 # Klasyfikacja Wieloklasowa = 
-# Regresja                  = 
+# Regresja                  = https://archive.ics.uci.edu/ml/datasets/Abalone
 
 
-dane_bin <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00292/Wholesale%20customers%20data.csv")
-dane_bin <- dane_bin[,-2]
-bin_kolumny <- colnames(dane_bin)               # glupi blad - przy zebraniu nazwy "dane_bin[,1]" jest NULL
-dane_bin_X <- bin_kolumny[-1]
-dane_bin_Y <- bin_kolumny[1]
-dane_bin[,1] <- as.factor(dane_bin[,1])
+dane_reg <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header = FALSE)
+
+reg_kolumny <- colnames(dane_reg)               
+dane_reg_X <- reg_kolumny[-9]
+dane_reg_Y <- reg_kolumny[9]
+
 
 ### KNN ###
 
@@ -43,8 +43,6 @@ nazwy_kolumn <- colnames(dane)
 X <- nazwy_kolumn[-5]
 Y <- nazwy_kolumn[5]
 
-model <- KNNtrain(dane[,X], dane[,Y], 3, 0, 1)
-predykcja <- KNNpred(model, dane[,-5])
 
 parTune_KNN_multi <- expand.grid(k=4)
 
