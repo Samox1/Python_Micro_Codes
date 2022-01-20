@@ -19,29 +19,36 @@ CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed 
   set.seed(seed)
   
   dl_wektora = nrow(dane)
+  podzial_zbioru <- data.frame()
   
   ramka <- as.data.frame(expand_grid(k=c(1:kFold), parTune))
   
-  podzial_zbioru <- data.frame()
-  
   for(i in 1:kFold)
   { 
-    indxTest <- sample( 1:nrow(dane), size = 1/kFold * nrow(dane), replace = F )
+    indxTest <- sample( 1:dl_wektora, size = 1/kFold * dl_wektora, replace = F )
     podzial_zbioru[indxTest,i] <- 1
     podzial_zbioru[-indxTest,i] <- 2
-    
   }
+  
+  
+  
+  for(id_modele in 1:nrow(ramka))
+  {
+    Drzewo1 <- Tree(Y, X, dane, 'Gini', parTune$depth, parTune$minobs, 'none', 0.2)
+  }
+  
   
   
   if(is.numeric(dane[,Y]))
   {
-    regresja <- data.frame(parTune, MAEt=0, MSEt=0, MAPEt=0, MAEw=0, MSEw=0, MAPEw=0  )
+    regresja <- data.frame(parTune, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0  )
+    # regresja %>% group_by(colnames(parTune)) %>% summarise_at(vars(contains("T", "W")), mean)
     return(regresja)
   }
   else if(is.factor(dane[,Y]))
   {
-    klasyfikacja_bin <- data.frame(parTune, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0,
-                                   AUCW=0, CzuloscT=0, SpecyficznoscW=0, JakoscW=0)
+    klasyfikacja_bin <- data.frame(parTune, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+    # klasyfikacja_bin %>% group_by(colnames(parTune)) %>% summarise_at(vars(contains("T", "W")), mean)
     return(klasyfikacja_bin)
   }
   else
