@@ -364,6 +364,7 @@ test_1 <- predict( KNN_model_pakiet, iris_pred[,-5] )
 test_1 <- cbind(test_1, '|')
 
 KNN_model <- KNNtrain(iris_train[,-5], iris_train[,5], k = 2, 0, 1)
+is.factor(KNNpred(KNN_model, iris_pred[,-5])$Klasa)
 test_1 <- cbind(test_1, KNNpred(KNN_model, iris_pred[,-5]))
 test_1 <- cbind(test_1, TRUE_Y = iris_pred[,5])
 test_1

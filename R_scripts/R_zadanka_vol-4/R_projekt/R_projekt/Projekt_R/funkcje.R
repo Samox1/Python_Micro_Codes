@@ -378,6 +378,7 @@ SS <- function(y){
 
 AssignInitialMeasures <- function(tree,Y,data,type,depth) {
   tree$Depth <- 0
+  
   if (type == "Entropy") {
     tree$inf <- Entropy(Prob(data[,Y]))
   }
@@ -393,16 +394,18 @@ AssignInitialMeasures <- function(tree,Y,data,type,depth) {
   return (tree)
 }
 
-AssignInfo <- function(tree,Y,X,data,type,depth, minobs, overfit, cf )
-{
-  tree$Y <- data[,Y]
-  tree$X <- data[,X]
-  tree$data <- data
-  tree$type <- type
-  tree$Depth <- depth
-  tree$minobs <- minobs
-  tree$overfit <- overfit
-  tree$cf <- cf
+AssignInfo <- function( tree, Y, X, data, type, depth, minobs, overfit, cf){
+  
+  attr(tree, 'Y') <- Y
+  attr(tree, 'X') <- X
+  attr(tree, 'data') <- data
+  attr(tree, 'type') <- type
+  attr(tree, 'depth') <- depth
+  attr(tree, 'minobs') <- minobs
+  attr(tree, 'overfit') <- overfit
+  attr(tree, 'cf') <- cf
+  
+  return(tree)
 }
 
 SpliNum <- function( Y, x, parentVal, splits, minobs, type){
@@ -621,39 +624,32 @@ PruneTree <- function( tree, cf){
 }
 
 
-Tree<- function(Y, X, data, type, depth, minobs, overfit ,cf){
+Tree<- function(Y, X, data, type, depth, minobs, overfit, cf){
   
-  if(StopIfNot(Y, X, data, type, depth, minobs, overfit,cf) == FALSE){
+  if(StopIfNot(Y, X, data, type, depth, minobs, overfit, cf) == FALSE){
     return(FALSE)
   }
   
-  for (i in 1:length(X)) { 
-    if (is.factor(data[,i])) {
-      data[,i] <- as.character(data[,i])
-    }
-    else {
-      next
-    }
-  }
-  
+  # for (i in X) {
+  #   if (is.factor(data[,i])) {
+  #     data[,i] <- as.character(data[,i])
+  #   }
+  #   else {
+  #     next
+  #   }
+  # }
+
   tree<- Node$new("Root")
   tree$Count <- nrow(data)
   
-  if (type == "Entropy") {
-    tree$inf <- Entropy(Prob(data[,Y]))
-  }
-  else if (type == "Gini") {
-    tree$inf <- Gini(Prob(data[,Y]))
-  }
-  else {
-    tree$inf <- SS(data[,Y])
-  }
-  
   tree <- AssignInitialMeasures(tree, Y, data, type, depth)
   
-  BuildTree(tree, Y, X, data, depth, type, minobs)  
+  BuildTree(node = tree, Y = Y, X = X, data = data, depth = depth, type = type, minobs = minobs)
   
-  PruneTree(tree, cf)
+  if(overfit == 'prune')
+  {
+    PruneTree(tree, cf)
+  }
   
   AssignInfo(tree,Y,X,data,type,depth, minobs, overfit, cf)
   
@@ -663,8 +659,7 @@ Tree<- function(Y, X, data, type, depth, minobs, overfit ,cf){
 
 ObsPred <- function(tree, obs) {
   if (tree$isLeaf) {
-    #print(tree$Prob)
-    return(data.frame("Prob" = max(tree$Prob), "Class" = (tree$Class), stringsAsFactors = F))}
+    return(c(as.numeric(tree$Prob), "Class" = tree$Class))}
   
   if (is.numeric(tree$children[[1]]$BestSplit) | is.ordered(tree$children[[1]]$BestSplit)) {
     child <- tree$children[[ifelse(obs[,tree$children[[1]]$feature] > (tree$children[[1]]$BestSplit), 2, 1)]]}
@@ -676,17 +671,22 @@ ObsPred <- function(tree, obs) {
 
 
 PredictTree <- function(tree, data) {
-  if (is.factor(attributes(tree)$Y)) {
-    res <- data.frame(matrix(0, nrow = nrow(data), ncol = 2))
+  
+  # (paste0("PREDICT TREE: ",is.factor(attributes(tree)$data[,attributes(tree)$Y])))
+  
+  if (is.factor(attributes(tree)$data[,attributes(tree)$Y])) {
+    res <- c()
     
     for (i in 1:nrow(data)) {
-      res[i,] <- (ObsPred(tree, data[i, ,drop = F]))}
-    colnames(res) <- c("Prob", "Class")
+      res <- rbind(res, (ObsPred(tree, data[i, ,drop = F])))}
+
+    #colnames(res[,1:(ncol(res)-1)]) <- c(1:(ncol(res)-1))
+    #colnames(res[,ncol(res)]) <- "Class"
   }
   else{
     res <- c()
     for (i in 1:nrow(data)) {
-      res[i] <- (ObsPred(tree, data[i, ,drop = F])$Class)}
+      res[i] <- as.numeric(ObsPred(tree, data[i, ,drop = F])["Class"])}
   }
   return (res)
 }
@@ -808,6 +808,7 @@ predNN_old <- function( xnew, nn, typ = "binarna" ){
 
 ### Statystyka Modeli i Kroswalidacja ###
 
+
 MAE <- function( y_tar, y_hat ){
   return( mean( abs( y_tar - y_hat ) ) )
 }
@@ -822,7 +823,7 @@ MAPE <- function(y_tar, y_hat ){
 
 
 AUC <- function(y_tar, y_hat){
-  krzywa_roc <- roc(y_tar, y_hat)
+  krzywa_roc <- roc(y_tar, y_hat, quiet = TRUE)
   czulosc <- rev(krzywa_roc$sensitivities)
   specyficznosc <- rev(1 - krzywa_roc$specificities)
   czulosc_op <- c(diff(czulosc), 0)
@@ -832,28 +833,23 @@ AUC <- function(y_tar, y_hat){
 }
 
 
-Youden <- function(y_tar, y_hat)
-{
-  krzywa_roc <- roc(y_tar, y_hat)
-  czulosc <- krzywa_roc$sensitivities 
-  specyficznosc <- krzywa_roc$specificities 
-  max <- 0
-  for (i in 1:length(czulosc))
-  {
-    J <- (czulosc[i] + specyficznosc[i]-1)
-    if(J > max)
-    {
-      max=J
+Youden <- function(a, b){
+  roc_krzywa <- roc(a, b, quiet = TRUE)
+  TPR <- roc_krzywa$sensitivities
+  FPR <- roc_krzywa$specificities
+  max_Y <- 0
+  for (i in 1:length(TPR)) {
+    Youden <- (TPR[i] + FPR[i]-1)
+    if(Youden > max_Y){
+      max_Y=Youden
     }
   }
-  return(max)
+  return(max_Y)
 }
-
 
 
 Czulosc <- function(Mat)
 {
-  
   return(round((Mat[4] / (Mat[4] + Mat[2])),4))
 }
 
@@ -867,23 +863,40 @@ Jakosc <- function(Mat)
   return(round(((Mat[1] + Mat[4]) / (Mat[1] + Mat[2] + Mat[3] + Mat[4])),4))
 }
 
+
 Accuracy_multi <- function(y_tar, y_hat){
-  return( sum(y_tar == y_hat) / length(y_tar) )
+  return( sum(as.numeric(y_tar) == as.numeric(y_hat)) / length(y_tar) )
 }
+
 
 ModelOcena <- function(y_tar, y_hat)
 {
-  Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden(y_tar, y_hat), 0, 1))
+  
   if(is.numeric(y_tar))
   {
     regresja <- c("MAE" = MAE(y_tar, y_hat), "MSE" = MSE(y_tar, y_hat), "MAPE" = MAPE(y_tar, y_hat))
     return(regresja)
   }
-  else if(is.factor(y_tar))
+  else if(is.factor(y_tar) & nlevels(y_tar) == 2)
   {
-    miary <- c( "AUC" = AUC(y_tar, y_hat), "Czulosc" = Czulosc(Mat), "Specyficznosc" = Specyficznosc(Mat), "Jakosc" = Jakosc(Mat))
-    klasyfikacja <- list(Mat, Youden(y_tar, y_hat), miary)
-    return(klasyfikacja)
+    if(length(y_tar) == 1)
+    {
+      Acc <- Accuracy_multi(y_tar, y_hat = ifelse(y_hat <= 0.5, 0, 1))
+      miary <- c("AUC" = 0, "Czulosc" = 0, "Specyficznosc" = 0, "Jakosc" = Acc)
+      return(miary)
+    }
+    else
+    {
+      Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden(y_tar, y_hat), 0, 1))
+      miary <- c( "AUC" = AUC(y_tar, y_hat), "Czulosc" = Czulosc(Mat), "Specyficznosc" = Specyficznosc(Mat), "Jakosc" = Jakosc(Mat))
+      return(miary)
+    }
+    
+  }
+  else if(is.factor(y_tar) & nlevels(y_tar) > 2)
+  {
+    multi <- c("Acc" = Accuracy_multi(y_tar, y_hat))
+    return(multi)
   }
   else
   {
@@ -892,23 +905,13 @@ ModelOcena <- function(y_tar, y_hat)
 }
 
 
-CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed = 123)
+
+
+
+CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
 {
   set.seed(seed)
-  
-  dl_wektora = nrow(dane)
-  podzial_zbioru <- data.frame()
-  
-  ramka <- as.data.frame(expand_grid(k_=c(1:kFold), parTune))
-  
-  # tabela z podzialem danych na treningowe i walidacyjne
-  for(i in 1:kFold)
-  { 
-    id_trening <- sample( 1:dl_wektora, size = (1/kFold * dl_wektora)-1, replace = F )
-    podzial_zbioru[id_trening,i] <- 1
-    podzial_zbioru[-id_trening,i] <- 2
-  }
-  
+
   # jakiego typu klasyfikacja czy regresja
   if(is.numeric(dane[,Y]))
   {
@@ -916,16 +919,31 @@ CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed 
   }
   else if(is.factor(dane[,Y]))
   {
-    if (length(levels(dane[,Y])) == 2)
+    if (nlevels(dane[,Y]) == 2)
     {
       typ = "bin"
     }
-    else if(length(levels(dane[,Y])) > 2)
+    else if(nlevels(dane[,Y]) > 2)
     {
       typ = "multi"
     }
   }
   
+    
+  dl_wektora = nrow(dane)
+  podzial_zbioru <- data.frame(matrix(ncol = kFold, nrow = nrow(dane)))
+  
+  ramka <- as.data.frame(expand_grid(k_=c(1:kFold), parTune))
+  
+  # tabela z podzialem danych na treningowe i walidacyjne
+  for(i in 1:kFold)
+  { 
+    id_trening <- sample( 1:dl_wektora, size = (1/kFold * dl_wektora)-1, replace = F )
+    podzial_zbioru[id_trening,i] <- 2
+    podzial_zbioru[-id_trening,i] <- 1
+  }
+  
+
   # print(ramka)
   
   # for(id_modele in 1:nrow(ramka))
@@ -941,48 +959,150 @@ CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed 
   #   
   # }
   
-  print("*** Podzial danych zrobiony ***")
+  # print("*** Podzial danych zrobiony ***")
+  
+  print("-------------------------------")
+  print(paste0("Algorytm: ", algorytm))
+  print(paste0("Problem: ", typ))
+  print(paste0("Liczba wariantow modeli: ", nrow(parTune)))
+  print(paste0("Liczba modeli: ", nrow(ramka)))
+  print("-------------------------------")
   
   ### KNN ###
   
   if(algorytm == "KNN")
   {
+    cat("Model Progress: ")
+    
     if(typ == "bin")
     {
       ramka_bin <- data.frame(ramka, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
-      print(ramka_bin)
       
       for(id_modele in 1:nrow(ramka_bin))
       {
-        print(id_modele)
+        cat(paste0(id_modele,"..."))
         
         dane_treningowe <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 1,]
         dane_walidacyjne <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 2,]
         
-        print("Dane rozdzielone")
-        
         KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], ramka_bin$k[id_modele], 0, 1) 
         
-        print("KNN Model nauczony")
+        KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
+        KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
+
+        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), (KNN_pred_Trening[,'N']))
+        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), (KNN_pred_Walid[,'N']))
+
+        ramka_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+        ramka_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+        ramka_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+        ramka_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+
+        ramka_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+        ramka_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+        ramka_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+        ramka_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
+
+      }
+      
+      return(ramka_bin)
+      
+    }
+    else if(typ == "multi")
+    {
+      ramka_multi <- data.frame(ramka, ACCT=0, ACCW=0)
+      
+      for(id_modele in 1:nrow(ramka_multi))
+      {
+        cat(paste0(id_modele,"..."))
+        
+        dane_treningowe <- dane[podzial_zbioru[,ramka_multi$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane[podzial_zbioru[,ramka_multi$k_[id_modele]] == 2,]
+        
+        KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], ramka_multi$k[id_modele], 0, 1) 
         
         KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
         KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
         
-        print("KNN Model Predykcja osiagnieta")
+        ramka_multi[id_modele, "ACCT"] = ModelOcena((dane_treningowe[,Y]), as.numeric(KNN_pred_Trening[,"Klasa"]))
+        ramka_multi[id_modele, "ACCW"] = ModelOcena((dane_walidacyjne[,Y]), as.numeric(KNN_pred_Walid[,"Klasa"]))
+      
+      }
+      
+      return(ramka_multi)
+    }
+    else if(typ == "reg")
+    {
+      ramka_reg <- data.frame(ramka, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
+
+      for(id_modele in 1:nrow(ramka_reg))
+      {
+        cat(paste0(id_modele,"..."))
         
-        Trening_Ocena = ModelOcena(as.numeric(dane_treningowe[,Y]), as.numeric(KNN_pred_Trening$Klasa))
-        Walidacja_Ocena = ModelOcena(as.numeric(dane_walidacyjne[,Y]), as.numeric(KNN_pred_Walid$Klasa))
+        dane_treningowe <- dane[podzial_zbioru[,ramka_reg$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane[podzial_zbioru[,ramka_reg$k_[id_modele]] == 2,]
+        
+        KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], ramka_reg$k[id_modele], 0, 1) 
+        
+        KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
+        KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
+        
+        Ocena_Trening <- ModelOcena(dane_treningowe[,Y], KNN_pred_Trening)
+        Ocena_Walidacja <- ModelOcena(dane_walidacyjne[,Y], KNN_pred_Walid)
+        
+        ramka_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
+        ramka_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
+        ramka_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
+        
+        ramka_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
+        ramka_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
+        ramka_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+      }
+      
+      return(ramka_reg)
+    }
+    
+    
+  }
 
-        ramka_bin$AUCT[id_modele] <- Trening_Ocena[[3]]["AUC"]
-        ramka_bin$CzuloscT[id_modele] <- Trening_Ocena[[3]]["Czulosc"]
-        ramka_bin$SpecyficznoscT[id_modele] <- Trening_Ocena[[3]]["Specyficznosc"]
-        ramka_bin$JakoscT[id_modele] <- Trening_Ocena[[3]]["Jakosc"]
-
-        ramka_bin$AUCT[id_modele] <- Trening_Ocena[[3]]["AUC"]
-        ramka_bin$CzuloscT[id_modele] <- Trening_Ocena[[3]]["Czulosc"]
-        ramka_bin$SpecyficznoscT[id_modele] <- Trening_Ocena[[3]]["Specyficznosc"]
-        ramka_bin$JakoscT[id_modele] <- Trening_Ocena[[3]]["Jakosc"]
-
+  
+  
+  
+  ### Drzewa decyzyjne ###
+  
+  
+  if(algorytm == "Tree")
+  {
+    cat("Model Progress: ")
+    
+    if(typ == "bin")
+    {
+      ramka_bin <- data.frame(ramka, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      
+      for(id_modele in 1:nrow(ramka_bin))
+      {
+        cat(paste0(id_modele,"..."))
+        
+        dane_treningowe <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 2,]
+        
+        Tree_Model <- Tree(Y, X, dane_treningowe, type = ramka_bin$type[id_modele], depth =  ramka_bin$depth[id_modele], minobs =  ramka_bin$minobs[id_modele], overfit =  ramka_bin$overfit[id_modele], cf = ramka_bin$cf[id_modele]) 
+        
+        Tree_pred_Trening <- PredictTree(Tree_Model, dane_treningowe[,X])
+        Tree_pred_Walid <- PredictTree(Tree_Model, dane_walidacyjne[,X])
+        
+        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(Tree_pred_Trening[,2]))
+        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(Tree_pred_Walid[,2]))
+        
+        ramka_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+        ramka_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+        ramka_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+        ramka_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+        
+        ramka_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+        ramka_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+        ramka_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+        ramka_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
         
       }
       
@@ -995,34 +1115,83 @@ CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed 
       
       for(id_modele in 1:nrow(ramka_multi))
       {
+        cat(paste0(id_modele,"..."))
+        
         dane_treningowe <- dane[podzial_zbioru[,ramka_multi$k_[id_modele]] == 1,]
         dane_walidacyjne <- dane[podzial_zbioru[,ramka_multi$k_[id_modele]] == 2,]
+
+        Tree_Model <- Tree(Y, X, dane_treningowe, type = ramka_multi$type[id_modele], depth =  ramka_multi$depth[id_modele], minobs =  ramka_multi$minobs[id_modele], overfit =  ramka_multi$overfit[id_modele], cf = ramka_multi$cf[id_modele]) 
         
-        KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], ramka_multi$k[id_modele], 0, 1) 
+        Tree_pred_Trening <- PredictTree(Tree_Model, dane_treningowe[,X])
+        Tree_pred_Walid <- PredictTree(Tree_Model, dane_walidacyjne[,X])
         
-        KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
-        KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
-        
-        ramka_multi$ACCT[id_modele] <- Accuracy_multi(as.numeric(dane_treningowe[,Y]), KNN_pred_Trening$Klasa)
-        ramka_multi$ACCW[id_modele] <- Accuracy_multi(as.numeric(dane_walidacyjne[,Y]), KNN_pred_Walid$Klasa)
+        ramka_multi[id_modele, "ACCT"] <- ModelOcena(dane_treningowe[,Y], Tree_pred_Trening[,"Class"])
+        ramka_multi[id_modele, "ACCW"] <- ModelOcena(dane_walidacyjne[,Y], Tree_pred_Walid[,"Class"])
       }
       
       return(ramka_multi)
     }
     else if(typ == "reg")
     {
+      ramka_reg <- data.frame(ramka, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
       
+      for(id_modele in 1:nrow(ramka_reg))
+      {
+        cat(paste0(id_modele,"..."))
+        
+        dane_treningowe <- dane[podzial_zbioru[,ramka_reg$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane[podzial_zbioru[,ramka_reg$k_[id_modele]] == 2,]
+        
+        Tree_Model <- Tree(Y, X, dane_treningowe, type = ramka_reg$type[id_modele], depth =  ramka_reg$depth[id_modele], minobs =  ramka_reg$minobs[id_modele], overfit =  ramka_reg$overfit[id_modele], cf = ramka_reg$cf[id_modele]) 
+
+        Ocena_Trening <- ModelOcena(dane_treningowe[,Y], PredictTree(Tree_Model, dane_treningowe[,X]))
+        Ocena_Walidacja <- ModelOcena(dane_walidacyjne[,Y], PredictTree(Tree_Model, dane_walidacyjne[,X]))
+    
+        ramka_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
+        ramka_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
+        ramka_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
+        
+        ramka_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
+        ramka_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
+        ramka_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+      }
+      
+      return(ramka_reg)
     }
     
     
   }
+  
 
   
   
-  ### Drzewa decyzyjne ###
-  
-  
   ### Sieci Neuronowe ###
+  
+  
+  # if(algorytm == "NN")
+  # {
+  #   cat("Model Progress: ")
+  #   
+  #   if(typ == "bin")
+  #   {
+  #     ramka_bin <- data.frame(ramka, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+  #     
+  #     for(id_modele in 1:nrow(ramka_bin))
+  #     {
+  #       cat(paste0(id_modele,"..."))
+  #       
+  #       dane_treningowe <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 1,]
+  #       dane_walidacyjne <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 2,]
+  
+  
+  
+  
+  
+  
+  
+  ##### BRUDNOPIS #####
+  ##### BRUDNOPIS #####
+  ##### BRUDNOPIS #####
   
   
   
