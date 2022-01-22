@@ -723,30 +723,30 @@ MinMaxOdwrot <- function( x, y_min, y_max ){
 } 
 
 
-wprzod_old <- function( X, W1, W2, W3, typ ){
+wprzod <- function( X, W1, W2, W3, typ ){
   h1 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W1 )  )
   h2 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( h1 %*% W2 )  )
-  if (typ =="binarna"){
+  if (typ =="bin"){
     y_hat <- sigmoid( h2 %*% W3 ) # klasyfikacja binarna
   }
-  else if (typ == "wieloklasowa"){
+  else if (typ == "multi"){
     y_hat <- matrix( t( apply( h2 %*% W3, 1, SoftMax ) ), nrow = nrow(X) ) # klasyfikacja wieloklasowa
   } 
-  else if (typ == "regresja"){
+  else if (typ == "reg"){
     y_hat <- h2 %*% W3 # regresja
   }
   return( list( y_hat = y_hat, H1 = h1, H2 = h2 ) )
 }
 
 
-wstecz_old <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr, typ ){
-  if (typ =="binarna"){
+wstecz <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr, typ ){
+  if (typ =="bin"){
     dy_hat <- (y_tar - y_hat) * dsigmoid( y_hat ) # klasyfikacja binarna
   }
-  else if (typ == "wieloklasowa"){
+  else if (typ == "multi"){
     dy_hat <- (y_tar - y_hat) / nrow( X ) # klasyfikacja wieloklasowa
   } 
-  else if (typ == "regresja"){
+  else if (typ == "reg"){
     dy_hat <- (y_tar - y_hat) # regresja
   }
   dW3 <- t(H2) %*% dy_hat
@@ -760,7 +760,7 @@ wstecz_old <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr, typ ){
   return( list( W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
-trainNN_old <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "binarna" ){
+trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "bin" ){
   set.seed( seed )
   X <- cbind( rep( 1, nrow(x) ), x )
   
@@ -773,8 +773,8 @@ trainNN_old <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 1
   error <- double( iter )
   
   for( i in 1:iter ){
-    sygnalwprzod <- wprzod_old( X, W1, W2, W3, typ=typ )
-    sygnalwtyl <- wstecz_old( X, y_tar, y_hat = sygnalwprzod$y_hat, W1, W2, W3, H1 = sygnalwprzod$H1, H2 = sygnalwprzod$H2, lr, typ=typ )
+    sygnalwprzod <- wprzod( X, W1, W2, W3, typ=typ )
+    sygnalwtyl <- wstecz( X, y_tar, y_hat = sygnalwprzod$y_hat, W1, W2, W3, H1 = sygnalwprzod$H1, H2 = sygnalwprzod$H2, lr, typ=typ )
     W1 <- sygnalwtyl$W1
     W2 <- sygnalwtyl$W2
     W3 <- sygnalwtyl$W3
@@ -787,17 +787,17 @@ trainNN_old <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 1
   return( list( y_hat = sygnalwprzod$y_hat, W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
-predNN_old <- function( xnew, nn, typ = "binarna" ){
+predNN <- function( xnew, nn, typ = "bin" ){
   xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
   h1 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( xnew %*% nn$W1 )  )
   h2 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( h1 %*% nn$W2 )  )
-  if (typ =="binarna"){
+  if (typ =="bin"){
     y_hat <- sigmoid( h2 %*% nn$W3 ) # klasyfikacja binarna
   }
-  else if (typ == "wieloklasowa"){
+  else if (typ == "multi"){
     y_hat <- matrix( t( apply( h2 %*% nn$W3, 1, SoftMax ) ), nrow = nrow(xnew) ) # klasyfikacja wieloklasowa
   } 
-  else if (typ == "regresja"){
+  else if (typ == "reg"){
     y_hat <- h2 %*% nn$W3 # regresja
   }
   return( y_hat )
@@ -990,8 +990,8 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
         KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
 
-        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), (KNN_pred_Trening[,'N']))
-        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), (KNN_pred_Walid[,'N']))
+        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(KNN_pred_Trening[,1]))
+        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(KNN_pred_Walid[,1]))
 
         ramka_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
         ramka_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
@@ -1168,379 +1168,125 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   ### Sieci Neuronowe ###
   
   
-  # if(algorytm == "NN")
-  # {
-  #   cat("Model Progress: ")
-  #   
-  #   if(typ == "bin")
-  #   {
-  #     ramka_bin <- data.frame(ramka, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
-  #     
-  #     for(id_modele in 1:nrow(ramka_bin))
-  #     {
-  #       cat(paste0(id_modele,"..."))
-  #       
-  #       dane_treningowe <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 1,]
-  #       dane_walidacyjne <- dane[podzial_zbioru[,ramka_bin$k_[id_modele]] == 2,]
-  
-  
-  
-  
-  
-  
-  
-  ##### BRUDNOPIS #####
-  ##### BRUDNOPIS #####
-  ##### BRUDNOPIS #####
-  
-  
-  
-  # if(is.numeric(dane[,Y]))
-  # {
-  #   regresja <- data.frame(parTune, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0  )
-  #   # regresja %>% group_by(colnames(parTune)) %>% summarise_at(vars(contains("T", "W")), mean)
-  #   return(regresja)
-  # }
-  # else if(is.factor(dane[,Y]))
-  # {
-  #   klasyfikacja_bin <- data.frame(parTune, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
-  #   # klasyfikacja_bin %>% group_by(colnames(parTune)) %>% summarise_at(vars(contains("T", "W")), mean)
-  #   return(klasyfikacja_bin)
-  # }
-  # else
-  # {
-  #   print("Niepoprawne dane")
-  # }
+  if(algorytm == "NN")
+  {
+    cat("Model Progress: ")
+
+    if(typ == "bin")
+    {
+      ramka_bin <- data.frame(ramka, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+
+      for(id_modele in 1:nrow(ramka_bin))
+      {
+        cat(paste0("\t ", id_modele,"..."))
+
+        dane_bin_NN <- dane
+        dane_bin_NN[,X] <- sapply(dane_bin_NN[,X], MinMax_nn)
+        
+        dane_treningowe <- dane_bin_NN[podzial_zbioru[,ramka_bin$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane_bin_NN[podzial_zbioru[,ramka_bin$k_[id_modele]] == 2,]
+
+        X_treningowe_NN = as.matrix(dane_treningowe[,X])
+        Y_treningowe_NN = model.matrix( ~ dane_treningowe[,Y] - 1, dane_treningowe)
+        X_walidacyjne_NN = as.matrix(dane_walidacyjne[,X])
+        Y_walidacyjne_NN = model.matrix( ~ dane_walidacyjne[,Y] - 1, dane_walidacyjne )
+        
+        NN_Model <- trainNN( X_treningowe_NN, Y_treningowe_NN, h = ramka_bin$h[id_modele], lr = ramka_bin$lr[id_modele], iter = ramka_bin$iter[id_modele], seed = 123, typ = typ)
+
+        NN_pred_Trening <- predNN(X_treningowe_NN, NN_Model, typ = typ)
+        NN_pred_Walid <- predNN(X_walidacyjne_NN, NN_Model, typ = typ)
+        
+        Trening_Ocena = ModelOcena(dane_treningowe[,Y], NN_pred_Trening[,2])
+        Walidacja_Ocena = ModelOcena(dane_walidacyjne[,Y], NN_pred_Walid[,2])
+        
+        ramka_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+        ramka_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+        ramka_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+        ramka_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+        
+        ramka_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+        ramka_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+        ramka_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+        ramka_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
+        
+      }
+      
+      return(ramka_bin)
+      
+    }
+    else if(typ == "multi")
+    {
+      ramka_multi <- data.frame(ramka, ACCT=0, ACCW=0)
+      
+      for(id_modele in 1:nrow(ramka_multi))
+      {
+        cat(paste0("\t ", id_modele,"..."))
+        
+        dane_multi_NN <- dane
+        dane_multi_NN[,X] <- sapply(dane_multi_NN[,X], MinMax_nn)
+        
+        dane_treningowe <- dane_multi_NN[podzial_zbioru[,ramka_multi$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane_multi_NN[podzial_zbioru[,ramka_multi$k_[id_modele]] == 2,]
+        
+        X_treningowe_NN = as.matrix(dane_treningowe[,X])
+        Y_treningowe_NN = model.matrix( ~ dane_treningowe[,Y] - 1, dane_treningowe)
+        X_walidacyjne_NN = as.matrix(dane_walidacyjne[,X])
+        Y_walidacyjne_NN = model.matrix( ~ dane_walidacyjne[,Y] - 1, dane_walidacyjne )
+        
+        NN_Model <- trainNN( X_treningowe_NN, Y_treningowe_NN, h = ramka_multi$h[id_modele], lr = ramka_multi$lr[id_modele], iter = ramka_multi$iter[id_modele], seed = 123, typ = typ)
+        
+        NN_pred_Trening <- predNN(X_treningowe_NN, NN_Model, typ = typ)
+        NN_pred_Walid <- predNN(X_walidacyjne_NN, NN_Model, typ = typ)
+        
+        NN_pred_Trening_multi <- as.numeric( levels(dane_multi_NN[,dane_multi_Y])[apply( NN_pred_Trening, 1, which.max )] )
+        NN_pred_Walid_multi <- as.numeric( levels(dane_multi_NN[,dane_multi_Y])[apply( NN_pred_Walid, 1, which.max )] )
+        
+        ramka_multi[id_modele, "ACCT"] <- ModelOcena(dane_treningowe[,Y], NN_pred_Trening_multi)
+        ramka_multi[id_modele, "ACCW"] <- ModelOcena(dane_walidacyjne[,Y], NN_pred_Walid_multi)
+      }
+      
+      return(ramka_multi)
+    }
+    else if(typ == "reg")
+    {
+      ramka_reg <- data.frame(ramka, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
+      
+      for(id_modele in 1:nrow(ramka_reg))
+      {
+        cat(paste0("\t ", id_modele,"..."))
+        
+        dane_reg_NN <- sapply(dane, MinMax_nn)
+        
+        dane_treningowe <- dane_reg_NN[podzial_zbioru[,ramka_reg$k_[id_modele]] == 1,]
+        dane_walidacyjne <- dane_reg_NN[podzial_zbioru[,ramka_reg$k_[id_modele]] == 2,]
+        
+        X_treningowe_NN = as.matrix(dane_treningowe[,X])
+        Y_treningowe_NN = as.matrix(dane_treningowe[,Y])
+        X_walidacyjne_NN = as.matrix(dane_walidacyjne[,X])
+        Y_walidacyjne_NN = as.matrix(dane_walidacyjne[,Y])
+        
+        NN_Model <- trainNN(X_treningowe_NN, Y_treningowe_NN, h = ramka_reg$h[id_modele], lr = ramka_reg$lr[id_modele], iter = ramka_reg$iter[id_modele], seed = 123, typ = typ)
+        
+        NN_pred_Trening <- predNN(X_treningowe_NN, NN_Model, typ = typ)
+        NN_pred_Walid <- predNN(X_walidacyjne_NN, NN_Model, typ = typ)
+        
+        NN_pred_Trening_reg <- MinMaxOdwrot(NN_pred_Trening[,1], y_min = min(dane[,Y]), y_max = max(dane[,Y]))
+        NN_pred_Walid_reg <- MinMaxOdwrot(NN_pred_Walid[,1], y_min = min(dane[,Y]), y_max = max(dane[,Y]))
+        
+        Ocena_Trening <- ModelOcena(dane[podzial_zbioru[,ramka_reg$k_[id_modele]] == 1,Y], NN_pred_Trening_reg)
+        Ocena_Walidacja <- ModelOcena(dane[podzial_zbioru[,ramka_reg$k_[id_modele]] == 2,Y], NN_pred_Walid_reg)
+        
+        ramka_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
+        ramka_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
+        ramka_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
+        
+        ramka_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
+        ramka_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
+        ramka_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+      }
+      
+      return(ramka_reg)
+    }
+  }
 }
-
-
-# CrossValidTune <- function(dane, X, Y, kFold = 3, parTune, algorytm="KNN", seed = 123)
-# {
-#   set.seed(seed)
-#   
-#   dl_wektora = nrow(dane)
-#   
-#   lista = list()
-#   
-#   for(i in 1:kFold)
-#   { 
-#     lista[[i]] <- sample(1:dl_wektora, size = dl_wektora, replace = F)
-#     indeks_U <- sample( x = 1:dl_wektora, size = (1-1/kFold)*dl_wektora, replace = F )
-#     
-#     for( j in 1:dl_wektora)
-#     {
-#       for(k in 1:length(indeks_U))
-#       {
-#         if(indeks_U == j)
-#         {
-#           lista[[i]][[j]]==1
-#         }
-#         else
-#         {
-#           lista[[i]][[j]]==2
-#         }
-#       }
-#     }
-#   }
-#   
-#   
-#   ramka <- as.data.frame(expand_grid(k=c(1:kFold), parTune))
-#   
-#   
-#   
-#   
-#   if(is.numeric(dane[,Y]))
-#   {
-#     regresja <- data.frame(parTune, MAEt=0, MSEt=0, MAPEt=0, MAEw=0, MSEw=0, MAPEw=0)
-#     return(regresja)
-#   }
-#   else if(is.factor(dane[,Y]))
-#   {
-#     klasyfikacja_bin <- data.frame(parTune, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscT=0, SpecyficznoscW=0, JakoscW=0)
-#     return(klasyfikacja_bin)
-#   }
-#   else
-#   {
-#     print("Niepoprawne dane")
-#   }
-# }
-
-
-
-
-
-# CrossValidTune <- function(dane, X, Y, kFold = 10, parTune, seed = 123, algorytm="KNN")
-# {
-#   set.seed(seed)
-#   
-#   print(Y)
-#   print(X)
-#   print(dane)
-#   
-#   if(is.numeric(dane[,Y])){
-#     typ = "reg"
-#   }else if(is.factor(dane[,Y])){
-#     if (length(levels(dane[,Y])) == 2){
-#       typ = "bin"
-#     }
-#     else if(length(levels(dane[,Y])) > 2){
-#       typ = "multi"
-#     }
-#   }
-#   
-#   print("******************")
-#   print("------------------")
-#   print(paste("Algorytm: ", algorytm))
-#   print(paste("Typ algorytmu: ", typ))
-#   print("------------------")
-#   print("******************")
-#  
-#   # print(parTune)
-#   
-#   
-#   if(typ=="reg"){
-#     MAE_Train_MEAN = vector()
-#     MSE_Train_MEAN = vector()
-#     MAPE_Train_MEAN = vector()
-# 
-#     MAE_Test_MEAN = vector()
-#     MSE_Test_MEAN = vector()
-#     MAPE_Test_MEAN = vector()
-#   }
-#   else if(typ=="bin"){
-#     Czulosc_Train_MEAN <- vector()
-#     Specyficznosc_Train_MEAN  <- vector()
-#     Jakosc_Train_MEAN  <- vector()
-# 
-#     Czulosc_Test_MEAN <- vector()
-#     Specyficznosc_Test_MEAN  <- vector()
-#     Jakosc_Test_MEAN <- vector()
-#   }
-#   else if(typ=="multi"){
-#     Jakosc_Train_MEAN <- vector()
-#     Jakosc_Test_MEAN <- vector()
-#   }
-#   
-#   
-#   
-#   for (i in 1:nrow(parTune)){
-#     hiper <- parTune[i,]
-# 
-#     if(typ=="reg"){
-#       MAE_Train = vector()
-#       MSE_Train = vector()
-#       MAPE_Train = vector()
-# 
-#       MAE_Test = vector()
-#       MSE_Test = vector()
-#       MAPE_Test = vector()
-#     }
-#     else if(typ=="bin"){
-#       Czulosc_Train <- vector()
-#       Specyficznosc_Train  <- vector()
-#       Jakosc_Train  <- vector()
-# 
-#       Czulosc_Test <- vector()
-#       Specyficznosc_Test  <- vector()
-#       Jakosc_Test <- vector()
-#     }
-#     else if(typ=="multi"){
-#       Jakosc_Train <- vector()
-#       Jakosc_Test <- vector()
-#     }
-
-  #   
-  #   
-  #   for (j in 1:kFold){
-  #     indxTest <- sample( 1:nrow(dane), size = 1/kFold * nrow(dane), replace = F )
-  #     dane_Test <- dane[indxTest,] 
-  #     dane_Train <- dane[-indxTest,]
-  #     
-  #     if(algorytm=="KNN"){                                ### --- ### --- KNN --- ### --- ### 
-  #       
-  #       KNNmodel <- KNNtrain( X=dane_Train[,X], y_tar=dane_Train[,y], k = hiper, XminNew=0, XmaxNew=1 )
-  #       KNNpred_Train <- KNNpred(KNNmodel, X=dane_Train[,X])
-  #       KNNpred_Test <- KNNpred(KNNmodel, X=dane_Test[,X])
-  #       
-  #       if(typ=="reg")
-  #       {
-  #         Train_ocena = ModelOcena(dane_Train[,y], KNNpred_Train)
-  #         Test_ocena = ModelOcena(dane_Test[,y], KNNpred_Test)
-  #         
-  #         MAE_Train = append(MAE_Train, Train_ocena["MAE"])
-  #         MSE_Train = append(MSE_Train, Train_ocena["MSE"])
-  #         MAPE_Train = append(MAPE_Train, Train_ocena["MAPE"])
-  #         
-  #         MAE_Test = append(MAE_Test, Test_ocena["MAE"])
-  #         MSE_Test = append(MSE_Test, Test_ocena["MSE"])
-  #         MAPE_Test = append(MAPE_Test, Test_ocena["MAPE"])
-  #       }
-  #       else if(typ=="bin")
-  #       {
-  #         print(1)
-  #         Train_ocena = ModelOcena(dane_Train[, y], as.numeric(KNNpred_Train[,1]))
-  #         Test_ocena = ModelOcena(dane_Test[, y], as.numeric(KNNpred_Test[,1]))
-  #         print(2)
-  #         Train_miary = Train_ocena[[3]]
-  #         Test_miary = Test_ocena[[3]]
-  #         
-  #         Czulosc_Train <- append(Czulosc_Train, Train_miary["Czulosc"])
-  #         Specyficznosc_Train  <- append(Specyficznosc_Train, Train_miary["Specyficznosc"])
-  #         Jakosc_Train  <- append(Jakosc_Train, Train_miary["Jakosc"])
-  #         
-  #         Czulosc_Test <- append(Czulosc_Test, Test_miary["Czulosc"])
-  #         Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
-  #         Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
-  #       }
-  #       else if(typ=="multi")
-  #       {
-  #         Jakosc_Train <- append(Jakosc_Train, Trafnosc_new(dane_Train[,y], KNNpred_Train$Klasa))
-  #         Jakosc_Test <- append(Jakosc_Test, Trafnosc_new(dane_Test[,y], KNNpred_Test$Klasa))
-  #       }
-  #       
-  #     }else if(algorytm=="drzewa"){                     ### --- ### --- DRZEWA --- ### --- ### 
-  #       
-  #       print("Brak mozliwosci zrobienia predykcji na Drzewach!")
-  #       
-  #     }else if(algorytm=="NN"){                      ### --- ### --- Neural Network --- ### --- ###
-  #       
-  #       dane_Test <- dane[indxTest,]
-  #       dane_Train <- dane[-indxTest,]
-  #       
-  #       X_Train = as.matrix(sapply(dane_Train[,X],MinMax))
-  #       X_Test = as.matrix(sapply(dane_Test[,X],MinMax))
-  #       
-  #       
-  #       if(typ=="bin"){
-  #         
-  #         Y_Train = as.matrix(as.numeric(dane_Train[,y]))
-  #         Y_Test = as.matrix(as.numeric(dane_Test[,y]))
-  #         
-  #         NN_model_Bin <- trainNN_old( X_Train, Y_Train, h = hiper$h[1], lr = hiper$lr, iter = hiper$iter, seed = 123, typ = "binarna")
-  #         NN_predict_Bin_Train <- predNN_old( X_Train, NN_model_Bin, typ = "binarna")
-  #         NN_predict_Bin_Test <- predNN_old( X_Test, NN_model_Bin, typ = "binarna")
-  #         
-  #         Train_ocena = ModelOcena(dane_Train[, y], NN_predict_Bin_Train)
-  #         Test_ocena = ModelOcena(dane_Test[, y], NN_predict_Bin_Test)
-  #         Train_miary = Train_ocena[[3]]
-  #         Test_miary = Test_ocena[[3]]
-  #         
-  #         Czulosc_Train <- append(Czulosc_Train, Train_miary["Czulosc"])
-  #         Specyficznosc_Train  <- append(Specyficznosc_Train, Train_miary["Specyficznosc"])
-  #         Jakosc_Train  <- append(Jakosc_Train, Train_miary["Jakosc"])
-  #         
-  #         Czulosc_Test <- append(Czulosc_Test, Test_miary["Czulosc"])
-  #         Specyficznosc_Test  <- append(Specyficznosc_Test, Test_miary["Specyficznosc"])
-  #         Jakosc_Test <- append(Jakosc_Test, Test_miary["Jakosc"])
-  #         
-  #       }else if(typ=="multi"){
-  #         
-  #         klasy = levels(dane[,y])
-  #         Y_Train = model.matrix( ~ dane_Train[,y] - 1, dane_Train)
-  #         Y_Test = model.matrix( ~ dane_Test[,y] - 1, dane_Test)
-  #         
-  #         NN_model_Multi <- trainNN_old( X_Train, Y_Train, h = hiper$h[1], lr = hiper$lr, iter = hiper$iter, seed = 123, typ = "wieloklasowa")
-  #         NN_predict_Multi_Train <- predNN_old( X_Train, NN_model_Multi, typ = "wieloklasowa")
-  #         NN_predict_Multi_Test <- predNN_old( X_Test, NN_model_Multi, typ = "wieloklasowa")
-  #         
-  #         NNpred_Train <- as.numeric(klasy[apply( NN_predict_Multi_Train, 1, which.max )])
-  #         NNpred_Test <- as.numeric(klasy[apply( NN_predict_Multi_Train, 1, which.max )])
-  #         
-  #         Jakosc_Train <- append(Jakosc_Train, Trafnosc_new(NNpred_Train, dane_Train[,y]))
-  #         Jakosc_Test <- append(Jakosc_Test, Trafnosc_new(NNpred_Test, dane_Test[,y]))
-  #         
-  #       }else if(typ=="reg"){
-  #         
-  #         Y_Train = as.matrix(MinMax(dane_Train[,y]))
-  #         Y_Test = as.matrix(MinMax(dane_Test[,y]))
-  #         Y_min = min(dane[,y])
-  #         Y_max = max(dane[,y])
-  #         
-  #         NN_model_Reg <- trainNN_old( X_Train, Y_Train, h = hiper$h[1], lr = hiper$lr, iter = hiper$iter, seed = 123, typ = "regresja")
-  #         NN_predict_Reg_Train <- predNN_old( X_Train, NN_model_Reg, typ = "regresja")
-  #         NN_predict_Reg_Test <- predNN_old( X_Test, NN_model_Reg, typ = "regresja")
-  #         
-  #         NN_predict_Reg_Train_Scale <- MinMaxOdwrot(NN_predict_Reg_Train, Y_min, Y_max)
-  #         NN_predict_Reg_Test_Scale <- MinMaxOdwrot(NN_predict_Reg_Test, Y_min, Y_max)
-  #         
-  #         Train_ocena = ModelOcena(dane_Train[,y], NN_predict_Reg_Train_Scale)
-  #         Test_ocena = ModelOcena(dane_Test[,y], NN_predict_Reg_Test_Scale)
-  #         
-  #         MAE_Train = append(MAE_Train, Train_ocena["MAE"])
-  #         MSE_Train = append(MSE_Train, Train_ocena["MSE"])
-  #         MAPE_Train = append(MAPE_Train, Train_ocena["MAPE"])
-  #         
-  #         MAE_Test = append(MAE_Test, Test_ocena["MAE"])
-  #         MSE_Test = append(MSE_Test, Test_ocena["MSE"])
-  #         MAPE_Test = append(MAPE_Test, Test_ocena["MAPE"])
-  #       }
-  #       
-  #       
-  #     }
-  #     
-  #   }
-  #   
-  #   if(typ=="reg"){
-  #     
-  #     mae_train = append(mae_train, mean(MAE_Train))
-  #     mse_train = append(mse_train, mean(MSE_Train))
-  #     mape_train = append(mape_train, mean(MAPE_Train))
-  #     
-  #     mae_test = append(mae_test, mean(MAE_Test))
-  #     mse_test = append(mse_test, mean(MSE_Test))
-  #     mape_test = append(mape_test, mean(MAPE_Test))
-  #   }
-  #   else if(typ=="bin"){
-  #     
-  #     czulosc_train <- append(czulosc_train, mean(Czulosc_Train))
-  #     specyficznosc_train  <- append(specyficznosc_train, mean(Specyficznosc_Train))
-  #     jakosc_train  <- append(jakosc_train, mean(Jakosc_Train))
-  #     
-  #     czulosc_test <- append(czulosc_test, mean(Czulosc_Test))
-  #     specyficznosc_test  <- append(specyficznosc_test, mean(Specyficznosc_Test))
-  #     jakosc_test <- append(jakosc_test, mean(Jakosc_Test))
-  #   }
-  #   else if(typ=="multi"){
-  #     jakosc_train <- append(jakosc_train, mean(Jakosc_Train))
-  #     jakosc_test <- append(jakosc_test, mean(Jakosc_Test))
-  #   }
-  # }#parTune
-  # 
-  # if(typ=="reg"){
-  #   wyniki <- data.frame(matrix(0, nrow(parTune), ncol=6))
-  #   colnames(wyniki) = c("MAE_TRAIN", "MSE_TRAIN", "MAPE_TRAIN", "MAE_TEST", "MSE_TEST", "MAPE_TEST")
-  #   wyniki[,1] = mae_train
-  #   wyniki[,2] = mse_train
-  #   wyniki[,3] = mape_train
-  #   wyniki[,4] = mae_test
-  #   wyniki[,5] = mse_test
-  #   wyniki[,6] = mape_test
-  # }
-  # else if(typ=="bin"){
-  #   wyniki <- data.frame(matrix(0, nrow(parTune), ncol=6))
-  #   colnames(wyniki) = c("Czulosc_TRAIN", "Specyficznosc_TRAIN", "Jakosc_TRAIN", "Czulosc_TEST", "Specyficznosc_TEST", "Jakosc_TEST")
-  #   # print(czulosc_train)
-  #   wyniki[,1] = czulosc_train
-  #   wyniki[,2] = specyficznosc_train
-  #   wyniki[,3] = jakosc_train
-  #   wyniki[,4] = czulosc_test
-  #   wyniki[,5] = specyficznosc_test
-  #   wyniki[,6] = jakosc_test
-  # }
-  # else if(typ=="multi"){
-  #   wyniki <- data.frame(matrix(0, nrow(parTune), ncol=2))
-  #   colnames(wyniki) = c("Jakosc_TRAIN", "Jakosc_TEST")
-  #   wyniki[,1] = jakosc_train
-  #   wyniki[,2] = jakosc_test
-  # }
-  # wyniki = cbind(parTune, wyniki)
-  # return( wyniki )
-# }
-
-
-
-
-
-
-
-
+  
