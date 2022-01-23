@@ -1,9 +1,5 @@
 rm(list=ls())
 
-library(data.tree)
-library(rpart.plot)
-library(tidyverse)
-library(pROC)
 library(openxlsx)
 
 source("funkcje.R")
@@ -46,8 +42,8 @@ print(head(dane_reg))
 
 ### KNN ###
 
-parTune_KNN_bin <- expand.grid(k=4)
-KNN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 5, parTune_KNN_bin, algorytm="KNN", seed = 123)
+parTune_KNN_bin <- expand.grid(k=c(2:15))
+KNN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_KNN_bin, algorytm="KNN", seed = 123)
 KNN_bin_CrossValid
 
 KNN_bin_CrossValid_gr <- KNN_bin_CrossValid %>% group_by(k)
@@ -61,8 +57,8 @@ KNN_bin_best_T
 KNN_bin_best_W
 
 
-parTune_KNN_multi <- expand.grid(k=3:15)
-KNN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 5, parTune_KNN_multi, algorytm="KNN", seed = 123)
+parTune_KNN_multi <- expand.grid(k=c(2:15))
+KNN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_KNN_multi, algorytm="KNN", seed = 123)
 KNN_multi_CrossValid
 
 KNN_multi_CrossValid_gr <- KNN_multi_CrossValid %>% group_by(k)
@@ -74,15 +70,15 @@ KNN_multi_best_T
 KNN_multi_best_W
 
 
-parTune_KNN_reg <- expand.grid(k=1)
-KNN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 5, parTune_KNN_reg, algorytm="KNN", seed = 123)
+parTune_KNN_reg <- expand.grid(k=c(2:15))
+KNN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_KNN_reg, algorytm="KNN", seed = 123)
 KNN_reg_CrossValid
 
 KNN_reg_CrossValid_gr <- KNN_reg_CrossValid %>% group_by(k)
 KNN_reg_CrossValid_gr <- as.data.frame(KNN_reg_CrossValid_gr %>% summarise(MAET = mean(MAET), MSET = mean(MSET), MAPET = mean(MAPET), MAEW = mean(MAEW), MSEW = mean(MSEW), MAPEW = mean(MAPEW)))
 KNN_reg_CrossValid_gr
-KNN_reg_best_T <- KNN_reg_CrossValid_gr[which.min(KNN_reg_CrossValid_gr$MAPET),]
-KNN_reg_best_W <- KNN_reg_CrossValid_gr[which.min(KNN_reg_CrossValid_gr$MAPEW),]
+KNN_reg_best_T <- KNN_reg_CrossValid_gr[which.min(KNN_reg_CrossValid_gr$MAET),]
+KNN_reg_best_W <- KNN_reg_CrossValid_gr[which.min(KNN_reg_CrossValid_gr$MAEW),]
 KNN_reg_best_T
 KNN_reg_best_W
 
@@ -90,8 +86,8 @@ KNN_reg_best_W
 
 ### Drzewa Decyzyjne ###
 
-parTune_Tree_bin <- expand.grid(depth=c(5:6), minobs=c(2:3), type=c('Entropy'), overfit = c('none', 'prune'), cf=0.2)
-Tree_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 5, parTune_Tree_bin, algorytm="Tree", seed = 123)
+parTune_Tree_bin <- expand.grid(depth=c(3:6), minobs=c(2:5), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.1, 0.25 ))
+Tree_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_Tree_bin, algorytm="Tree", seed = 123)
 Tree_bin_CrossValid
 
 Tree_bin_CrossValid_gr <- Tree_bin_CrossValid %>% group_by(depth, minobs, type, overfit, cf)
@@ -105,8 +101,8 @@ Tree_bin_best_T
 Tree_bin_best_W
 
 
-parTune_Tree_multi <- expand.grid(depth=c(5:6), minobs=c(2:3), type=c('Entropy'), overfit = c('none', 'prune'), cf=0.2)
-Tree_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 5, parTune_Tree_multi, algorytm="Tree", seed = 123)
+parTune_Tree_multi <- expand.grid(depth=c(3:6), minobs=c(2:5), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.1, 0.25 ))
+Tree_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_Tree_multi, algorytm="Tree", seed = 123)
 Tree_multi_CrossValid
 
 Tree_multi_CrossValid_gr <- Tree_multi_CrossValid %>% group_by(depth, minobs, type, overfit, cf)
@@ -118,8 +114,8 @@ Tree_multi_best_T
 Tree_multi_best_W
 
 
-parTune_Tree_reg <- expand.grid(depth=c(5:6), minobs=c(2:3), type=c('SS'), overfit = c('none'), cf=0.2)
-Tree_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 5, parTune_Tree_reg, algorytm="Tree", seed = 123)
+parTune_Tree_reg <- expand.grid(depth=c(3:6), minobs=c(2:5), type=c('SS'), overfit = c('none'), cf=0.2)
+Tree_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_Tree_reg, algorytm="Tree", seed = 123)
 Tree_reg_CrossValid
 
 Tree_reg_CrossValid_gr <- Tree_reg_CrossValid %>% group_by(depth, minobs, type, overfit, cf)
@@ -148,8 +144,8 @@ Tree_reg_best_W
 # NN_pred_Klasy_bin
 # print(ModelOcena(dane_bin_NN[,dane_bin_Y], NN_predict_bin[,2]))
 
-parTune_NN_bin <- expand.grid(h=list(c(4,4)), lr = c(0.001), iter = c(200000))
-NN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 5, parTune_NN_bin, algorytm="NN", seed = 123)
+parTune_NN_bin <- expand.grid(h=list(c(3,4), c(4,4), c(5,5), c(6,6)), lr = c(0.001), iter = c(200000, 100000))
+NN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_NN_bin, algorytm="NN", seed = 123)
 NN_bin_CrossValid
 
 NN_bin_CrossValid_gr <- NN_bin_CrossValid %>% group_by(h, lr, iter)
@@ -177,8 +173,8 @@ NN_bin_best_W
 # NN_pred_Klasy_multi
 # print(ModelOcena(dane_multi_NN[,dane_multi_Y], NN_pred_Klasy_multi))
 
-parTune_NN_multi <- expand.grid(h=list(c(4,4)), lr = c(0.001), iter = c(200000))
-NN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 5, parTune_NN_multi, algorytm="NN", seed = 123)
+parTune_NN_multi <- expand.grid(h=list(c(3,4), c(4,4), c(5,5), c(6,6)), lr = c(0.001), iter = c(200000, 100000))
+NN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_NN_multi, algorytm="NN", seed = 123)
 NN_multi_CrossValid
 
 NN_multi_CrossValid_gr <- NN_multi_CrossValid %>% group_by(h, lr, iter)
@@ -204,8 +200,8 @@ NN_multi_best_W
 # NN_predict_reg_real
 # print(ModelOcena(dane_reg[,dane_reg_Y], NN_predict_reg_real))
 
-parTune_NN_reg <- expand.grid(h=list(c(4,4)), lr = c(0.001), iter = c(200000))
-NN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 5, parTune_NN_reg, algorytm="NN", seed = 123)
+parTune_NN_reg <- expand.grid(h=list(c(3,4), c(4,4), c(5,5), c(6,6)), lr = c(0.001), iter = c(200000, 100000))
+NN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_NN_reg, algorytm="NN", seed = 123)
 NN_reg_CrossValid
 
 NN_reg_CrossValid_gr <- NN_reg_CrossValid %>% group_by(h, lr, iter)
@@ -215,6 +211,77 @@ NN_reg_best_T <- NN_reg_CrossValid_gr[which.min(NN_reg_CrossValid_gr$MAPET),]
 NN_reg_best_W <- NN_reg_CrossValid_gr[which.min(NN_reg_CrossValid_gr$MAPEW),]
 NN_reg_best_T
 NN_reg_best_W
+
+
+
+
+
+#################################### Funkcje z bibliotek R ######################################
+
+cv_R <- trainControl(method="cv", number=10)
+
+
+### KNN ###
+
+print("KNN - R - bin")
+knn_grid_bin = expand.grid(k=2:50)
+KNN_bin_R = train(x=dane_bin[,dane_bin_X], y=dane_bin[,dane_bin_Y], tuneGrid=knn_grid_bin, method='knn', metric='Accuracy', trControl=cv_R)
+KNN_bin_R_Wynik = KNN_bin_R$results
+print(paste("Najlepszy KNN w R - Binarny: k = ", KNN_bin_R$finalModel$k, " | Accuracy = " ,KNN_bin_R_Wynik$Accuracy[KNN_bin_R_Wynik$k == KNN_bin_R$finalModel$k]))
+
+print("KNN - R - multi")
+knn_grid_multi = expand.grid(k=2:50)
+KNN_multi_R = train(x=dane_multi[,dane_multi_X], y=dane_multi[,dane_multi_Y], tuneGrid=knn_grid_multi, method='knn', metric='Accuracy', trControl=cv_R)
+KNN_multi_R_Wynik = KNN_multi_R$results
+print(paste("Najlepszy KNN w R - Binarny: k = ", KNN_multi_R$finalModel$k, " | Accuracy = " ,KNN_multi_R_Wynik$Accuracy[KNN_multi_R_Wynik$k == KNN_multi_R$finalModel$k]))
+
+print("KNN - R - reg")
+knn_grid_reg = expand.grid(k=2:50)
+KNN_reg_R = train(x=dane_reg[,dane_reg_X], y=dane_reg[,dane_reg_Y], tuneGrid=knn_grid_reg, method='knn', metric='MAE', trControl=cv_R)
+KNN_reg_R_Wynik = KNN_reg_R$results
+print(paste("Najlepszy KNN w R - Regresja: k = ", KNN_reg_R$finalModel$k, " | MAE = " ,KNN_reg_R_Wynik$MAE[KNN_reg_R_Wynik$k == KNN_reg_R$finalModel$k]))
+
+
+### TREE ###
+
+print("TREE - R - bin")
+tree_grid_bin = expand.grid(maxdepth=2:15)
+Tree_bin_R = train(x=dane_bin[,dane_bin_X], y=dane_bin[,dane_bin_Y], tuneGrid=tree_grid_bin, method='rpart2', metric='Accuracy', trControl=cv_R)
+Tree_bin_R_Wynik = Tree_bin_R$results
+print(paste("Najlepszy Tree w R - Binarny: Max Depth = ", Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_bin_R_Wynik$Accuracy[Tree_bin_R_Wynik$maxdepth == Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+print("TREE - R - multi")
+tree_grid_multi = expand.grid(maxdepth=2:15)
+Tree_multi_R = train(x=dane_multi[,dane_multi_X], y=dane_multi[,dane_multi_Y], tuneGrid=tree_grid_multi, method='rpart2', metric='Accuracy', trControl=cv_R)
+Tree_multi_R_Wynik = Tree_multi_R$results
+print(paste("Najlepszy Tree w R - Wieloklasowy: Max Depth = ", Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_multi_R_Wynik$Accuracy[Tree_multi_R_Wynik$maxdepth == Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+print("TREE - R - reg")
+tree_grid_reg = expand.grid(maxdepth=2:15)
+Tree_reg_R = train(x=dane_reg[,dane_reg_X], y=dane_reg[,dane_reg_Y], tuneGrid=tree_grid_reg, method='rpart2', metric='MAE', trControl=cv_R)
+Tree_reg_R_Wynik = Tree_reg_R$results
+print(paste("Najlepszy Tree w R - Regresja: Max Depth = ", Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | MAE = " , Tree_reg_R_Wynik$MAE[Tree_reg_R_Wynik$maxdepth == Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+
+### NN ###
+
+print("Neural Network - R - bin")
+nn_grid_bin = expand.grid(size=3:10, decay=0.00001)
+NN_bin_R = train(x=dane_bin[,dane_bin_X], y=dane_bin[,dane_bin_Y], tuneGrid=nn_grid_bin, method='nnet', metric='Accuracy', trControl=cv_R)
+NN_bin_R_Wynik = NN_bin_R$results
+print(paste("Najlepszy NN w R - Binarny: h = ", NN_bin_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_bin_R_Wynik$Accuracy[NN_bin_R_Wynik$size == NN_bin_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+print("Neural Network - R - multi")
+nn_grid_multi = expand.grid(size=3:10, decay=0.00001)
+NN_multi_R = train(x=dane_multi[,dane_multi_X], y=dane_multi[,dane_multi_Y], tuneGrid=nn_grid_multi, method='nnet', metric='Accuracy', trControl=cv_R)
+NN_multi_R_Wynik = NN_multi_R$results
+print(paste("Najlepszy NN w R - Wieloklasowy: h = ", NN_multi_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_multi_R_Wynik$Accuracy[NN_multi_R_Wynik$size == NN_multi_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+print("Neural Network - R - reg")
+nn_grid_reg = expand.grid(size=3:10, decay = 0.00001)
+NN_reg_R = train(x=dane_reg[,dane_reg_X], y=dane_reg[,dane_reg_Y], tuneGrid=nn_grid_reg, method='nnet', metric='MAE', trControl=cv_R)
+NN_reg_R_Wynik = NN_reg_R$results
+print(paste("Najlepszy NN w R - Regresja: h = ", NN_reg_R[["finalModel"]][["tuneValue"]][["size"]], " | MAE = " , NN_reg_R_Wynik$MAE[NN_reg_R_Wynik$size == NN_reg_R[["finalModel"]][["tuneValue"]][["size"]]]))
 
 
 

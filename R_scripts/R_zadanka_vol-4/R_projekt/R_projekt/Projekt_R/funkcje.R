@@ -1,11 +1,19 @@
-library(data.tree)
 library(tidyverse)
 library(pROC)
+library(ggplot2)
+library(StatMatch)
+library(dplyr)
+library(data.tree)
+library(caret)
+library(microbenchmark)
+library(rpart)
+library(rpart.plot)
+library(caTools)
+library(nnet)
 
 
 
 ### KNN ###
-
 
 
 MinMax <- function( x, new_min = 0, new_max = 1 ){
@@ -782,8 +790,8 @@ trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, 
     
     error[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
   }
-  xwartosci <- seq( 1, iter, length = 1000 )
-  print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+  # xwartosci <- seq( 1, iter, length = 1000 )
+  # print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
   return( list( y_hat = sygnalwprzod$y_hat, W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
