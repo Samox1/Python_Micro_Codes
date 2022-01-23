@@ -18,6 +18,7 @@ bin_kolumny <- colnames(dane_bin)               # glupi blad - przy zebraniu naz
 dane_bin_X <- bin_kolumny[-1]
 dane_bin_Y <- bin_kolumny[1]
 dane_bin[,1] <- as.factor(dane_bin[,1])
+print("*** Dane - klasyfikacja binarna ***")
 print(head(dane_bin))
 
 
@@ -27,6 +28,7 @@ multi_kolumny <- colnames(dane_multi)
 dane_multi_X <- multi_kolumny[-8]
 dane_multi_Y <- multi_kolumny[8]
 dane_multi[,8] <- as.factor(dane_multi[,8])
+print("*** Dane - klasyfikacja multi ***")
 print(head(dane_multi))
 
 
@@ -36,12 +38,18 @@ dane_reg[,1] <- as.numeric(dane_reg[,1])
 reg_kolumny <- colnames(dane_reg)               
 dane_reg_X <- reg_kolumny[-8]
 dane_reg_Y <- reg_kolumny[8]
+print("*** Dane - regresja ***")
 print(head(dane_reg))
 
+
+print("//////////////////////////////////////////////////////////")
+print("/////////////////////// OBLICZENIA ///////////////////////")
+print("//////////////////////////////////////////////////////////")
 
 
 ### KNN ###
 
+print("*** KNN - bin - kroswalidacja ***")
 parTune_KNN_bin <- expand.grid(k=c(2:15))
 KNN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_KNN_bin, algorytm="KNN", seed = 123)
 KNN_bin_CrossValid
@@ -56,7 +64,7 @@ KNN_bin_best_W <- KNN_bin_CrossValid_gr[which.max(KNN_bin_CrossValid_gr$JakoscW)
 KNN_bin_best_T
 KNN_bin_best_W
 
-
+print("*** KNN - multi - kroswalidacja ***")
 parTune_KNN_multi <- expand.grid(k=c(2:15))
 KNN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_KNN_multi, algorytm="KNN", seed = 123)
 KNN_multi_CrossValid
@@ -69,7 +77,7 @@ KNN_multi_best_W <- KNN_multi_CrossValid_gr[which.max(KNN_multi_CrossValid_gr$AC
 KNN_multi_best_T
 KNN_multi_best_W
 
-
+print("*** KNN - reg - kroswalidacja ***")
 parTune_KNN_reg <- expand.grid(k=c(2:15))
 KNN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_KNN_reg, algorytm="KNN", seed = 123)
 KNN_reg_CrossValid
@@ -86,6 +94,7 @@ KNN_reg_best_W
 
 ### Drzewa Decyzyjne ###
 
+print("*** Tree - bin - kroswalidacja ***")
 parTune_Tree_bin <- expand.grid(depth=c(3:6), minobs=c(2:5), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.1, 0.25 ))
 Tree_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_Tree_bin, algorytm="Tree", seed = 123)
 Tree_bin_CrossValid
@@ -100,7 +109,7 @@ Tree_bin_best_W <- Tree_bin_CrossValid_gr[which.max(Tree_bin_CrossValid_gr$Jakos
 Tree_bin_best_T
 Tree_bin_best_W
 
-
+print("*** Tree - multi - kroswalidacja ***")
 parTune_Tree_multi <- expand.grid(depth=c(3:6), minobs=c(2:5), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.1, 0.25 ))
 Tree_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_Tree_multi, algorytm="Tree", seed = 123)
 Tree_multi_CrossValid
@@ -113,7 +122,7 @@ Tree_multi_best_W <- Tree_multi_CrossValid_gr[which.max(Tree_multi_CrossValid_gr
 Tree_multi_best_T
 Tree_multi_best_W
 
-
+print("*** Tree - reg - kroswalidacja ***")
 parTune_Tree_reg <- expand.grid(depth=c(3:6), minobs=c(2:5), type=c('SS'), overfit = c('none'), cf=0.2)
 Tree_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_Tree_reg, algorytm="Tree", seed = 123)
 Tree_reg_CrossValid
@@ -144,6 +153,7 @@ Tree_reg_best_W
 # NN_pred_Klasy_bin
 # print(ModelOcena(dane_bin_NN[,dane_bin_Y], NN_predict_bin[,2]))
 
+print("*** Sieci - bin - kroswalidacja ***")
 parTune_NN_bin <- expand.grid(h=list(c(3,4), c(4,4), c(5,5), c(6,6)), lr = c(0.001), iter = c(200000, 100000))
 NN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_NN_bin, algorytm="NN", seed = 123)
 NN_bin_CrossValid
@@ -173,6 +183,7 @@ NN_bin_best_W
 # NN_pred_Klasy_multi
 # print(ModelOcena(dane_multi_NN[,dane_multi_Y], NN_pred_Klasy_multi))
 
+print("*** Sieci - multi - kroswalidacja ***")
 parTune_NN_multi <- expand.grid(h=list(c(3,4), c(4,4), c(5,5), c(6,6)), lr = c(0.001), iter = c(200000, 100000))
 NN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_NN_multi, algorytm="NN", seed = 123)
 NN_multi_CrossValid
@@ -200,6 +211,7 @@ NN_multi_best_W
 # NN_predict_reg_real
 # print(ModelOcena(dane_reg[,dane_reg_Y], NN_predict_reg_real))
 
+print("*** Sieci - reg - kroswalidacja ***")
 parTune_NN_reg <- expand.grid(h=list(c(3,4), c(4,4), c(5,5), c(6,6)), lr = c(0.001), iter = c(200000, 100000))
 NN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_NN_reg, algorytm="NN", seed = 123)
 NN_reg_CrossValid
@@ -217,6 +229,8 @@ NN_reg_best_W
 
 
 #################################### Funkcje z bibliotek R ######################################
+
+print("/// --- Obliczenia dla funkcji wbudowanych --- ///")
 
 cv_R <- trainControl(method="cv", number=10)
 
