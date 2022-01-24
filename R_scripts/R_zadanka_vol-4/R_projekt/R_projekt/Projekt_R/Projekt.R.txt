@@ -27,3 +27,32 @@
 #   d) Plik o dowolnym rozszerzeniu np. pdf, docx, pptx, zawierający opis i wyniki z przeprowadzonej analizy.
 # 
 # 6) Projekty proszę przesłać do 20 stycznia do godziny 23.59.
+
+
+
+print(KNN_bin_best_W)
+print(KNN_multi_best_W)
+print(KNN_reg_best_W)
+
+print(Tree_bin_best_W)
+print(Tree_multi_best_W)
+print(Tree_reg_best_W)
+
+print(NN_bin_best_W)
+print(NN_multi_best_W)
+print(NN_reg_best_W)
+
+R - KNN
+print(paste("Najlepszy KNN w R - Binarny: k = ", KNN_bin_R$finalModel$k, " | Accuracy = " ,KNN_bin_R_Wynik$Accuracy[KNN_bin_R_Wynik$k == KNN_bin_R$finalModel$k]))
+print(paste("Najlepszy KNN w R - Multi: k = ", KNN_multi_R$finalModel$k, " | Accuracy = " ,KNN_multi_R_Wynik$Accuracy[KNN_multi_R_Wynik$k == KNN_multi_R$finalModel$k]))
+print(paste("Najlepszy KNN w R - Regresja: k = ", KNN_reg_R$finalModel$k, " | MAE = " ,KNN_reg_R_Wynik$MAE[KNN_reg_R_Wynik$k == KNN_reg_R$finalModel$k]))
+
+R - Tree
+print(paste("Najlepszy Tree w R - Binarny: Max Depth = ", Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_bin_R_Wynik$Accuracy[Tree_bin_R_Wynik$maxdepth == Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+print(paste("Najlepszy Tree w R - Wieloklasowy: Max Depth = ", Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_multi_R_Wynik$Accuracy[Tree_multi_R_Wynik$maxdepth == Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+print(paste("Najlepszy Tree w R - Regresja: Max Depth = ", Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | MAE = " , Tree_reg_R_Wynik$MAE[Tree_reg_R_Wynik$maxdepth == Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+
+R - NN
+print(paste("Najlepszy NN w R - Binarny: h = ", NN_bin_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_bin_R_Wynik$Accuracy[NN_bin_R_Wynik$size == NN_bin_R[["finalModel"]][["tuneValue"]][["size"]]]))
+print(paste("Najlepszy NN w R - Wieloklasowy: h = ", NN_multi_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_multi_R_Wynik$Accuracy[NN_multi_R_Wynik$size == NN_multi_R[["finalModel"]][["tuneValue"]][["size"]]]))
+print(paste0("Najlepszy NN w R - Regresja: h = ", NN_reg_R[["finalModel"]][["tuneValue"]][["size"]], " | MAE = " , NN_reg_R_Wynik$MAE[NN_reg_R_Wynik$size == NN_reg_R[["finalModel"]][["tuneValue"]][["size"]]][1]))

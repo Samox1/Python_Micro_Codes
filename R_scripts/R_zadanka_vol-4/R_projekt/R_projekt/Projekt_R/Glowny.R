@@ -7,7 +7,7 @@ source("funkcje.R")
 
 ### DANE ###
 
-# Klasyfikacja Binarna      = https://archive.ics.uci.edu/ml/datasets/Wholesale+customers         # Dane przez prowadzacego
+# Klasyfikacja Binarna      = https://archive.ics.uci.edu/ml/datasets/Wholesale+customers         # Dane wybrane przez prowadzacego
 # Klasyfikacja Wieloklasowa = https://archive.ics.uci.edu/ml/datasets/seeds
 # Regresja                  = https://archive.ics.uci.edu/ml/datasets/Computer+Hardware
 
@@ -334,6 +334,78 @@ print(paste0("Najlepszy NN w R - Regresja: h = ", NN_reg_R[["finalModel"]][["tun
 
 
 
+#### PODSUMOWANIE WYNIKOW I POROWNANIE ####
+
+# print(KNN_bin_best_W)
+# print(KNN_multi_best_W)
+# print(KNN_reg_best_W)
+# 
+# print(Tree_bin_best_W)
+# print(Tree_multi_best_W)
+# print(Tree_reg_best_W)
+# 
+# print(NN_bin_best_W)
+# print(NN_multi_best_W)
+# print(NN_reg_best_W)
+# 
+# R - KNN
+# print(paste("Najlepszy KNN w R - Binarny: k = ", KNN_bin_R$finalModel$k, " | Accuracy = " ,KNN_bin_R_Wynik$Accuracy[KNN_bin_R_Wynik$k == KNN_bin_R$finalModel$k]))
+# print(paste("Najlepszy KNN w R - Multi: k = ", KNN_multi_R$finalModel$k, " | Accuracy = " ,KNN_multi_R_Wynik$Accuracy[KNN_multi_R_Wynik$k == KNN_multi_R$finalModel$k]))
+# print(paste("Najlepszy KNN w R - Regresja: k = ", KNN_reg_R$finalModel$k, " | MAE = " ,KNN_reg_R_Wynik$MAE[KNN_reg_R_Wynik$k == KNN_reg_R$finalModel$k]))
+# 
+# R - Tree
+# print(paste("Najlepszy Tree w R - Binarny: Max Depth = ", Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_bin_R_Wynik$Accuracy[Tree_bin_R_Wynik$maxdepth == Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+# print(paste("Najlepszy Tree w R - Wieloklasowy: Max Depth = ", Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_multi_R_Wynik$Accuracy[Tree_multi_R_Wynik$maxdepth == Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+# print(paste("Najlepszy Tree w R - Regresja: Max Depth = ", Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | MAE = " , Tree_reg_R_Wynik$MAE[Tree_reg_R_Wynik$maxdepth == Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+# 
+# R - NN
+# print(paste("Najlepszy NN w R - Binarny: h = ", NN_bin_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_bin_R_Wynik$Accuracy[NN_bin_R_Wynik$size == NN_bin_R[["finalModel"]][["tuneValue"]][["size"]]]))
+# print(paste("Najlepszy NN w R - Wieloklasowy: h = ", NN_multi_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_multi_R_Wynik$Accuracy[NN_multi_R_Wynik$size == NN_multi_R[["finalModel"]][["tuneValue"]][["size"]]]))
+# print(paste("Najlepszy NN w R - Regresja: h = ", NN_reg_R[["finalModel"]][["tuneValue"]][["size"]], " | MAE = " , NN_reg_R_Wynik$MAE[NN_reg_R_Wynik$size == NN_reg_R[["finalModel"]][["tuneValue"]][["size"]]][1]))
+
+
+
+# Klasyfikacja BINARNA - Porownanie
+print("*** Porownanie modeli - Klasyfikacja BINARNA ***")
+print("Najlepsze KNN - wlasne: ")
+print(KNN_bin_best_W)
+print(paste("Najlepszy KNN w R: k = ", KNN_bin_R$finalModel$k, " | Accuracy = " ,KNN_bin_R_Wynik$Accuracy[KNN_bin_R_Wynik$k == KNN_bin_R$finalModel$k]))
+print("Najlepsze Drzewo Decyzyjne - wlasne: ")
+print(Tree_bin_best_W)
+print(paste("Najlepszy Tree w R: Max Depth = ", Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_bin_R_Wynik$Accuracy[Tree_bin_R_Wynik$maxdepth == Tree_bin_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+print("Najlepsze NN - wlasne: ")
+print(NN_bin_best_W)
+print(paste("Najlepszy NN w R: h = ", NN_bin_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_bin_R_Wynik$Accuracy[NN_bin_R_Wynik$size == NN_bin_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+
+# Klasyfikacja MULTI - Porownanie
+print("*** Porownanie modeli - Klasyfikacja MULTI ***")
+print("Najlepsze KNN - wlasne: ")
+print(KNN_multi_best_W)
+print(paste("Najlepszy KNN w R: k = ", KNN_multi_R$finalModel$k, " | Accuracy = " ,KNN_multi_R_Wynik$Accuracy[KNN_multi_R_Wynik$k == KNN_multi_R$finalModel$k]))
+print("Najlepsze Drzewo Decyzyjne - wlasne: ")
+print(Tree_multi_best_W)
+print(paste("Najlepszy Tree w R: Max Depth = ", Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | Accuracy = " , Tree_multi_R_Wynik$Accuracy[Tree_multi_R_Wynik$maxdepth == Tree_multi_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+print("Najlepsze NN - wlasne: ")
+print(NN_multi_best_W)
+print(paste("Najlepszy NN w R: h = ", NN_multi_R[["finalModel"]][["tuneValue"]][["size"]], " | Accuracy = " , NN_multi_R_Wynik$Accuracy[NN_multi_R_Wynik$size == NN_multi_R[["finalModel"]][["tuneValue"]][["size"]]]))
+
+
+# Regresja - Porownanie
+print("*** Porownanie modeli - Regresja ***")
+print("Najlepsze KNN - wlasne: ")
+print(KNN_reg_best_W)
+print(paste("Najlepszy KNN w R - Regresja: k = ", KNN_reg_R$finalModel$k, " | MAE = " ,KNN_reg_R_Wynik$MAE[KNN_reg_R_Wynik$k == KNN_reg_R$finalModel$k]))
+print("Najlepsze Drzewo Decyzyjne - wlasne: ")
+print(Tree_reg_best_W)
+print(paste("Najlepszy Tree w R - Regresja: Max Depth = ", Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]], " | MAE = " , Tree_reg_R_Wynik$MAE[Tree_reg_R_Wynik$maxdepth == Tree_reg_R[["finalModel"]][["tuneValue"]][["maxdepth"]]]))
+print("Najlepsze NN - wlasne: ")
+print(NN_reg_best_W)
+print(paste0("Najlepszy NN w R - Regresja: h = ", NN_reg_R[["finalModel"]][["tuneValue"]][["size"]], " | MAE = " , NN_reg_R_Wynik$MAE[NN_reg_R_Wynik$size == NN_reg_R[["finalModel"]][["tuneValue"]][["size"]]][1]))
+
+
+
+
 ### Wykresy ###
 
 # Porownanie KNN wlasnych z bibliotekami w R
@@ -377,18 +449,18 @@ ggplot(Porownanie_KNN_Reg , aes(x=k)) +
   theme(legend.position = "bottom")
 
 
-
+### Drzewa Decyzyjne ###
 ### Zaleznosc wynikow od parametrow drzewa - BIN ###
 
 # Zaleznosc parametru PRUNE ('prune' / 'none') - ucinajacego drzewo
-Tree_bin_CrossValid_gr_prune <- Tree_bin_CrossValid %>% group_by(depth, minobs, type, overfit)
+Tree_bin_CrossValid_gr_prune <- Tree_bin_CrossValid %>% group_by(depth, minobs,overfit)
 Tree_bin_CrossValid_gr_prune <- as.data.frame(Tree_bin_CrossValid_gr_prune %>% summarise(
   AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),
   AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
 print(Tree_bin_CrossValid_gr_prune)
 
-bin_prune_yes <- Tree_bin_CrossValid_gr_prune[Tree_bin_CrossValid_gr_prune$overfit == 'prune',c("depth","minobs","type", "JakoscW")]
-bin_prune_no <- Tree_bin_CrossValid_gr_prune[Tree_bin_CrossValid_gr_type$overfit == 'none',c("depth","minobs","type", "JakoscW")]
+bin_prune_yes <- Tree_bin_CrossValid_gr_prune[Tree_bin_CrossValid_gr_prune$overfit == 'prune',c("depth","minobs", "JakoscW")]
+bin_prune_no <- Tree_bin_CrossValid_gr_prune[Tree_bin_CrossValid_gr_prune$overfit == 'none',c("depth","minobs", "JakoscW")]
 Tree_bin_Porownanie_Prune <- cbind("nr_wariantu" = c(1:nrow(bin_prune_yes)), bin_prune_yes, "JakoscW_none" = bin_prune_no$JakoscW)
 Tree_bin_Porownanie_Prune
 
@@ -439,7 +511,7 @@ ggplot(Tree_bin_Porownanie_Minobs , aes(x=minobs)) +
   geom_line(aes(y = JakoscW_4, color='red'), size=1,) +
   geom_line(aes(y = JakoscW_5, color='green'), size=1,) +
   geom_line(aes(y = JakoscW_6, color='black'), size=1,) +
-  labs(title='Drzwa Decyzyjne - Klas. Binarna - porownanie MinObs dla kazdej glebokosci', x='MinObs', y='Accuracy') +
+  labs(title='Drzwa Decyzyjne - Klas. Binarna - porownanie Acc od MinObs dla kazdej glebokosci', x='MinObs', y='Accuracy') +
   scale_color_discrete(name = "Depth", labels = c("D_3", "D_4", "D_5", "D_6")) +
   theme(legend.position = "bottom")
 
@@ -449,12 +521,12 @@ ggplot(Tree_bin_Porownanie_Minobs , aes(x=minobs)) +
 ### Zaleznosc wynikow od parametrow drzewa - MULTI ###
 
 # Zaleznosc parametru PRUNE ('prune' / 'none') - ucinajacego drzewo
-Tree_multi_CrossValid_gr_prune <- Tree_multi_CrossValid %>% group_by(depth, minobs, type, overfit)
+Tree_multi_CrossValid_gr_prune <- Tree_multi_CrossValid %>% group_by(depth, minobs, overfit)
 Tree_multi_CrossValid_gr_prune <- as.data.frame(Tree_multi_CrossValid_gr_prune %>% summarise(ACCT = mean(ACCT), ACCW = mean(ACCW)))
 print(Tree_multi_CrossValid_gr_prune)
 
-multi_prune_yes <- Tree_multi_CrossValid_gr_prune[Tree_multi_CrossValid_gr_prune$overfit == 'prune',c("depth","minobs","type", "ACCW")]
-multi_prune_no <- Tree_multi_CrossValid_gr_prune[Tree_multi_CrossValid_gr_prune$overfit == 'none',c("depth","minobs","type", "ACCW")]
+multi_prune_yes <- Tree_multi_CrossValid_gr_prune[Tree_multi_CrossValid_gr_prune$overfit == 'prune',c("depth","minobs", "ACCW")]
+multi_prune_no <- Tree_multi_CrossValid_gr_prune[Tree_multi_CrossValid_gr_prune$overfit == 'none',c("depth","minobs", "ACCW")]
 Tree_multi_Porownanie_Prune <- cbind("nr_wariantu" = c(1:nrow(multi_prune_yes)), multi_prune_yes, "ACCW_none" = multi_prune_no$ACCW)
 Tree_multi_Porownanie_Prune
 
@@ -501,7 +573,7 @@ ggplot(Tree_multi_Porownanie_Minobs , aes(x=minobs)) +
   geom_line(aes(y = ACCW_4, color='red'), size=1,) +
   geom_line(aes(y = ACCW_5, color='green'), size=1,) +
   geom_line(aes(y = ACCW_6, color='black'), size=1,) +
-  labs(title='Drzwa Decyzyjne - Klas. Wieloklasowa - porownanie MinObs dla kazdej glebokosci', x='MinObs', y='Accuracy') +
+  labs(title='Drzwa Decyzyjne - Klas. Wieloklasowa - porownanie MAE od MinObs dla kazdej glebokosci', x='MinObs', y='Accuracy') +
   scale_color_discrete(name = "Depth", labels = c("D_3", "D_4", "D_5", "D_6")) +
   theme(legend.position = "bottom")
 
@@ -526,15 +598,83 @@ ggplot(Tree_reg_Porownanie_Minobs , aes(x=minobs)) +
   geom_line(aes(y = MAEW_4, color='red'), size=1,) +
   geom_line(aes(y = MAEW_5, color='green'), size=1,) +
   geom_line(aes(y = MAEW_6, color='black'), size=1,) +
-  labs(title='Drzwa Decyzyjne - Klas. Wieloklasowa - porownanie MinObs dla kazdej glebokosci', x='MinObs', y='MAE') +
+  labs(title='Drzwa Decyzyjne - Regresja - porownanie MinObs dla kazdej glebokosci', x='MinObs', y='MAE') +
   scale_color_discrete(name = "Depth", labels = c("D_3", "D_4", "D_5", "D_6")) +
   theme(legend.position = "bottom")
 
 
 
 
+### Sieci Neuronowe ###
+
+### Zaleznosc wynikow od parametrow Sieci Neuronowej - BIN ###
+
+# print(NN_bin_CrossValid_wynik)
+
+# Zaleznosc parametru ITER i kombinacji neuronow w warstwach
+NN_bin_CrossValid_gr_iter <- NN_bin_CrossValid_wynik %>% group_by(h, iter)
+NN_bin_CrossValid_gr_iter <- as.data.frame(NN_bin_CrossValid_gr_iter %>% summarise(
+  AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),
+  AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
+print(NN_bin_CrossValid_gr_iter)
+
+bin_iter_1 <- NN_bin_CrossValid_gr_iter[NN_bin_CrossValid_gr_iter$iter == unique(NN_bin_CrossValid_gr_iter$iter)[1], c("h", "JakoscW")]
+bin_iter_2 <- NN_bin_CrossValid_gr_iter[NN_bin_CrossValid_gr_iter$iter == unique(NN_bin_CrossValid_gr_iter$iter)[2], c("h", "JakoscW")]
+NN_bin_Porownanie_iter <- cbind("nr_wariantu" = c(1:nrow(bin_iter_1)), bin_iter_1, "JakoscW_2" = bin_iter_2$JakoscW)
+NN_bin_Porownanie_iter
+
+ggplot(NN_bin_Porownanie_iter , aes(x=nr_wariantu)) +
+  geom_line(aes(y = JakoscW, color='blue'), size=1, ) +
+  geom_line(aes(y = JakoscW_2, color='red'), size=1,) +
+  labs(title='Sieci Neuronowe - Klas. Binarna - porownanie wynikow dla roznych ITER i modeli', x='Wariant warstw', y='Accuracy') +
+  scale_color_discrete(name = "Iter", labels = c(as.character(unique(NN_bin_CrossValid_gr_iter$iter)[1]), as.character(unique(NN_bin_CrossValid_gr_iter$iter)[2]))) +
+  theme(legend.position = "bottom")
 
 
+
+### Zaleznosc wynikow od parametrow Sieci Neuronowej - MULTI ###
+
+# print(NN_multi_CrossValid_wynik)
+
+# Zaleznosc parametru ITER i kombinacji neuronow w warstwach
+NN_multi_CrossValid_gr_iter <- NN_multi_CrossValid_wynik %>% group_by(h, iter)
+NN_multi_CrossValid_gr_iter <- as.data.frame(NN_multi_CrossValid_gr_iter %>% summarise(ACCT = mean(ACCT), ACCW = mean(ACCW)))
+print(NN_multi_CrossValid_gr_iter)
+
+multi_iter_1 <- NN_multi_CrossValid_gr_iter[NN_multi_CrossValid_gr_iter$iter == unique(NN_multi_CrossValid_gr_iter$iter)[1], c("h", "ACCW")]
+multi_iter_2 <- NN_multi_CrossValid_gr_iter[NN_multi_CrossValid_gr_iter$iter == unique(NN_multi_CrossValid_gr_iter$iter)[2], c("h", "ACCW")]
+NN_multi_Porownanie_iter <- cbind("nr_wariantu" = c(1:nrow(multi_iter_1)), multi_iter_1, "ACCW_2" = multi_iter_2$ACCW)
+NN_multi_Porownanie_iter
+
+ggplot(NN_multi_Porownanie_iter , aes(x=nr_wariantu)) +
+  geom_line(aes(y = ACCW, color='blue'), size=1, ) +
+  geom_line(aes(y = ACCW_2, color='red'), size=1,) +
+  labs(title='Sieci Neuronowe - Klas. Wieloklasowa - porownanie wynikow dla roznych ITER i modeli', x='Wariant warstw', y='Accuracy') +
+  scale_color_discrete(name = "Iter", labels = c(as.character(unique(NN_multi_CrossValid_gr_iter$iter)[1]), as.character(unique(NN_multi_CrossValid_gr_iter$iter)[2]))) +
+  theme(legend.position = "bottom")
+
+
+
+### Zaleznosc wynikow od parametrow Sieci Neuronowej - REG ###
+
+# print(NN_reg_CrossValid_wynik)
+
+# Zaleznosc parametru ITER i kombinacji neuronow w warstwach
+NN_reg_CrossValid_gr_iter <- NN_reg_CrossValid_wynik %>% group_by(h, iter)
+NN_reg_CrossValid_gr_iter <- as.data.frame(NN_reg_CrossValid_gr_iter %>% summarise(MAET = mean(MAET), MAEW = mean(MAEW)))
+print(NN_reg_CrossValid_gr_iter)
+
+reg_iter_1 <- NN_reg_CrossValid_gr_iter[NN_reg_CrossValid_gr_iter$iter == unique(NN_reg_CrossValid_gr_iter$iter)[1], c("h", "MAEW")]
+reg_iter_2 <- NN_reg_CrossValid_gr_iter[NN_reg_CrossValid_gr_iter$iter == unique(NN_reg_CrossValid_gr_iter$iter)[2], c("h", "MAEW")]
+NN_reg_Porownanie_iter <- cbind("nr_wariantu" = c(1:nrow(reg_iter_1)), reg_iter_1, "MAEW_2" = reg_iter_2$MAEW)
+NN_reg_Porownanie_iter
+
+ggplot(NN_reg_Porownanie_iter , aes(x=nr_wariantu)) +
+  geom_line(aes(y = MAEW, color='blue'), size=1, ) +
+  geom_line(aes(y = MAEW_2, color='red'), size=1,) +
+  labs(title='Sieci Neuronowe - Regresja - porownanie wynikow dla roznych ITER i modeli', x='Wariant warstw', y='MAE') +
+  scale_color_discrete(name = "Iter", labels = c(as.character(unique(NN_reg_CrossValid_gr_iter$iter)[1]), as.character(unique(NN_reg_CrossValid_gr_iter$iter)[2]))) +
+  theme(legend.position = "bottom")
 
 
 
