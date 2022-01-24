@@ -354,17 +354,20 @@ KNNpred <- function(KNNmodel, X)
 library(caret)
 
 iris_test <- as.data.frame(iris)
+iris_test$Species <- as.character(iris_test$Species)
+iris_test <- iris_test[iris_test[,5]=="setosa" | iris_test[,5]=="virginica",]
 iris_test$Species <- as.factor(iris_test$Species)
+
 wiersze <- sample(nrow(iris_test), 125, replace = FALSE)
 iris_train <- iris_test[wiersze,]
 iris_pred <- iris_test[-wiersze,]
 
-KNN_model_pakiet <- knn3( iris_train[,-5], iris_train[,5], k = 2 )
+KNN_model_pakiet <- knn3( iris_test[,-5], iris_test[,5], k = 2 )
 test_1 <- predict( KNN_model_pakiet, iris_pred[,-5] )
 test_1 <- cbind(test_1, '|')
 
-KNN_model <- KNNtrain(iris_train[,-5], iris_train[,5], k = 2, 0, 1)
-is.factor(KNNpred(KNN_model, iris_pred[,-5])$Klasa)
+KNN_model_iris <- KNNtrain(iris_test[,-5], iris_test[,5], k = 2, 0, 1)
+is.factor(KNNpred(KNN_model_iris, iris_pred[,-5])$Klasa)
 test_1 <- cbind(test_1, KNNpred(KNN_model, iris_pred[,-5]))
 test_1 <- cbind(test_1, TRUE_Y = iris_pred[,5])
 test_1

@@ -889,7 +889,7 @@ ModelOcena <- function(y_tar, y_hat)
   {
     if(length(y_tar) == 1)
     {
-      Acc <- Accuracy_multi(y_tar, y_hat = ifelse(y_hat <= 0.5, 0, 1))
+      Acc <- Accuracy_multi(y_tar, y_hat = ifelse(y_hat < 0.5, 0, 1))
       miary <- c("AUC" = 0, "Czulosc" = 0, "Specyficznosc" = 0, "Jakosc" = Acc)
       return(miary)
     }
@@ -951,23 +951,6 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
     podzial_zbioru[-id_trening,i] <- 1
   }
   
-
-  # print(ramka)
-  
-  # for(id_modele in 1:nrow(ramka))
-  # {
-  #   dane_treningowe <- dane[podzial_zbioru[,ramka$k_[id_modele]] == 1,]
-  #   dane_walidacyjne <- dane[podzial_zbioru[,ramka$k_[id_modele]] == 2,]
-  #   
-  #   Drzewo <- Tree(Y, X, dane_treningowe, type = ramka$type[id_modele], depth = ramka$depth[id_modele], minobs = ramka$minobs[id_modele], overfit = 'none', cf = ramka$cf[id_modele])
-  #   Test_treningowy <- PredictTree(Drzewo, dane_treningowe[,X])
-  #   Test_walidacyjny <- PredictTree(Drzewo, dane_walidacyjne[,X])
-  #   
-  #   print(ModelOcena(dane_treningowe[,Y], Test_treningowy))
-  #   
-  # }
-  
-  # print("*** Podzial danych zrobiony ***")
   
   print("-------------------------------")
   print(paste0("Algorytm: ", algorytm))
@@ -997,9 +980,9 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         
         KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
         KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
-
-        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(KNN_pred_Trening[,1]))
-        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(KNN_pred_Walid[,1]))
+        
+        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
+        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
 
         ramka_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
         ramka_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
@@ -1010,7 +993,8 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         ramka_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
         ramka_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         ramka_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-
+        
+        return(ramka_bin)
       }
       
       return(ramka_bin)
