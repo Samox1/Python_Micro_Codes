@@ -1,26 +1,19 @@
-rm(list=ls())
-
-library(openxlsx)
-
 source("funkcje.R")
 
 
-### DANE ###
+# Dane do Projektu:
+# Klasyfikacja Binarna      = https://archive.ics.uci.edu/ml/datasets/Breast+Cancer         
+# Klasyfikacja Wieloklasowa = https://archive.ics.uci.edu/ml/datasets/Abalone
+# Regresja                  = https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set
 
-# Klasyfikacja Binarna      = https://archive.ics.uci.edu/ml/datasets/Wholesale+customers         # Dane wybrane przez prowadzacego
-# Klasyfikacja Wieloklasowa = https://archive.ics.uci.edu/ml/datasets/seeds
-# Regresja                  = https://archive.ics.uci.edu/ml/datasets/Computer+Hardware
 
-
-dane_bin <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00292/Wholesale%20customers%20data.csv")
+dane_bin <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer/breast-cancer.data", header = FALSE)
 dane_bin <- dane_bin[,-2]
-bin_kolumny <- colnames(dane_bin)               # glupi blad - przy zebraniu nazwy "dane_bin[,1]" jest NULL
+bin_kolumny <- colnames(dane_bin)               
 dane_bin_X <- bin_kolumny[-1]
 dane_bin_Y <- bin_kolumny[1]
 dane_bin[,1] <- as.factor(dane_bin[,1])
-print("*** Dane - klasyfikacja binarna ***")
-print(head(dane_bin))
-print("*********************************")
+
 
 dane_multi <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00236/seeds_dataset.txt", header = FALSE, sep = "\t")
 dane_multi <- drop_na(dane_multi)
@@ -28,9 +21,7 @@ multi_kolumny <- colnames(dane_multi)
 dane_multi_X <- multi_kolumny[-8]
 dane_multi_Y <- multi_kolumny[8]
 dane_multi[,8] <- as.factor(dane_multi[,8])
-print("*** Dane - klasyfikacja multi ***")
-print(head(dane_multi))
-print("*********************************")
+
 
 
 dane_reg <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/cpu-performance/machine.data", header = FALSE)
@@ -39,18 +30,10 @@ dane_reg[,1] <- as.numeric(dane_reg[,1])
 reg_kolumny <- colnames(dane_reg)               
 dane_reg_X <- reg_kolumny[-8]
 dane_reg_Y <- reg_kolumny[8]
-print("*** Dane - regresja ***")
-print(head(dane_reg))
-print("*********************************")
-cat(" \n")
 
 
-print("//////////////////////////////////////////////////////////")
-print("/////////////////////// OBLICZENIA ///////////////////////")
-print("//////////////////////////////////////////////////////////")
 
-
-### KNN ###
+# KNN
 
 print("*** KNN - bin - kroswalidacja ***")
 # parTune_KNN_bin <- expand.grid(k=c(2:15))       <-- SIATKA PARAMETROW DO OBLICZEN, zmniejszona w celu oszczedzenia czasu | To samo sie tyczy kFold = 10 (do obliczen)
