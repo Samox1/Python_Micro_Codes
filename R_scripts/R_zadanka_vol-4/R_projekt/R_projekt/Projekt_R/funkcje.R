@@ -993,8 +993,6 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         ramka_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
         ramka_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         ramka_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-        
-        return(ramka_bin)
       }
       
       return(ramka_bin)
