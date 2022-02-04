@@ -818,7 +818,7 @@ predNN <- function( xnew, nn, typ = "bin" ){
 
 
 MAE <- function( y_tar, y_hat ){
-  return( mean( abs( y_tar - y_hat ) ) )
+  return(mean( abs( y_tar - y_hat ) ) )
 }
 
 MSE <- function(y_tar, y_hat ){
@@ -1245,7 +1245,7 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
       {
         cat(paste0("\t ", id_modele,"..."))
         
-        dane_reg_NN <- sapply(dane, MinMax_nn)
+        dane_reg_NN <- sapply(dane, MinMax_NN)
         
         dane_treningowe <- dane_reg_NN[podzial_zbioru[,ramka_reg$k_[id_modele]] == 1,]
         dane_walidacyjne <- dane_reg_NN[podzial_zbioru[,ramka_reg$k_[id_modele]] == 2,]

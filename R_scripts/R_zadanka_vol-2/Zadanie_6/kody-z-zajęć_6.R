@@ -11,11 +11,16 @@ wprzod <- function( X, Win, Wout ){
 }
 
 wstecz <- function( X, y_tar, y_hat, Win, Wout, H, lr ){
+  
   dWout <- t( cbind( 1, H ) ) %*% ( y_hat - y_tar )
+  
   dH <- ( y_hat - y_tar ) %*% t( Wout[-1,,drop=F] )
+  
   dWin <- t( cbind( 1, X ) ) %*% ( H * (1-H) * dH )
+  
   Win <- Win - lr * dWin
   Wout <- Wout - lr * dWout
+  
   return( list( Win = Win, Wout = Wout ) )
 }
 c(5,2)

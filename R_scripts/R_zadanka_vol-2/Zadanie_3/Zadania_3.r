@@ -52,7 +52,7 @@ MinMax <- function( x, new_min = 0, new_max = 1 ){
 KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew) 
 {
   if (any(is.na(X) == TRUE) || any(is.na(y_tar) == TRUE) || k <= 0 || (is.data.frame(X) == FALSE & is.matrix(X) == FALSE) ){
-    stop("Bledne dane")
+    stop("Bledne dane lub parametry")
   }
   else{
     X <- data.frame(X)

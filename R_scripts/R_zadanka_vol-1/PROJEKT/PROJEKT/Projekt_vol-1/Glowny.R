@@ -7,39 +7,59 @@ source("funkcje.R")
 # Regresja                  = https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set
 
 
-dane_bin <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer/breast-cancer.data", header = FALSE)
-dane_bin <- dane_bin[,-2]
-bin_kolumny <- colnames(dane_bin)               
-dane_bin_X <- bin_kolumny[-1]
-dane_bin_Y <- bin_kolumny[1]
-dane_bin[,1] <- as.factor(dane_bin[,1])
+bin_cancer <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer/breast-cancer.data", header = FALSE)
+bin_cancer <- read.csv("breast-cancer.data", header = FALSE)
+bin_cancer_X <- colnames(bin_cancer)[-1]
+bin_cancer_Y <- colnames(bin_cancer)[1]
+bin_cancer[,bin_cancer_Y] <- as.factor(bin_cancer[,bin_cancer_Y])
+summary(bin_cancer)
+bin_cancer <- bin_cancer[! bin_cancer$V6 == "?",]       # Usuniecie wierszy z wartosciami '?'
+bin_cancer$V6 <- as.factor(as.character(bin_cancer$V6))
+bin_cancer <- bin_cancer[! bin_cancer$V9 == "?",]       # Usuniecie wierszy z wartosciami '?'
+bin_cancer$V9 <- as.factor(as.character(bin_cancer$V9))
+
+bin_cancer$V2 <- as.numeric(bin_cancer$V2)
+bin_cancer$V3 <- as.numeric(bin_cancer$V3)
+bin_cancer$V4 <- as.numeric(bin_cancer$V4)
+bin_cancer$V5 <- as.numeric(bin_cancer$V5)
+bin_cancer$V6 <- as.numeric(bin_cancer$V6)
+bin_cancer$V7 <- as.numeric(bin_cancer$V7)
+bin_cancer$V8 <- as.numeric(bin_cancer$V8)
+bin_cancer$V9 <- as.numeric(bin_cancer$V9)
+bin_cancer$V10 <- as.numeric(bin_cancer$V10)
 
 
-dane_multi <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/00236/seeds_dataset.txt", header = FALSE, sep = "\t")
-dane_multi <- drop_na(dane_multi)
-multi_kolumny <- colnames(dane_multi)               
-dane_multi_X <- multi_kolumny[-8]
-dane_multi_Y <- multi_kolumny[8]
-dane_multi[,8] <- as.factor(dane_multi[,8])
+summary(bin_cancer)
+
+
+# dane_multi <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header = FALSE, sep = "\t")
+# dane_multi <- drop_na(dane_multi)
+# multi_kolumny <- colnames(dane_multi)               
+# dane_multi_X <- multi_kolumny[-8]
+# dane_multi_Y <- multi_kolumny[8]
+# dane_multi[,8] <- as.factor(dane_multi[,8])
 
 
 
-dane_reg <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/cpu-performance/machine.data", header = FALSE)
-dane_reg <- dane_reg[,-c(2,10)]
-dane_reg[,1] <- as.numeric(dane_reg[,1])
-reg_kolumny <- colnames(dane_reg)               
-dane_reg_X <- reg_kolumny[-8]
-dane_reg_Y <- reg_kolumny[8]
+# dane_reg <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/cpu-performance/machine.data", header = FALSE)
+# dane_reg <- dane_reg[,-c(2,10)]
+# dane_reg[,1] <- as.numeric(dane_reg[,1])
+# reg_kolumny <- colnames(dane_reg)               
+# dane_reg_X <- reg_kolumny[-8]
+# dane_reg_Y <- reg_kolumny[8]
 
 
 
 # KNN
 
 print("KNN - bin")
-parTune_KNN_bin <- expand.grid(k=c(2:50))   
-KNN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 6, parTune_KNN_bin, algorytm="KNN", seed = 123)
+parTune_KNN_bin <- expand.grid(k=c(2:2))   
+KNN_bin_CrossValid <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 10, parTune_KNN_bin, algorytm="KNN", seed = 123)
 KNN_bin_CrossValid
 
+KNN_Model <- KNNtrain(bin_cancer[,bin_cancer_X], bin_cancer[,bin_cancer_Y], 20, 0, 1)
+KNN_pred_Trening <- KNNpred(KNN_Model, X=bin_cancer[,bin_cancer_X])
+KNN_pred_Trening
 
 
 print("KNN - multi")
@@ -61,7 +81,7 @@ KNN_reg_CrossValid
 
 print("Tree - bin")
 parTune_Tree_bin <- expand.grid(depth=c(2:8), minobs=c(2:8), type=c('Entropy', 'Gini'), overfit = c('none'), cf=c(0.0))
-Tree_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_Tree_bin, algorytm="Tree", seed = 123)
+Tree_bin_CrossValid <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 10, parTune_Tree_bin, algorytm="Tree", seed = 123)
 Tree_bin_CrossValid
 
 
@@ -82,7 +102,7 @@ Tree_reg_CrossValid
 
 print("Sieci NN - bin")
 parTune_NN_bin <- expand.grid(h=list(c(3,5), c(4,6), c(2,7), c(3,4)), lr = c(0.01), iter = c(50000, 100000))
-NN_bin_CrossValid <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_NN_bin, algorytm="NN", seed = 123)
+NN_bin_CrossValid <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 10, parTune_NN_bin, algorytm="NN", seed = 123)
 NN_bin_CrossValid
 
 
@@ -104,7 +124,7 @@ cv_R <- trainControl(method="cv", number=10)
 
 print("KNN - R - bin")
 knn_grid_bin = expand.grid(k=2:50)
-KNN_bin_R = train(x=dane_bin[,dane_bin_X], y=dane_bin[,dane_bin_Y], tuneGrid=knn_grid_bin, method='knn', metric='Accuracy', trControl=cv_R)
+KNN_bin_R = train(x=bin_cancer[,bin_cancer_X], y=bin_cancer[,bin_cancer_Y], tuneGrid=knn_grid_bin, method='knn', metric='Accuracy', trControl=cv_R)
 KNN_bin_R_Wynik = KNN_bin_R$results
 
 print("KNN - R - multi")
@@ -120,7 +140,7 @@ KNN_reg_R_Wynik = KNN_reg_R$results
 
 print("TREE - R - bin")
 tree_grid_bin = expand.grid(maxdepth=2:15)
-Tree_bin_R = train(x=dane_bin[,dane_bin_X], y=dane_bin[,dane_bin_Y], tuneGrid=tree_grid_bin, method='rpart2', metric='Accuracy', trControl=cv_R)
+Tree_bin_R = train(x=bin_cancer[,bin_cancer_X], y=bin_cancer[,bin_cancer_Y], tuneGrid=tree_grid_bin, method='rpart2', metric='Accuracy', trControl=cv_R)
 Tree_bin_R_Wynik = Tree_bin_R$results
 
 print("TREE - R - multi")
@@ -134,9 +154,9 @@ Tree_reg_R = train(x=dane_reg[,dane_reg_X], y=dane_reg[,dane_reg_Y], tuneGrid=tr
 Tree_reg_R_Wynik = Tree_reg_R$results
 
 print("Neural Network - R - bin")
-dane_bin_norm <- MinMax_nn(dane_bin[,dane_bin_X])
+bin_cancer_norm <- MinMax_nn(bin_cancer[,bin_cancer_X])
 nn_grid_bin = expand.grid(size=3:15, decay = c(0.0001, 0.001))
-NN_bin_R = train(x=dane_bin_norm, y=dane_bin[,dane_bin_Y], tuneGrid=nn_grid_bin, method='nnet', metric='Accuracy', trControl=cv_R)
+NN_bin_R = train(x=bin_cancer_norm, y=bin_cancer[,bin_cancer_Y], tuneGrid=nn_grid_bin, method='nnet', metric='Accuracy', trControl=cv_R)
 NN_bin_R_Wynik = NN_bin_R$results
 
 

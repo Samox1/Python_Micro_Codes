@@ -10,6 +10,12 @@ library(rpart)
 library(rpart.plot)
 library(caTools)
 library(nnet)
+library(parallel)
+library(biglm)
+library(bigmemory)
+library(pryr)
+library("doParallel")
+library("doSNOW")
 
 
 
@@ -831,7 +837,7 @@ MAPE <- function(y_tar, y_hat ){
 
 
 AUC <- function(y_tar, y_hat){
-  krzywa_roc <- roc(y_tar, y_hat, quiet = TRUE)
+  krzywa_roc <- pROC::roc(y_tar, y_hat, quiet = TRUE)
   czulosc <- rev(krzywa_roc$sensitivities)
   specyficznosc <- rev(1 - krzywa_roc$specificities)
   czulosc_op <- c(diff(czulosc), 0)
@@ -842,7 +848,7 @@ AUC <- function(y_tar, y_hat){
 
 
 Youden <- function(a, b){
-  roc_krzywa <- roc(a, b, quiet = TRUE)
+  roc_krzywa <- pROC::roc(a, b, quiet = TRUE)
   TPR <- roc_krzywa$sensitivities
   FPR <- roc_krzywa$specificities
   max_Y <- 0
@@ -914,6 +920,13 @@ ModelOcena <- function(y_tar, y_hat)
 
 
 
+Test_ForEach <- function(x)
+{
+  wynik <- x + 10
+  return(wynik)
+}
+
+
 
 
 CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
@@ -952,40 +965,87 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   }
   
 
+  nCores <- detectCores()
+  klaster <- makeCluster(nCores-1)
+  registerDoParallel(klaster)
+  
   
   if(algorytm == "KNN")
   {
     cat("Model Progress: ")
+    cat('\n')
     
     if(typ == "bin")
     {
       tablica_bin <- data.frame(tablica, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
-      for(id_modele in 1:nrow(tablica_bin))
-      {
-        cat(paste0(id_modele,"..."))
+      wynik <- foreach(id_modele = 1:nrow(tablica_bin), .export = c("X", "Y", "dane", "tablica_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "Youden", "Czulosc", "Jakosc", "Specyficznosc", "d_euklides"), .combine = rbind) %dopar%
         
-        dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
-        
-        KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_bin$k[id_modele], 0, 1) 
-        
-        KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
-        KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
-        
-        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
-        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
+        {
+            # cat(paste0(id_modele,"..."))
+            # print(paste0("Model: ", i, " / ", nrow(tablica_bin)))  
+          
+            # tablica_bin[id_modele,"AUCT"] <- id_modele
+            # tablica_bin[id_modele,"AUCT"] <- sum(runif(100000000, min = 0, max = id_modele))        # TO DZIALA
+            # tablica_bin[id_modele,"AUCT"] <- Test_ForEach(id_modele)
+          
+            
+            dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
+            dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
 
-        tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
-        tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
-        tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
-        tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+            KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_bin$k[id_modele], 0, 1)
 
-        tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
-        tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
-        tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
-        tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-      }
+            KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
+            KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
+
+            Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
+            Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
+
+            tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+            tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+            tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+            tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+
+            tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+            tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+            tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+            tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
+            
+            return(tablica_bin[id_modele,])
+        }
+      
+      stopCluster(klaster)
+      
+      print(wynik)
+      # print(wynik)
+      
+      print(tablica_bin)
+      
+      # for(id_modele in 1:nrow(tablica_bin))
+      # {
+      #   cat(paste0(id_modele,"..."))
+      #   
+      #   dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
+      #   dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
+      #   
+      #   KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_bin$k[id_modele], 0, 1) 
+      #   
+      #   KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
+      #   KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
+      #   
+      #   Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
+      #   Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
+      # 
+      #   tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+      #   tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+      #   tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+      #   tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+      # 
+      #   tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+      #   tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+      #   tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+      #   tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
+      # }
       
       return(tablica_bin)
       
@@ -1052,6 +1112,8 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   
   ### Drzewa decyzyjne ###
   
+
+  
   
   if(algorytm == "Tree")
   {
@@ -1064,28 +1126,28 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
       for(id_modele in 1:nrow(tablica_bin))
       {
         cat(paste0(id_modele,"..."))
-        
+
         dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
         dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
-        
-        Tree_Model <- Tree(Y, X, dane_treningowe, type = tablica_bin$type[id_modele], depth =  tablica_bin$depth[id_modele], minobs =  tablica_bin$minobs[id_modele], overfit =  tablica_bin$overfit[id_modele], cf = tablica_bin$cf[id_modele]) 
-        
+
+        Tree_Model <- Tree(Y, X, dane_treningowe, type = tablica_bin$type[id_modele], depth =  tablica_bin$depth[id_modele], minobs =  tablica_bin$minobs[id_modele], overfit =  tablica_bin$overfit[id_modele], cf = tablica_bin$cf[id_modele])
+
         Tree_pred_Trening <- PredictTree(Tree_Model, dane_treningowe[,X])
         Tree_pred_Walid <- PredictTree(Tree_Model, dane_walidacyjne[,X])
-        
+
         Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(Tree_pred_Trening[,2]))
         Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(Tree_pred_Walid[,2]))
-        
+
         tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
         tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
         tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
         tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
-        
+
         tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
         tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
         tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-        
+
       }
       
       return(tablica_bin)
