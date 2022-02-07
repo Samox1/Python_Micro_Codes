@@ -960,7 +960,7 @@ predNN <- function(x, NN, typ){
   }
   else
   {
-    y_hat <- sigmoid(h1 %*% NN$W_out)
+    # y_hat <- sigmoid(h1 %*% NN$W_out)
     
     if (typ =="bin")
     {

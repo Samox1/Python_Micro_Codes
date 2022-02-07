@@ -1,12 +1,14 @@
 library(dplyr)
-library(ROCR)
 library(pROC)
 library(parallel)
 library(doParallel)
 library(foreach)
 library(iterators)
 library(data.tree)
-
+library(caret)
+library(rpart)
+library(nnet)
+library(ggplot2)
 
 
 
@@ -36,7 +38,7 @@ SoftMax <- function(x) {
   exp( x ) / sum( exp( x ) )
 }
 
-MinMax <- function( x ) {
+MinMax_bez_przedzialu <- function( x ) {
   return( ( x - min(x) ) / ( max(x) - min(x) ) )
 }  
 
@@ -45,53 +47,44 @@ MinMaxOdwrot <- function( x, y_min, y_max ) {
 }  
 
 
-wprzod <- function(X, W){
-  #h1 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W1 )  )
-  #h2 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( h1 %*% W2 )  )
-  
-  # y_hat <- sigmoid( h2 %*% W3 ) # klasyfikacja binarna
-  # if (type == "bin") {
-  #   y_hat <- sigmoid( h2 %*% W3 )}
-  # y_hat <- matrix( t( apply( h2 %*% W3, 1, SoftMax ) ), nrow = nrow(X) ) # klasyfikacja wieloklasowa
-  # else if (type == "multiclass") {
-  # y_hat <- matrix( t( apply( h2 %*% W3, 1, SoftMax ) ), nrow = nrow(X) )}
-  # y_hat <- h2 %*% W3 # regresja
-  # else {
-  #   y_hat <- h2 %*% W3}
-  # return( list( y_hat = y_hat, H1 = h1, H2 = h2 ) )
+forward_prop <- function(X, W, type){
   H <- list()
-  H[[1]] <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W[[1]] )  )
+
+  H[[1]] <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W[[1]] ))
+  
   if(length(W) > 2){
     for(i in 1:(length(W)-2)){
       H[[i+1]] <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( H[[i]] %*% W[[i+1]] )  )
     }
   }
-  y_hat <- sigmoid( H[[length(W)-1]] %*% W[[length(W)]] )
+  
+  if(type == 'bin'){
+    y_hat <- sigmoid( H[[length(H)]] %*% W[[length(W)]] )
+  }else if(type == 'multi'){
+    y_hat <- matrix( t( apply( H[[length(H)]] %*% W[[length(W)]], 1, SoftMax ) ), nrow = nrow(X))
+  }else if(type == 'reg'){
+    y_hat <- ( H[[length(H)]] %*% W[[length(W)]] ) 
+  }
   
   return(list(y_hat = y_hat, H = H))
-  
 }#wprzod
 
 
 
-wstecz <- function(Y, X, Y_hat, W, H, lr){
-  # dy_hat <- (y_tar - y_hat) * dsigmoid( y_hat ) # klasyfikacja binarna
-  # dy_hat <- (y_tar - y_hat) / nrow( X ) # klasyfikacja wieloklasowa
-  # dy_hat <- (y_tar - y_hat) # regresja
-  #Z ZAJEC
-  # dW3 <- t(H2) %*% dy_hat
-  # dH2<- dy_hat %*% t(W3) * dsigmoid( H2 )
-  # dW2 <- t(H1) %*% dH2[,-1]
-  # dH1<- dH2[,-1] %*% t(W2) * dsigmoid( H1 )
-  # dW1 <- t(X) %*% dH1[,-1]
-  # W1 <- W1 + lr * dW1
-  # W2 <- W2 + lr * dW2
-  # W3 <- W3 + lr * dW3
+backword_prop <- function(Y, X, Y_hat, W, H, lr, type){
+
+  if (type =="bin"){
+    dy_hat <- (Y - Y_hat) * dsigmoid(Y_hat)
+  }
+  else if (type == "multi"){
+    dy_hat <- (Y - Y_hat) / nrow(X)       
+  } 
+  else if (type == "reg"){
+    dy_hat <- (Y - Y_hat)
+  }
   
-  dy_hat <- (as.numeric(Y) - Y_hat) * dsigmoid( Y_hat )
-  #dy_hat <- (y_tar - Y_hat) * dsigmoid( Y_hat )
-  dW = list()
   dH = list()
+  dW = list()
   
   dW[[length(W)]] <- t(H[[length(H)]]) %*% dy_hat
   dH[[length(H)]] <- dy_hat %*% t(W[[length(W)]]) * dsigmoid(H[[length(H)]])
@@ -104,71 +97,82 @@ wstecz <- function(Y, X, Y_hat, W, H, lr){
   }
   dW[[1]] <- t(X) %*% dH[[1]][, -1]
   
-  W_b = list()
   for(i in 1:length(W)){
-    W_b[[i]] <- W[[i]] + lr * dW[[i]]
+    W[[i]] <- W[[i]] + lr * dW[[i]]
   }
   
-  return(W = W_b)
-  # return( list( W1 = W1, W2 = W2, W3 = W3 ) )
+  return(W)
 }#wstecz
 
-trainNN<- function( Yname, Xnames, data, h = c(2,3), lr = 0.01, iter = 1000, seed = 123 ){
-  
-  # W1, .... W_liczba_warst_ukrytych+1
-  # assign( paste0( "W", 1:W_liczba_warst_ukrytych+1), matrix( rnorm( h + 1 ) ) )
-  # W1 <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
-  # W2 <- matrix( runif( (h[1]+1) * h[2], -1, 1 ), nrow = h[1] + 1 )
-  # W3 <- matrix( runif( (h[2]+1) * ncol(y_tar), -1, 1 ), nrow = h[2] + 1 )
-  
-  
-  X <- as.matrix(data[, Xnames])
-  Y <- as.numeric(as.character(data[, Yname]))
-  
-  
-  set.seed( seed )
-  X <- cbind( rep( 1, nrow(X) ), X ) #WSP
+trainNN<- function( Yname, Xnames, data, h, lr, iter, seed, type){
+
+  set.seed(seed)
+  h <- unlist(h, use.names = FALSE)
+  X <- (data[, Xnames])
+  X <- as.matrix(cbind( rep( 1, nrow(X) ), X )) #WSP
+  y_tar <- as.matrix(data[, Yname])
   
   W = list()
   W[[1]] <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
   
   if(length(h)>1){
-    for(i in 1:(length(h)-1)){
+    for(i in 2:(length(h))){
       # W_in lists
-      W[[i+1]] <- matrix( runif( (h[i]+1) * h[i+1], -1, 1 ), nrow = h[i] + 1 )
+      W[[i]] <- matrix( runif( (h[i-1]+1) * h[i], -1, 1 ), nrow = h[i-1] + 1 )
     }
   }
   
   W[[length(h)+1]] <- matrix( runif( (h[length(h)]+1) * ncol(y_tar), -1, 1 ), nrow = h[length(h)] + 1 )
   
-  error <- double( iter )
+  # error <- double( iter )
   
   for( i in 1:iter ){
-    sygnalwprzod <- forward_prop( X, W )# W = list( W1, W2, W3 )
-    sygnalwtyl   <- backword_prop( X, Y, Y_hat = sygnalwprzod$y_hat, W, H = sygnalwprzod$H, lr )
-    #                           (X, Y, Y_hat, W, H, lr)
+    sygnalwprzod <- forward_prop( X, W , type)
+    sygnalwtyl   <- backword_prop( y_tar, X, Y_hat = sygnalwprzod$y_hat, W, H = sygnalwprzod$H, lr , type)
     W <- sygnalwtyl
+
     cat( paste0( "\rIteracja: ", i ) )
-    error[i] <- lossSS( Y, sygnalwprzod$y_hat )
+    # error[i] <- lossSS( Y, sygnalwprzod$y_hat )
   }
-  xwartosci <- seq( 1, iter, length = 1000 )
-  print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
-  # 
-  return( list( y_hat = sygnalwprzod$y_hat, W = W ) )
+  # xwartosci <- seq( 1, iter, length = 1000 )
+  # print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
   
+  return(list( y_hat = sygnalwprzod$y_hat, Wagi = W ))
 } #trainNN
 
 
-                                                                                                                          # PREDYKCJA SIECI DO NAPRAWY
-predNN <- function( xnew, NN ){
-  xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
-  h1 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( xnew %*% NN$W1 )  )
-  h2 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( h1 %*% NN$W2 )  )
-  y_hat <- sigmoid( h2 %*% NN$W3 )
-  return( y_hat )
-} #predNN
 
+predNN <- function(xnew, NN, type){
+  xnew <- cbind(rep(1, nrow(xnew)), xnew)
 
+  H <- list()
+  H[[1]] <- cbind(matrix(1, nrow = nrow(xnew)), sigmoid(xnew %*% NN$W[[1]]))
+  
+  if(length(NN$W) > 2){
+    for (i in 2:(length(NN$W)-1)){
+      H[[i]] <- cbind(matrix(1, nrow = nrow(xnew)), sigmoid(H[[i-1]] %*% NN$W[[i]] ))
+    }
+  }
+
+  y_hat <- sigmoid( H[[length(H)]] %*% NN$W[[length(NN$W)]] )
+  
+  if (type =="bin"){
+    y_hat <- sigmoid( H[[length(H)]] %*% NN$W[[length(NN$W)]])                 
+  }
+  else if (type == "multi"){
+    y_hat <- matrix(t(apply( H[[length(H)]] %*% NN$W[[length(NN$W)]], 1, SoftMax)), nrow = nrow(xnew))
+  } 
+  else if (type == "reg"){
+    y_hat <- H[[length(H)]] %*% NN$W[[length(NN$W)]] 
+  }
+  
+  
+  if(is.factor(NN$y_hat)){
+    
+  }
+  
+  return(y_hat)
+}
 
 
 
@@ -248,7 +252,7 @@ Gini <- function(prob) {
 
 SS <- function(y) {
   if (is.factor(y)) {
-    stop("Niemozliwe do wykonania. Dziala jedynie dla regresji. Wprowadzono factor, SS jest tylgo do regresji")
+    stop("Niemozliwe do wykonania. Dziala jedynie dla regresji. Wprowadzono factor, SS jest tylko do regresji")
   }
   else {
     y_1 <- sum(y)/length(y)
@@ -402,8 +406,53 @@ FindBestSplit <- function(Y, X, data, parentVal, type, minobs) {
   return (res)
 } #FindBestSplit
 
-PruneTree <- function() {
+
+
+PE <- function(p, n, z){
+  return((p+(z^2)/(2*n)+z*sqrt(p/n-(p^2)/(n)+(z^2)/(4*n^2)))/(1+z^2/n))
+}
+
+PruneTree <- function(tree, cf){
+  errcf <- qnorm(1 - cf)
+  if( length( tree$Get("pathString") ) == 1 ) return( NULL )
+  liscie_byly <- c()
   
+  repeat{
+    sciezka_lisci <- tree$Get("pathString", filterFun = isLeaf)
+    if(all( sciezka_lisci %in% liscie_byly) | sciezka_lisci[1] == "Root") break
+    temp <- strsplit(sciezka_lisci[ !sciezka_lisci %in% liscie_byly ][1], "/")[[1]]
+    leaf <- eval(parse(text = paste("tree", paste0(paste0("'", temp[-1]), "'", collapse = "$"), sep = "$")))
+    parent <- leaf$parent
+    sibling <- leaf$siblings[[1]]
+    leaf_class <- leaf$Class
+    sibling_class <- sibling$Class
+    parent_class <- parent$Class
+    leaf_prob <- leaf$Prob
+    sibling_prob <- sibling$Prob
+    parent_prob <- parent$Prob
+    leaf_count <- leaf$Count
+    sibling_count <- sibling$Count
+    parent_count <- parent$Count
+    leaf_isLeaf <- leaf$isLeaf
+    sibling_isLeaf <- sibling$isLeaf
+    
+    leaf_PE <- PE( 1 - max(leaf_prob), leaf_count, errcf)
+    sibling_PE <- PE( 1 - max(sibling_prob), sibling_count, errcf)
+    parent_PE <- PE( 1 - max(parent_prob), parent_count, errcf)
+    
+    if_prune <- parent_PE <= leaf_count / parent_count * leaf_PE + sibling_count / parent_count * sibling_PE
+    
+    if( if_prune & leaf_isLeaf == sibling_isLeaf)
+    {
+      parent$RemoveChild(sibling$name)
+      parent$RemoveChild(leaf$name)
+      parent$Leaf <- "*"
+    }
+    else
+    {
+      liscie_byly <- c(liscie_byly, leaf$pathString)
+    }
+  }
 }
 
 
@@ -463,14 +512,16 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit = "none", cf = "0.2") 
   }
   
   #STRING W FACTOR
-  for (i in 1:length(X)) {
-    if (is.factor(data[,i])) {
-      data[,i] <- as.character(data[,i])
-    }
-    else {
-      next
-    }
-  }
+  # for (i in 1:length(X)) {
+  #   if (is.factor(data[,i])) {
+  #     data[,i] <- as.character(data[,i])
+  #   }
+  #   else {
+  #     next
+  #   }
+  # }
+  
+  print("KAPPA")
   
   tree<- Node$new("Root")
   tree$Count <- nrow(data)
@@ -488,7 +539,11 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit = "none", cf = "0.2") 
   tree <- AssignInitialMeasures(tree, Y, data, type, depth)
   
   BuildTree(tree, Y, X, data, depth, type, minobs)  #BuildTree
-  PruneTree <- function() {}
+  
+  if(overfit == 'prune')
+  {
+    PruneTree(tree = tree, cf = cf)
+  }
   
   AssignInfo(tree,Y,X,data,type,depth, minobs, overfit, cf ) #AssignTree
   
@@ -499,8 +554,8 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit = "none", cf = "0.2") 
 obsPred <- function(tree, obs) {
   
   if (tree$isLeaf) {
-    print(tree$Prob)
-    return(data.frame("Prob" = max(tree$Prob), "Class" = (tree$Class), stringsAsFactors = F))
+    # print(tree$Prob)
+    return(c(as.numeric(as.character(tree$Prob)), "Class" = tree$Class))
   }
   if (is.numeric(tree$children[[1]]$BestSplit) | is.ordered(tree$children[[1]]$BestSplit)) {
     
@@ -518,22 +573,24 @@ obsPred <- function(tree, obs) {
 PredictTree <- function(tree, data) {
   
   if (is.factor(attributes(tree)$Y)) {
-    out <- data.frame(matrix(0, nrow = nrow(data), ncol = 2))
+    out <- c()
     
-    for (i in 1:nrow(data)) {
-      out[i,] <- (obsPred(tree, data[i, ,drop = F]))
+    for (i in 1:nrow(data)){
+      out <- rbind(out, (obsPred(tree, data[i, ,drop = F])))
     }
-    colnames(out) <- c("Prob", "Class")
+    
+    # out[,-ncol(out)] <- as.numeric(out[,-ncol(out)])
+    
   }
-  
   else {
     out <- c()
     
     for (i in 1:nrow(data)) {
-      out[i] <- (obsPred(tree, data[i, ,drop = F])$Class)
+      out[i] <- as.numeric(obsPred(tree, data[i, ,drop = F])["Class"])
     }
   }
   return (out)
+
 } #PredictTree
 
 
@@ -541,6 +598,22 @@ PredictTree <- function(tree, data) {
 
 
 # KNN
+
+MinMax <- function( x, new_min = 0, new_max = 1 ){
+  return( ( ( x - min(x) ) / ( max(x) - min(x) ) ) * ( new_max - new_min ) + new_min )
+}
+# set.seed(123)
+# y <- runif(100, min = 1, max = 2)
+# summary(y) # wywołuje informacje statystki dla wszystkich wartości 
+# summary( MinMax(y)) # sprawdzamy MinMax pracując na y
+# summary( MinMax(y, 10, 25)) # sprawdzamy MinMax pracując na innej skali od 10 do 25
+
+#NORMALIZACJA ZScore
+ZScore <- function(x) {
+  return ((x - mean(x))/sd(x))  
+}
+
+
 
 #wyszukanie mody dla zbioru, dominanta
 getMode <- function(x) {
@@ -589,13 +662,69 @@ d_gower <- function(dane,x_i,x_n) {
       }
       else {
         odl <- sum(x_i[i] != x_n[i])
-        out <- out + odl
-        #=+ nie dziala
+        wynik <- wynik + odl
       }
     }
-    return (as.numeric(out)/length(x_i))
+    return (as.numeric(wynik)/length(x_i))
   }
 }
+
+
+KNNtrain <- function(X, y_tar, k = 2, XminNew = 0, XmaxNew = 1){
+  if(k <=0 ){
+    stop("Analiza nie jest możliwa do wykonania. Liczba sasiadow niepoprawnie wprowadzona, mniejsza lub rowna 0")
+  }
+  else if(!is.matrix(X) & !is.data.frame(X)){
+    stop("Analiza nie jest mozliwa do wykonania. Wektor wejsciowy nie jest ani macierza, ani ramka danych.")
+  }
+  else if(anyNA(X) | anyNA(y_tar)){
+    stop("Analiza nie jest mozliwa do wykonania. Brakujace dane. Uzupelnij zbior danych" )
+  }
+  
+  # else if(nrow(X) != length(y_tar)){
+  #   stop("Ilosc Wartosci prognozowanych jest rozna od ilosci zmiennych objasniajacych")
+  # }
+  
+  else{
+    macierz <- matrix(0, nrow = nrow(X), ncol = ncol(X))
+    ramka_danych <- data.frame(macierz)
+    
+    minOrg <- c()
+    maxOrg <- c()
+    minmaxNew <- c()
+    
+    for (i in 1:length(X)) {
+      if (all(sapply(X[i], class) == "numeric")) {
+        minOrg <- append(minOrg, min(X[i]))
+        maxOrg <- append(maxOrg, max(X[i]))
+        X[i] <- as.vector(unlist(MinMax(X[i], XminNew,XmaxNew)))
+        minmax <- c(c(min(X[i]),max(X[i])))
+        names(minmax) <- c( paste( colnames(X[i]), "min", sep="_"), paste(colnames(X[i]), "max", sep="_"))
+        minmaxNew <- append(minmaxNew, minmax)
+      }
+      else if (all(sapply(X[i], class) == "factor")) {
+        maxOrg <- append(maxOrg,max(as.vector(as.numeric(unlist(X[i])))))
+        minOrg <- append(minOrg,min(as.vector(as.numeric(unlist(X[i])))))
+        X[i] <- factor(as.vector(unlist(X[i])))
+      }
+      else {
+        maxOrg <- append(maxOrg,max(as.vector(unlist(X[i]))))
+        minOrg <- append(minOrg,min(as.vector(unlist(X[i]))))
+        X[i] <- (X[i])
+      }
+    }
+    
+    names(maxOrg) <- colnames(X)
+    names(minOrg) <- colnames(X)
+    attr(X,paste("minOrg")) <- minOrg
+    attr(X,paste("maxOrg")) <- maxOrg
+    attr(X,paste("minmaxNew")) <- minmaxNew
+    knn_lista <- list("X" = X, "y_tar" = y_tar, "k" = k)
+    
+    return (knn_lista)
+  }
+  
+}#KNNtrain
 
 
 
@@ -899,6 +1028,9 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
   
   stopCluster(cl)
   
+  env <- foreach:::.foreachGlobals
+  rm(list=ls(name=env), pos=env)
+  
 }#KNNpred
 
 
@@ -922,7 +1054,7 @@ MAPE <- function(y_t, y_h){
 }
 
 AUC  <- function(y_t, y_h){
-  krzywa_roc <- roc(y_t, y_h)
+  krzywa_roc <- roc(y_t, y_h, quiet = TRUE)
   
   y <- rev(krzywa_roc$sensitivities)
   x <- rev(1 - krzywa_roc$specificities)
@@ -938,7 +1070,7 @@ AUC  <- function(y_t, y_h){
 
 
 Youden_index <- function(y_tar, y_hat){
-  roc_wyzn <- roc(y_tar, y_hat)
+  roc_wyzn <- roc(y_tar, y_hat, quiet = TRUE)
   
   y <- roc_wyzn$sensitivities #Czulosc
   x <- roc_wyzn$specificities #Specyficznosc
@@ -986,6 +1118,8 @@ ModelOcena <- function (y_tar, y_hat){
   }
   else if(is.factor(y_tar) & nlevels(y_tar) == 2)
   {
+    
+    Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden_index(y_tar, y_hat), 0, 1))
     klasyfikacja_wynik <- list( Mat,
                                 Youden_index(y_tar, y_hat),
                                 c("AUC" = AUC(y_tar, y_hat),
@@ -996,7 +1130,12 @@ ModelOcena <- function (y_tar, y_hat){
   }
   else if(is.factor(y_tar) & nlevels(y_tar) > 2)
   {
-    klasyfikacja_wielo_wynik <- c("Trafienia" = Trafienia(y_tar, y_hat))
+    y_hat <- factor(y_hat, levels = levels(y_tar))
+    
+    klasyfikacja_wielo_wynik <- list("Trafienia" = Trafienia(y_tar, y_hat), "Mat" = table(y_tar, y_hat))
+    
+    # print(table(y_tar, y_hat))
+    
     return(klasyfikacja_wielo_wynik)
   }
   else

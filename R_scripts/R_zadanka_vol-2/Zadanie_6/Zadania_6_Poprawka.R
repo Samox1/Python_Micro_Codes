@@ -356,6 +356,14 @@ table(iris_data[,5], ifelse(predykcja_NN_test(iris_data[,-5], TEST_SIEC_NN) >= 0
 # dz1 <- dz2[,-1] %*% t(W2) * funkcja_dsigmoid(z_in)
 # dW1 <- t(x) %*% dz1[,-1]
 
+# W1 <- (lr * dW1) + W1
+# W2 <- (lr * dW2) + W2
+# W3 <- (lr * dW3) + W3
+# W4 <- (lr * dW4) + W4
+# W5 <- (lr * dW5) + W5
+
+
+
 
 # 3 warstwy
 
@@ -377,6 +385,7 @@ table(iris_data[,5], ifelse(predykcja_NN_test(iris_data[,-5], TEST_SIEC_NN) >= 0
 # W1 <- (lr * dW1) + W1
 # W2 <- (lr * dW2) + W2
 # W3 <- (lr * dW3) + W3
+# W4 <- (lr * dW4) + W4
 
 
 
