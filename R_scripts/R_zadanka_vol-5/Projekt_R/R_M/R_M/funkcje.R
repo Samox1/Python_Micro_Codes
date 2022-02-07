@@ -371,6 +371,7 @@ SplitVar <- function(Y, x, parentVal, minobs, type) {
 }# SpliVar
 
 FindBestSplit <- function(Y, X, data, parentVal, type, minobs) {
+
   res <- sapply(X, function(i) {
     
     # if (is.numeric(data[,i]) | is.ordered(data[,i])) {
@@ -390,7 +391,7 @@ FindBestSplit <- function(Y, X, data, parentVal, type, minobs) {
         d <- (paste(factor(data[,i], levels = names(a), ordered = TRUE)))
       }
       else {
-        a <- tapply(data[,Y], data[,i], mean)
+        a <- tapply(as.numeric(data[,Y]), as.numeric(data[,i]), mean)
         a <- sort(a)
         d <- (paste(factor(data[,i], levels = names(a), ordered = TRUE)))
       }
@@ -402,6 +403,8 @@ FindBestSplit <- function(Y, X, data, parentVal, type, minobs) {
   
   best <- which.max(res$InfGain)
   res <- res[best, , drop = F]
+  
+  
   
   return (res)
 } #FindBestSplit
@@ -520,8 +523,6 @@ Tree <- function(Y, X, data, type, depth, minobs, overfit = "none", cf = "0.2") 
   #     next
   #   }
   # }
-  
-  print("KAPPA")
   
   tree<- Node$new("Root")
   tree$Count <- nrow(data)

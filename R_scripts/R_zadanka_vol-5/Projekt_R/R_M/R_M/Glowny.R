@@ -4,6 +4,7 @@ print("******************************************************")
 print("*** Wczytywanie danych do klasyfikacji binarnej - Breast Cancer Wisconsin (Diagnostic)")         # http://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29
 binarna <- read.csv("breast-cancer-wisconsin.data", header = FALSE) 
 binarna[,11] <- as.factor(binarna[,11])                                                                 # Klasy zapisane jako wartosci numeryczne -> "2 for benign, 4 for malignant" (z notki)
+# Usunac znaki zapytania '?' z danych
 binarna_Y <- colnames(binarna)[11]
 binarna_X <- colnames(binarna)[-11]
 print(paste0("Czy dane do klasyfikacji wieloklasowej maja warstosci NA: ", anyNA(binarna)))   
@@ -14,6 +15,7 @@ print(summary(binarna))
 print("******************************************************")
 print("** Wczytywanie danych do klasyfikacji wieloklasowej - Yeast")                                    # Dane od prowadzacego -> https://archive.ics.uci.edu/ml/datasets/Yeast
 wieloklasowa <- read.csv("yeast.data", header = FALSE, sep = ";")[,-1]                                  # Dane wedlug notki maja 8 kolumn numerycznych i 1 z klasami docelowymi -> kolumna nr 1 to nic nie mowiaca nazwa
+wieloklasowa[,9] <- as.factor(wieloklasowa[,9])
 wieloklasowa_Y <- colnames(wieloklasowa)[9]
 wieloklasowa_X <- colnames(wieloklasowa)[-9]
 print(paste0("Czy dane do klasyfikacji wieloklasowej maja warstosci NA: ", anyNA(wieloklasowa)))        # Brak wartosci NA - dane mialy specyficzny separator, ktory zostal zamieniony na srednik + upewniono sie ze nie ma zadnych problemow z separatorem
@@ -26,6 +28,8 @@ print(sort(summary(wieloklasowa[,9])))
 print("******************************************************")
 print("*** Wczytywanie danych do regresji - Computer Hardware")                                         # https://archive.ics.uci.edu/ml/datasets/Computer+Hardware
 regresja <- read.csv("machine.data", header = FALSE)[,-10]                                              # Ostatnia kolumna wedlug notki to estymacja wydajnosci (kolumny nr 9) z jakiegos artykulu
+regresja[,1] <- as.factor(regresja[,1])
+regresja[,2] <- as.factor(regresja[,2])
 regresja_Y <- colnames(regresja)[9]
 regresja_X <- colnames(regresja)[-9]
 print(paste0("Czy dane do klasyfikacji wieloklasowej maja warstosci NA: ", anyNA(regresja))) 
@@ -38,12 +42,12 @@ source("funkcje.R")
 
 # Sieci Neuronowe
 
-# binarna_NN <- binarna
-# binarna_NN[,binarna_Y] <- as.numeric(binarna[,binarna_Y])
-# binarna_NN[,7] <- as.numeric(binarna_NN[,7])
-# binarna_NN <- sapply(binarna_NN, MinMax)
-# binarna_NN
-# 
+binarna_NN <- binarna
+binarna_NN[,binarna_Y] <- as.numeric(binarna[,binarna_Y])
+binarna_NN[,7] <- as.numeric(binarna_NN[,7])
+binarna_NN <- sapply(binarna_NN, MinMax)
+binarna_NN
+
 # HELL <- trainNN(binarna_Y, binarna_X, binarna_NN, h = c(2,4), lr = 0.01, iter = 2000, seed = 300, type = 'bin')
 # HELL$y_hat
 # 
@@ -51,6 +55,13 @@ source("funkcje.R")
 # table(binarna_NN[,binarna_Y], ifelse(predNN(binarna_NN[,binarna_X], HELL) >= 0.5, 1, 0))
 # ModelOcena(as.factor(binarna_NN[,binarna_Y]), predNN(binarna_NN[,binarna_X], HELL))
 
+
+wieloklasowa_NN <- wieloklasowa
+wieloklasowa_NN <- sapply(wieloklasowa_NN, as.numeric)
+wieloklasowa_NN <- sapply(wieloklasowa_NN, MinMax_bez_przedzialu)
+wieloklasowa_NN[,1] <- MinMax_bez_przedzialu(wieloklasowa_NN[,1])
+
+HELL_2 <- trainNN(wieloklasowa_Y, wieloklasowa_X, wieloklasowa_NN, h = c(2,4), lr = 0.01, iter = 2000, seed = 300, type = 'multi')
 
 
 
@@ -62,14 +73,13 @@ source("funkcje.R")
 # table(binarna[,binarna_Y], ifelse(Tree_wynik[,2] >= 0.5, 1, 0))
 # ModelOcena(binarna[,binarna_Y], as.numeric(Tree_wynik[,2]))
 
-Tree_2 <- Tree(wieloklasowa_Y, wieloklasowa_X, wieloklasowa, type = "Entropy", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
-Tree_wynik_2 <- PredictTree(Tree_2, wieloklasowa[,wieloklasowa_X])
-table(wieloklasowa[,wieloklasowa_Y], Tree_wynik_2[,'Class'])
-ModelOcena(wieloklasowa[,wieloklasowa_Y], (Tree_wynik_2[,'Class']))
+# Tree_2 <- Tree(wieloklasowa_Y, wieloklasowa_X, wieloklasowa, type = "Entropy", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
+# Tree_wynik_2 <- PredictTree(Tree_2, wieloklasowa[,wieloklasowa_X])
+# ModelOcena(wieloklasowa[,wieloklasowa_Y], (Tree_wynik_2[,'Class']))
 
-Tree_3 <- Tree(regresja_Y, regresja_X, regresja, type = "SS", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
-Tree_wynik_3 <- PredictTree(Tree_3, regresja[,regresja_X])
-ModelOcena(regresja[,regresja_Y], (Tree_wynik_3))
+# Tree_3 <- Tree(regresja_Y, regresja_X, regresja, type = "SS", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
+# Tree_wynik_3 <- PredictTree(Tree_3, regresja[,regresja_X])
+# ModelOcena(regresja[,regresja_Y], (Tree_wynik_3))
 
 
 
