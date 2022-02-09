@@ -53,12 +53,11 @@ print(summary(dane_reg))
 
 
 
-source('Funkcje.R')
   ##  Kroswalidacja wlasnych algorytmow  ##
 
 ### KNN ###
 parTune_KNN_bin <- expand.grid(k=c(2,4,6,8,10))                                                                                     # COS JEST NIE TAK Z --> KNN - BIN
-KNN_bin_CV <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 10, parTune_KNN_bin, algorytm="KNN", seed = 264)
+KNN_bin_CV <- CrossValidTune(dane_bin, dane_bin_X, dane_bin_Y, kFold = 8, parTune_KNN_bin, algorytm="KNN", seed = 264)
 
 parTune_KNN_multi <- expand.grid(k=c(2,4,6,8,10))  
 KNN_multi_CV <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 8, parTune_KNN_multi, algorytm="KNN", seed = 264)

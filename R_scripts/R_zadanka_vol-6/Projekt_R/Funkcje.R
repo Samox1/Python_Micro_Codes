@@ -1,3 +1,6 @@
+library(parallel)
+library(doParallel)
+library(foreach)
 library(tidyverse)
 library(pROC)
 library(ggplot2)
@@ -91,6 +94,22 @@ przeksztalcenie_reg<-function(dane){
 
 ## K-najblizszych sasiadow ##
 
+d_euklides <- function(x_i, x_n)
+{
+  return(sqrt(sum((x_i - x_n)^2)))
+}
+
+d_hamming <- function(x_i, x_n, p)
+{
+  return((sum(x_i != x_n)) / p)
+}
+
+d_porzadkowa <- function(x_i, x_n, unikalne)
+{
+  return(sum(abs(as.numeric(x_i) - as.numeric(x_n))  / (unikalne - 1)))
+}
+
+
 
 KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew){
   if(k > 0 && (is.matrix(X) == TRUE || is.data.frame(X) == TRUE) && all(!is.na(X)) && all(!is.na(y_tar))){
@@ -133,119 +152,185 @@ KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew){
 
 
 KNNpred <- function(KNNmodel, X){
-  if(all(!is.na(X)) & ncol(KNNmodel$X)==ncol(X)){
-    if(is.matrix(X)){
-      X_norm <- matrix(0,nrow(X),ncol(X))
+  
+  if (is.na(KNNmodel) == TRUE || is.na(X) == TRUE || ncol(KNNmodel$X) != ncol(X) || colnames(KNNmodel$X) != colnames(X)){
+    stop("Niekompletne dane!")
+  }
+  else
+  {
+    if(!is.data.frame(X))
+    {
+      X <- data.frame(X)
     }
-    if(is.data.frame(X)){
-      X_norm <- matrix(0,nrow(X),ncol(X))
-      X_norm <- as.data.frame(X_norm)
+    
+    X_znormalizowane <- matrix(0,nrow(X), ncol(X))
+    X_znormalizowane <- data.frame(X_znormalizowane)
+    
+    n_wierszy_model = nrow(KNNmodel$X)
+    n_kolumn_model = ncol(KNNmodel$X)
+    
+    n_wierszy_znorm = nrow(X_znormalizowane)
+    n_kolumn_znorm = ncol(X_znormalizowane)
+    
+    kolumny_numeryczne <- 0
+    kolumny_factor_order <- 0
+    kolumny_factor <- 0
+    
+    for (i in 1:n_kolumn_znorm) 
+    {
+      if(is.numeric(X[,i]))
+      {
+        min_k <- as.numeric(attributes(KNNmodel$X)$minOrg[i])
+        max_k <- as.numeric(attributes(KNNmodel$X)$maxOrg[i])
+        newmin_k <- as.numeric(attributes(KNNmodel$X)$minmaxNew[1])
+        newmax_k <- as.numeric(attributes(KNNmodel$X)$minmaxNew[2])
+        
+        X_znormalizowane[,i] <- ((X[,i] - min_k) / (max_k - min_k)) * (newmax_k - newmin_k) + newmin_k
+        kolumny_numeryczne <- kolumny_numeryczne + 1
+      }
+      else if(is.factor(X[,i]))
+      {
+        X_znormalizowane[,i] <- X[,i]
+        kolumny_factor <- kolumny_factor + 1
+      }
+      else if(is.factor(X[,i]) & is.ordered(X[,i]))
+      {
+        X_znormalizowane[,i] <- X[,i]
+        kolumny_factor_order <- kolumny_factor_order + 1
+      }
     }
-    ilorazowa <- 0
-    porzadkowa <- 0
-    nominalna <- 0
-    for (i in 1:ncol(X)) {
-      if(is.numeric(X[,i])){
-        ilorazowa <- ilorazowa + 1
-        for (j in 1:nrow(X)) {
-          X_norm[j,i] <- ((X[j,i] - attr(KNNmodel$X,"minOrg")[i]) / 
-                            (attr(KNNmodel$X,"maxOrg")[i] - attr(KNNmodel$X,"minOrg")[i]))  * 
-            (attr(KNNmodel$X,"minmaxNew")["max"] - attr(KNNmodel$X,"minmaxNew")["min"]) + 
-            attr(KNNmodel$X,"minmaxNew")["min"]
+    
+    
+    odleglosc <- matrix(0, n_wierszy_model, n_wierszy_znorm)
+    
+    if(kolumny_numeryczne == n_kolumn_znorm)
+    {
+      for(i in 1:n_wierszy_model)
+      {
+        for(j in 1:n_wierszy_znorm)
+        {
+          odleglosc[i,j] <- d_euklides(KNNmodel$X[i,], X_znormalizowane[j,])
         }
       }
-      else if(is.factor(X[,i]) & is.ordered(X[,i])){
-        porzadkowa <- porzadkowa + 1
-        X_norm[,i] <- X[,i]
-      }
-      else if(is.factor(X[,i])){
-        nominalna <- nominalna + 1
-        X_norm[,i] <- X[,i]
-      }
     }
-    odl <- matrix(0, nrow(KNNmodel$X), nrow(X_norm))
-    #w zaleznosci od typow zmiennych obliczam odpowiednia odleglosc
-    #1 dla skali nominalnej obliczam odleglosc Euklidesa
-    if(ilorazowa == ncol(X_norm)){ 
-      for(i in 1:nrow(KNNmodel$X)){
-        for(j in 1:nrow(X_norm)){
-          odl[ i, j ] <- sqrt(sum( (KNNmodel$X[i,] - X_norm[j,])^2 ))
+    else if(kolumny_factor == n_kolumn_znorm)
+    {
+      for(i in 1:n_wierszy_model)
+      {
+        for(j in 1:n_wierszy_znorm)
+        {
+          odleglosc[i,j] <- d_hamming(KNNmodel$X[i,], X_znormalizowane[j,], n_kolumn_znorm)
         }
       }
     }
-    #2 dla skali porzadkowej 
-    else if(porzadkowa == ncol(X_norm)){ 
-      for(i in 1:nrow((KNNmodel$X))){
-        for(j in 1:nrow(X_norm)){
-          for (k in 1:ncol(X_norm)) {
-            uniq <- length(unique(X_norm[,k]))
-            odl[i, j] <- (sum( abs(as.numeric(KNNmodel$X[i,]) - as.numeric(X_norm[j,]))  / (uniq - 1)) )
+    else if(kolumny_factor_order == n_kolumn_znorm)
+    {
+      for(i in 1:n_wierszy_model)
+      {
+        for(j in 1:n_wierszy_znorm)
+        {
+          for(k in 1:n_kolumn_znorm)
+          {
+            unikalne <- nlevels(X_znormalizowane[,k])
+            odleglosc[i,j] <- d_porzadkowa(KNNmodel$X[i,], X_znormalizowane[j,], unikalne)
           }
         }
       }
     }
-    #dla skali nominaknej licze odleglosc hamminga
-    else if(nominalna == ncol(X_norm)){ 
-      for(i in 1:nrow(KNNmodel$X)){
-        for(j in 1:nrow(X_norm)){
-          odl[i, j] <- ( (sum(KNNmodel$X[i,] != X_norm[j,])) / ncol(X_norm) )
+    else
+    {
+      for(i in 1:n_wierszy_model)
+      {
+        for(j in 1:n_wierszy_znorm)
+        {
+          temp <- 0
+          
+          for(k in 1:n_kolumn_znorm)
+          {
+            if(is.numeric(X_znormalizowane[,k]))
+            {
+              max_k <- as.numeric(attributes(KNNmodel$X)$maxOrg[k])
+              min_k <- as.numeric(attributes(KNNmodel$X)$minOrg[k])
+              
+              temp <- temp + (abs(KNNmodel$X[i,k] - X_znormalizowane[j,k]) / (max_k -  min_k)) 
+            }
+            else if(is.factor(X_znormalizowane[,k]))
+            {
+              if(KNNmodel$X[i,k] != X_znormalizowane[j,k])
+              {
+                temp <- temp + 1
+              }
+            }
+            else if(is.factor(X_znormalizowane[,k]) & is.ordered(X_znormalizowane[,k]))
+            {
+              z_i <- (i - 1) / (n_wierszy_model - 1)
+              z_n <- (j - 1) / (n_wierszy_znorm - 1)
+              temp <- temp + (abs(z_i - z_n) / (n_wierszy_model - 1))
+            }
+          }
+          odleglosc[i, j] <- temp / n_kolumn_znorm
         }
       }
     }
-    else{
-      c("brak oblugi dla odleg?o?ci Gowera")
+    
+    
+    if(is.numeric(KNNmodel$y))
+    {
+      predykcja <- double(n_kolumn_znorm)
       
-    } 
-    if(is.numeric(KNNmodel$y)){
-      pred <- double(nrow(X_norm))
-      for( i in 1:nrow(X_norm) ){
-        kNaj <- order( odl[,i] )
-        kNaj <- kNaj[1:KNNmodel$k]
-        y_hat <- mean( KNNmodel$y[ kNaj ] )
-        pred[ i ] <- y_hat
+      for(i in 1:n_wierszy_znorm)
+      {
+        k_najblizej <- order(odleglosc[,i])[1:KNNmodel$k]
+        
+        y_predykcja <- mean(KNNmodel$y[k_najblizej])
+        
+        predykcja[i] <- y_predykcja
       }
-      
+      return(predykcja)
     }
     else if(is.factor(KNNmodel$y))
     {
-      pred <- as.data.frame(matrix(nrow = nrow(X_norm), ncol = nlevels(KNNmodel$y)+1))
+      predykcja <- as.data.frame(matrix(nrow = n_wierszy_znorm, ncol = nlevels(KNNmodel$y)+1))
       
-      for(i in 1:nrow(X_norm))
+      for(i in 1:n_wierszy_znorm)
       {
-        knaj <- order(odl[,i])[1:KNNmodel$k]
+        k_najblizej <- order(odleglosc[,i])[1:KNNmodel$k]
         
         if(nlevels(KNNmodel$y) == 2)
         {
-          poz <- sum(KNNmodel$y[knaj] == 1) / KNNmodel$k
-          neg <- sum(KNNmodel$y[knaj] == 0) / KNNmodel$k
+          pozytywna <- sum(KNNmodel$y[k_najblizej] == 1) / KNNmodel$k
+          negatywna <- sum(KNNmodel$y[k_najblizej] == 0) / KNNmodel$k
           
-          pred_klasy <- ifelse(poz >= 0.5, 'P', 'N')
+          predykcja_klasy <- ifelse(pozytywna >= 0.5, 'P', 'N')
           
-          names(pred) <- c('P', 'N', 'Klasa')
-          pred[i, 1] <- poz
-          pred[i, 2] <- neg
-          pred[i, 3] <- pred_klasy
+          names(predykcja) <- c('P', 'N', 'Klasa')
+          predykcja[i, 1] <- pozytywna
+          predykcja[i, 2] <- negatywna
+          predykcja[i, 3] <- predykcja_klasy
         }
         else if(nlevels(KNNmodel$y) > 2)
         {
           etykiety <- sort(unique(KNNmodel$y))
-          names(pred) <- etykiety
-          names(pred)[nlevels(KNNmodel$y)+1] <- 'Klasa'
+          names(predykcja) <- etykiety
+          names(predykcja)[nlevels(KNNmodel$y)+1] <- 'Klasa'
           
           for (j in 1:length(etykiety))
           {
-            poz <- sum(KNNmodel$y[knaj] == as.character(etykiety[j])) / KNNmodel$k
-            pred[i,j] <- poz
+            pozytywna <- sum(KNNmodel$y[k_najblizej] == as.character(etykiety[j])) / KNNmodel$k
+            predykcja[i,j] <- pozytywna
           }
           
-          pred_klasy <- etykiety[which.max(pred[i,])]
-          pred[i,'Klasa'] <- as.factor(pred_klasy)
+          predykcja_klasy <- etykiety[which.max(predykcja[i,])]
+          predykcja[i,'Klasa'] <- as.factor(predykcja_klasy)
         }
       }
+      return(predykcja)
     }
-    return(pred)
+    else
+    {
+      stop("Dane y modelu sa niepoprawne!")
+    }
   }
-  
 }
 
   ##  Drzewa decyzyjne  ##
@@ -786,49 +871,8 @@ ModelOcena <- function(y_tar, y_hat){
 
   ##  Kroswalidacja ##
 
-# CrossValidTune <- function(dane, kFold,parTune, seed){
-#   set.seed(seed)
-#   lista <- list()
-#   for (i in 1:kFold){
-#     #dziele probe na zbior testpwy i walidacyjny
-#     indxT<- sample(1:nrow(dane),
-#                    size = (1-1/kFold)*nrow(dane),
-#                    replace = F) 
-#     indxV <- (1:nrow(dane))[-indxT]
-#     lista[[i]] <- sample(1:nrow(dane),size = nrow(dane),replace = F) 
-#     for (j in 1:nrow(dane)) {
-#       for(k in 1:length(indxV)){
-#         if(j==indxV[k]){
-#           lista[[i]][[j]] = 2
-#           break
-#         }
-#         else{
-#           lista[[i]][[j]] = 1
-#         }
-#       }
-#     }
-#   }
-#   
-#   k <- rep(c(1:kFold), times=length(parTune))
-#   wyniki <- data.frame(k, parTune)
-#   
-#   if(is.numeric(dane[,1])){
-#     regresja_wyniki <- data.frame(wyniki, MAEt=0, MSEt=0, MAPEt=0, MAEw=0, MSEw=0, MAPEw=0  )
-#     return(regresja_wyniki)
-#   }
-#   else if(is.factor(dane[,1])){
-#     klasyfikacja_wyniki <- data.frame(wyniki, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0,
-#                                       AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
-#     return(klasyfikacja_wyniki)
-#   }
-#   else{
-#     c("Bledne dane!")
-#   }
-#   
-# }
 
-
-CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
+CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
 {
   set.seed(seed)
   
@@ -855,23 +899,21 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   }
   
   
+  nCores <- detectCores()
+  klaster <- makeCluster(nCores-1)
+  registerDoParallel(klaster)
+  
   
   if(algorytm == "KNN"){
     cat("ID modelu: ")
     
-    nCores <- detectCores()
-    klaster <- makeCluster(nCores-1)
-    registerDoParallel(klaster)
-    
-    
-    
     if(typ == "bin"){
-      tabela_bin <- data.frame(tabela, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, 
-                               AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      tabela_bin <- data.frame(tabela, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
-      wynik <- foreach(indx_tabeli = 1:nrow(tabela_bin), .export = c("X", "Y", "dane", "tabela_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "Youden", "Sensitivity", "Specificity", "Jakosc", "Accuracy__", "d_euklides", "d_hamming", "d_porzadkowa"), .combine = rbind) %dopar%
-      {
+      wynik_bin <- foreach(indx_tabeli = 1:nrow(tabela_bin), .export = c("X", "Y", "dane", "tabela_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi", "d_euklides", "d_hamming", "d_porzadkowa"), .combine = rbind) %dopar%
+      
       # for(indx_tabeli in 1:nrow(tabela_bin)){
+      {
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_bin$indx_modelu[indx_tabeli]] == 1,]
@@ -881,7 +923,7 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_tr[,X])
         KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_wal[,X])
         
-        print(KNN_pred_Trening)
+        # print(KNN_pred_Trening)
         
         Trening_Ocena = ModelOcena((dane_tr[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
         Walidacja_Ocena = ModelOcena((dane_wal[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
@@ -894,16 +936,23 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_bin[indx_tabeli, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         tabela_bin[indx_tabeli, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
         
-        return(tabela_bin)
+        return(tabela_bin[indx_tabeli,])
+        # return(tabela_bin)
       }
+      stopCluster(klaster)
       
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
       
+      tabela_bin <- wynik_bin
       return(tabela_bin)
     }
     else if(typ == "multi"){
       tabela_multi <- data.frame(tabela, ACCT=0, ACCW=0)
       
-      for(indx_tabeli in 1:nrow(tabela_multi)){
+      wynik_multi <- foreach(indx_tabeli = 1:nrow(tabela_multi), .export = c("X", "Y", "dane", "tabela_multi", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi", "d_euklides", "d_hamming", "d_porzadkowa"), .combine = rbind) %dopar%
+      {
+      # for(indx_tabeli in 1:nrow(tabela_multi)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_multi$indx_modelu[indx_tabeli]] == 1,]
@@ -916,15 +965,24 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_multi[indx_tabeli, "ACCT"] = ModelOcena((dane_tr[,Y]), as.numeric(KNN_pred_Trening[,"Klasa"]))
         tabela_multi[indx_tabeli, "ACCW"] = ModelOcena((dane_wal[,Y]), as.numeric(KNN_pred_Walid[,"Klasa"]))
         
-        return(tabela_multi)
+        return(tabela_multi[indx_tabeli,])
+        # return(tabela_multi)
       }
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      tabela_multi <- wynik_multi
       return(tabela_multi)
     }
     else if(typ == "reg"){
       tabela_reg <- data.frame(tabela, MAET=0, MSET=0, MAPET=0, 
                                MAEW=0, MSEW=0, MAPEW=0)
       
-      for(indx_tabeli in 1:nrow(tabela_reg)){
+      wynik_reg <- foreach(indx_tabeli = 1:nrow(tabela_reg), .export = c("X", "Y", "dane", "tabela_reg", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "MSE", "MAE", "MAPE", "d_euklides", "d_hamming", "d_porzadkowa"), .combine = rbind) %dopar%
+      {
+      # for(indx_tabeli in 1:nrow(tabela_reg)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_reg$indx_modelu[indx_tabeli]] == 1,]
@@ -943,15 +1001,22 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_reg[indx_tabeli, "MSEW"] <- Ocena_Walidacja["MSE"]
         tabela_reg[indx_tabeli, "MAPEW"] <- Ocena_Walidacja["MAPE"]
         
-        return(tabela_reg)
+        return(tabela_reg[indx_tabeli,])
+        # return(tabela_reg)
       }
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      tabela_reg <- wynik_reg
       return(tabela_reg)
     }
     
-    stopCluster(klaster)
-    
-    env <- foreach:::.foreachGlobals
-    rm(list=ls(name=env), pos=env)
+    # stopCluster(klaster)
+    # 
+    # env <- foreach:::.foreachGlobals
+    # rm(list=ls(name=env), pos=env)
   }
 
 
@@ -962,7 +1027,9 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
       tabela_bin <- data.frame(tabela, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, 
                                AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
-      for(indx_tabeli in 1:nrow(tabela_bin)){
+      wynik_bin <- foreach(indx_tabeli = 1:nrow(tabela_bin), .export = c("X", "Y", "dane", "tabela_bin", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
+      {
+      # for(indx_tabeli in 1:nrow(tabela_bin)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_bin$indx_modelu[indx_tabeli]] == 1,]
@@ -983,14 +1050,23 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_bin[indx_tabeli, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         tabela_bin[indx_tabeli, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
         
-        return(tabela_bin)
+        return(tabela_bin[indx_tabeli,])
+        # return(tabela_bin)
       }
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      tabela_bin <- wynik_bin
       return(tabela_bin)
     }
     else if(typ == "multi"){
       tabela_multi <- data.frame(tabela, ACCT=0, ACCW=0)
       
-      for(indx_tabeli in 1:nrow(tabela_multi)){
+      wynik_multi <- foreach(indx_tabeli = 1:nrow(tabela_multi), .export = c("X", "Y", "dane", "tabela_multi", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
+      {
+      # for(indx_tabeli in 1:nrow(tabela_multi)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_multi$indx_modelu[indx_tabeli]] == 1,]
@@ -1003,15 +1079,24 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_multi[indx_tabeli, "ACCT"] <- ModelOcena(dane_tr[,Y], Tree_pred_Trening[,ncol(Tree_pred_Trening)])
         tabela_multi[indx_tabeli, "ACCW"] <- ModelOcena(dane_wal[,Y], Tree_pred_Walid[,ncol(Tree_pred_Walid)])
         
-        return(tabela_multi)
+        return(tabela_multi[indx_tabeli,])
+        # return(tabela_multi)
       }
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      tabela_multi <- wynik_multi
       return(tabela_multi)
     }
     else if(typ == "reg"){
       tabela_reg <- data.frame(tabela, MAET=0, MSET=0, MAPET=0, 
                                MAEW=0, MSEW=0, MAPEW=0)
       
-      for(indx_tabeli in 1:nrow(tabela_reg)){
+      wynik_reg <- foreach(indx_tabeli = 1:nrow(tabela_reg), .export = c("X", "Y", "dane", "tabela_reg", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "MAE", "MSE", "MAPE"), .combine = rbind) %dopar%
+      {
+      # for(indx_tabeli in 1:nrow(tabela_reg)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_reg$indx_modelu[indx_tabeli]] == 1,]
@@ -1028,8 +1113,15 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_reg[indx_tabeli, "MSEW"] <- Ocena_Walidacja["MSE"]
         tabela_reg[indx_tabeli, "MAPEW"] <- Ocena_Walidacja["MAPE"]
         
-        return(tabela_reg)
+        return(tabela_reg[indx_tabeli,])
+        # return(tabela_reg)
       }
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      tabela_reg <- wynik_reg
       return(tabela_reg)
     }
   }
@@ -1070,7 +1162,7 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_bin[indx_tabeli, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         tabela_bin[indx_tabeli, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
         
-        return(tabela_bin)
+        # return(tabela_bin)
       }
       return(tabela_bin)
     }
@@ -1096,7 +1188,7 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_multi[indx_tabeli, "ACCT"] <- ModelOcena(dane_tr[,Y], NN_pred_Trening_multi)
         tabela_multi[indx_tabeli, "ACCW"] <- ModelOcena(dane_wal[,Y], NN_pred_Walid_multi)
         
-        return(tabela_multi)
+        # return(tabela_multi)
       }
       return(tabela_multi)
     }
@@ -1129,7 +1221,7 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
         tabela_reg[indx_tabeli, "MSEW"] <- Ocena_Walidacja["MSE"]
         tabela_reg[indx_tabeli, "MAPEW"] <- Ocena_Walidacja["MAPE"]
         
-        return(tabela_reg)
+        # return(tabela_reg)
       }
       return(tabela_reg)
     }
