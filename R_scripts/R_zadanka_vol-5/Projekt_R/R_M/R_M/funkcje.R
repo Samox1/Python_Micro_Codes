@@ -1,14 +1,16 @@
-library(dplyr)
-library(pROC)
 library(parallel)
 library(doParallel)
 library(foreach)
 library(iterators)
+library(pROC)
 library(data.tree)
 library(caret)
 library(rpart)
 library(nnet)
 library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(stringr)
 
 
 
@@ -63,7 +65,12 @@ forward_prop <- function(X, W, type){
   }else if(type == 'multi'){
     y_hat <- matrix( t( apply( H[[length(H)]] %*% W[[length(W)]], 1, SoftMax ) ), nrow = nrow(X))
   }else if(type == 'reg'){
+    # print(H[[length(H)]])
+    # print(W[[length(W)]])
+    
     y_hat <- ( H[[length(H)]] %*% W[[length(W)]] ) 
+    
+    # print(y_hat)
   }
   
   return(list(y_hat = y_hat, H = H))
@@ -110,8 +117,14 @@ trainNN<- function( Yname, Xnames, data, h, lr, iter, seed, type){
   h <- unlist(h, use.names = FALSE)
   X <- (data[, Xnames])
   X <- as.matrix(cbind( rep( 1, nrow(X) ), X )) #WSP
-  y_tar <- as.matrix(data[, Yname])
-  
+ 
+  if(type == 'multi'){
+    y_tar <- model.matrix( ~ data[, Yname] - 1, data)
+    colnames(y_tar) <- str_sub(colnames(y_tar), start = 14)
+  }else{
+    y_tar <- as.matrix(data[, Yname])
+  }
+
   W = list()
   W[[1]] <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
   
@@ -131,11 +144,13 @@ trainNN<- function( Yname, Xnames, data, h, lr, iter, seed, type){
     sygnalwtyl   <- backword_prop( y_tar, X, Y_hat = sygnalwprzod$y_hat, W, H = sygnalwprzod$H, lr , type)
     W <- sygnalwtyl
 
-    cat( paste0( "\rIteracja: ", i ) )
+    cat( paste0( "\rIteracja: ", i , " / ", iter) )
     # error[i] <- lossSS( Y, sygnalwprzod$y_hat )
   }
   # xwartosci <- seq( 1, iter, length = 1000 )
   # print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+  
+  cat('\n')
   
   return(list( y_hat = sygnalwprzod$y_hat, Wagi = W ))
 } #trainNN
@@ -143,32 +158,32 @@ trainNN<- function( Yname, Xnames, data, h, lr, iter, seed, type){
 
 
 predNN <- function(xnew, NN, type){
-  xnew <- cbind(rep(1, nrow(xnew)), xnew)
+  xnew <- as.matrix(cbind(rep(1, nrow(xnew)), xnew))
 
   H <- list()
-  H[[1]] <- cbind(matrix(1, nrow = nrow(xnew)), sigmoid(xnew %*% NN$W[[1]]))
+  H[[1]] <- cbind(matrix(1, nrow = nrow(xnew)), sigmoid(xnew %*% NN$Wagi[[1]]))
   
-  if(length(NN$W) > 2){
-    for (i in 2:(length(NN$W)-1)){
-      H[[i]] <- cbind(matrix(1, nrow = nrow(xnew)), sigmoid(H[[i-1]] %*% NN$W[[i]] ))
+  if(length(NN$Wagi) > 2){
+    for (i in 2:(length(NN$Wagi)-1)){
+      H[[i]] <- cbind(matrix(1, nrow = nrow(xnew)), sigmoid(H[[i-1]] %*% NN$Wagi[[i]] ))
     }
   }
 
-  y_hat <- sigmoid( H[[length(H)]] %*% NN$W[[length(NN$W)]] )
-  
   if (type =="bin"){
-    y_hat <- sigmoid( H[[length(H)]] %*% NN$W[[length(NN$W)]])                 
+    y_hat <- sigmoid( H[[length(H)]] %*% NN$Wagi[[length(NN$Wagi)]])                 
   }
   else if (type == "multi"){
-    y_hat <- matrix(t(apply( H[[length(H)]] %*% NN$W[[length(NN$W)]], 1, SoftMax)), nrow = nrow(xnew))
+    y_hat <- matrix(t(apply( H[[length(H)]] %*% NN$Wagi[[length(NN$Wagi)]], 1, SoftMax)), nrow = nrow(xnew))
   } 
   else if (type == "reg"){
-    y_hat <- H[[length(H)]] %*% NN$W[[length(NN$W)]] 
+    y_hat <- H[[length(H)]] %*% NN$Wagi[[length(NN$Wagi)]] 
   }
   
   
-  if(is.factor(NN$y_hat)){
-    
+  if(type == 'multi'){
+    colnames(y_hat) <- colnames(NN$Wagi[[length(NN$Wagi)]])
+    # y_hat <- data.frame(cbind(y_hat, "Class" = factor(colnames(NN$Wagi[[length(NN$Wagi)]])[apply( y_hat, 1, which.max )], levels = (colnames(NN$Wagi[[length(NN$Wagi)]])))))
+    y_hat <- data.frame(y_hat, "Class" = (colnames(NN$Wagi[[length(NN$Wagi)]])[apply( y_hat, 1, which.max )]))
   }
   
   return(y_hat)
@@ -803,7 +818,13 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
         drops <- c("max")
         out <- out[ , !(names(out) %in% drops)]
         
-        return (data.frame("y_tar" = KNNmodel$y,out,y_hat = pred))
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
+        
+        return (data.frame(out,y_hat = pred))
       }#is factor     
       
       
@@ -823,6 +844,12 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
           kNaj <- kNaj[1:KNNmodel$k]
           pred <- mean(KNNmodel$y[kNaj])
         }))
+        
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
         
         return (unlist(out))
       }#porzadkowa, nie facto,r KLASYFIKACJA
@@ -870,7 +897,13 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
         drops <- c("max")
         out <- out[ , !(names(out) %in% drops)]
         
-        return (data.frame("y_tar" = KNNmodel$y,out,y_hat = pred))
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
+        
+        return (data.frame(out,y_hat = pred))
       }# KLASYFIKACJA DLA SKALI ILORAZOWEJ
       
       #REGRESJA na skali ilorazowej
@@ -891,6 +924,12 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
           kNaj <- kNaj[1:KNNmodel$k]
           pred <- mean(KNNmodel$y[kNaj])
         }))
+        
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
         
         return (unlist(out))
       }#REGRESJA na skali ilorazowej
@@ -935,7 +974,13 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
         drops <- c("max")
         out <- out[ , !(names(out) %in% drops)]
         
-        return (data.frame("y_tar" = KNNmodel$y,out,y_hat = pred))
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
+        
+        return (data.frame(out,y_hat = pred))
       }# KLASYFIKACJA SKALI NOMINALNEJ
       
       #REGRESJA skala nominalna
@@ -955,6 +1000,11 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
           kNaj <- kNaj[1:KNNmodel$k]
           pred <- mean(KNNmodel$y[kNaj])
         }))
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
         
         return (unlist(out))
       }#REGRESJA skala nominalna
@@ -1001,7 +1051,12 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
         drops <- c("max")
         out <- out[ , !(names(out) %in% drops)]
         
-        return (data.frame("y_tar" = KNNmodel$y,out,y_hat = pred))
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
+        
+        return (data.frame(out,y_hat = pred))
       }# KLASYFIKACJA skala mieszana
       
       #REGRESJA MIESZANA
@@ -1021,6 +1076,11 @@ KNNpred <- function(KNNmodel, X, Ncores = 1){
           kNaj <- kNaj[1:KNNmodel$k]
           pred <- mean(KNNmodel$y[kNaj])
         }))
+        
+        stopCluster(cl)
+        
+        env <- foreach:::.foreachGlobals
+        rm(list=ls(name=env), pos=env)
         
         return (unlist(out))
       }# Regresja dla mieszanej
@@ -1051,7 +1111,7 @@ MSE <- function(y_t, y_h){
 }
 
 MAPE <- function(y_t, y_h){
-  return (mean(abs((y_t - y_h)/y_t)))
+  return (mean(abs((y_t - y_h)/y_t)) * 100)
 }
 
 AUC  <- function(y_t, y_h){
@@ -1120,10 +1180,10 @@ ModelOcena <- function (y_tar, y_hat){
   else if(is.factor(y_tar) & nlevels(y_tar) == 2)
   {
     
-    Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden_index(y_tar, y_hat), 0, 1))
-    klasyfikacja_wynik <- list( Mat,
-                                Youden_index(y_tar, y_hat),
-                                c("AUC" = AUC(y_tar, y_hat),
+    Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden_index(y_tar, as.numeric(y_hat)), 0, 1))
+    klasyfikacja_wynik <- list( "Mat" = Mat,
+                                "Youden" = Youden_index(y_tar, as.numeric(y_hat)),
+                                "Statystyka" = c("AUC" = AUC(y_tar, as.numeric(y_hat)),
                                   "Czulosc" = Czulosc(Mat),
                                   "Specyficznosc" = Specyficznosc( Mat),
                                   "Jakosc" = Jakosc(Mat))) 
@@ -1133,7 +1193,7 @@ ModelOcena <- function (y_tar, y_hat){
   {
     y_hat <- factor(y_hat, levels = levels(y_tar))
     
-    klasyfikacja_wielo_wynik <- list("Trafienia" = Trafienia(y_tar, y_hat), "Mat" = table(y_tar, y_hat))
+    klasyfikacja_wielo_wynik <- list("Mat" = table(y_tar, y_hat), "Trafienia" = Trafienia(y_tar, y_hat))
     
     # print(table(y_tar, y_hat))
     
@@ -1152,58 +1212,244 @@ ModelOcena <- function (y_tar, y_hat){
 
 
 
-CrossValidTune <- function(dane_Y, dane_X, dane, kFold, parTune, seed)
+CrossValidTune <- function(dane_Y, dane_X, dane, algo, kFold, parTune, seed)
 {
   set.seed(seed) #losowe
   n = nrow(dane) # dlugosc wektora wchodzacego w sklad listy
-  wektor <- c() #pusty wektor przypisywania
-  lista <- list()
+
+  podzial_trening_walidacja <- data.frame(matrix(ncol = kFold, nrow = n))                      # tabela z podzialem danych na treningowe i walidacyjne
   
-  for ( i in 1:kFold){                                                              #dziele probe na zbior testpwy i walidacyjny
-    index <- sample( x = 1:n, size = round((1-1/kFold) * n), replace = F )          #bez powtorzen, tylko raz wybieramy obiekt
+  for( i in 1:kFold ){ 
+    index_walidacja <- sample( 1:n, size = (1/kFold * n)-1, replace = F )
+    podzial_trening_walidacja[-index_walidacja,i] <- 1
+    podzial_trening_walidacja[index_walidacja,i] <- 2
     
-    index_sort = sort(index, decreasing = FALSE) #sort niemalej?co
-    lista[[i]] <- sample(1:nrow(dane),size = nrow(dane),replace = F)
+  }
+  
+  wyniki <- as.data.frame(expand_grid(id_iteracja=c(1:kFold), parTune))
+  
+  print(paste0("Algorytm: ", algo))                                                                    
+  print(paste0("Liczba modeli: ", nrow(wyniki)))
+  
+  if(is.numeric(dane[,dane_Y])){                                                                              # REGRESJA
+    wyniki_regresja <- data.frame(wyniki, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
     
-    for(j in 1:n){
-      for(k in 1:length(index_sort)){
-        if(j == index_sort[k]){
-          lista[[i]][[j]] = 2
-          break
-        }
-        else{
-          lista[[i]][[j]] = 1
-        }
+    print("Problem: Regresja")
+    
+    for (iteracja in 1:nrow(wyniki_regresja)) {
+      
+      print(paste0("Model nr: ", iteracja))
+      
+      if(algo == 'NN'){
+        regresja_NN <- dane
+        regresja_NN <- as.data.frame(sapply(regresja_NN, as.numeric))
+        regresja_NN <- as.data.frame(sapply(regresja_NN, MinMax))
+        
+        regresja_trening <- regresja_NN[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,]
+        regresja_walidacja <- regresja_NN[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 2,]
+        
+        NN_Model <- trainNN(dane_Y, dane_X, regresja_trening, h = wyniki_regresja$h[iteracja], lr = wyniki_regresja$lr[iteracja], iter = wyniki_regresja$iter[iteracja], seed = seed, type = 'reg')
+        
+        Ocena_T <- ModelOcena((dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1, dane_Y]), 
+                              MinMaxOdwrot(predNN(as.matrix(regresja_trening[,dane_X]), NN_Model, type = 'reg'), 
+                                           y_min = min(dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,dane_Y]), 
+                                           y_max = max(dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,dane_Y])))
+        
+        Ocena_W <- ModelOcena((dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 2, dane_Y]), 
+                              MinMaxOdwrot(predNN(as.matrix(regresja_walidacja[,dane_X]), NN_Model, type = 'reg'), 
+                                           y_min = min(dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,dane_Y]), 
+                                           y_max = max(dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,dane_Y])))
+        
+        wyniki_regresja[iteracja, "MAET"] <- Ocena_T['MAE']
+        wyniki_regresja[iteracja, "MSET"] <- Ocena_T['MSE']
+        wyniki_regresja[iteracja, "MAPET"] <- Ocena_T['MAPE']
+        
+        wyniki_regresja[iteracja, "MAEW"] <- Ocena_W['MAE']
+        wyniki_regresja[iteracja, "MSEW"] <- Ocena_W['MSE']
+        wyniki_regresja[iteracja, "MAPEW"] <- Ocena_W['MAPE']
+        print(wyniki_regresja[iteracja,])
+        
+      }else if(algo == "Tree"){
+        
+        regresja_trening <- dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,]
+        regresja_walidacja <- dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 2,]
+        
+        Tree_Model <- Tree(dane_Y, dane_X, regresja_trening, type = wyniki_regresja$type[iteracja], depth = wyniki_regresja$depth[iteracja], minobs = wyniki_regresja$minobs[iteracja], overfit = wyniki_regresja$overfit[iteracja], cf = wyniki_regresja$cf[iteracja])
+        
+        Ocena_T <- ModelOcena(regresja_trening[,dane_Y], PredictTree(Tree_Model, regresja_trening[,dane_X]))
+        Ocena_W <- ModelOcena(regresja_walidacja[,dane_Y], PredictTree(Tree_Model, regresja_walidacja[,dane_X]))
+        
+        wyniki_regresja[iteracja, "MAET"] <- Ocena_T['MAE']
+        wyniki_regresja[iteracja, "MSET"] <- Ocena_T['MSE']
+        wyniki_regresja[iteracja, "MAPET"] <- Ocena_T['MAPE']
+        
+        wyniki_regresja[iteracja, "MAEW"] <- Ocena_W['MAE']
+        wyniki_regresja[iteracja, "MSEW"] <- Ocena_W['MSE']
+        wyniki_regresja[iteracja, "MAPEW"] <- Ocena_W['MAPE']
+        print(wyniki_regresja[iteracja,])
+        
+      }else if(algo == "KNN"){
+        
+        regresja_trening <- dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 1,]
+        regresja_walidacja <- dane[podzial_trening_walidacja[,wyniki_regresja$id_iteracja[iteracja]] == 2,]
+        
+        KNN_Model <- KNNtrain(regresja_trening[,dane_X], regresja_trening[,dane_Y], k=wyniki_regresja$k[iteracja], 0, 1)
+        
+        Ocena_T <- ModelOcena( regresja_trening[,dane_Y] , KNNpred(KNNmodel = KNN_Model, regresja_trening[,dane_X], Ncores = detectCores() - 1))
+        Ocena_W <- ModelOcena( regresja_walidacja[,dane_Y] , KNNpred(KNNmodel = KNN_Model, regresja_walidacja[,dane_X], Ncores = detectCores() - 1))
+        
+        wyniki_regresja[iteracja, "MAET"] <- Ocena_T['MAE']
+        wyniki_regresja[iteracja, "MSET"] <- Ocena_T['MSE']
+        wyniki_regresja[iteracja, "MAPET"] <- Ocena_T['MAPE']
+        
+        wyniki_regresja[iteracja, "MAEW"] <- Ocena_W['MAE']
+        wyniki_regresja[iteracja, "MSEW"] <- Ocena_W['MSE']
+        wyniki_regresja[iteracja, "MAPEW"] <- Ocena_W['MAPE']
+        print(wyniki_regresja[iteracja,])
       }
     }
-    
-  }
-  
-  k <- rep(c(1:kFold), times=length(parTune))
-  wyniki <- data.frame(k, parTune)
-  
-  print(wyniki)                                                                                             # OBEJRZEC CO TO WYRZUCA
-  
-  if(is.numeric(dane[,dane_Y])){
-    wyniki_regresja <- data.frame(wyniki, MAEt=0, MSEt=0, MAPEt=0, MAEw=0, MSEw=0, MAPEw=0)
-    
-    
-    
+
+    # print(wyniki_regresja)
     return(wyniki_regresja)
   }
-  else if(is.factor(dane[,dane_Y]) & nlevels(dane[,dane_Y]) == 2){
+  else if(is.factor(dane[,dane_Y]) & nlevels(dane[,dane_Y]) == 2){                                            # KLASYFIKACJA BINARNA
     wyniki_klasyfikacja <- data.frame(wyniki, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0,
-                                      AUCW=0, SpecyficznoscW=0, SpecyficznoscW=0, JakoscW=0)
+                                      AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+    print("Problem: Klasyfikacja Binarna")
     
-    
-    
+    for (iteracja in 1:nrow(wyniki_klasyfikacja)) {
+      
+      print(paste0("Model nr: ", iteracja))
+      
+      if(algo == 'NN'){
+        binarna_NN <- dane
+        binarna_NN <- as.data.frame(sapply(binarna_NN, as.numeric))
+        binarna_NN <- as.data.frame(sapply(binarna_NN, MinMax))
+        
+        binarna_trening <- binarna_NN[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 1,]
+        binarna_walidacja <- binarna_NN[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 2,]
+        
+        NN_Model <- trainNN(dane_Y, dane_X, binarna_trening, h = wyniki_klasyfikacja$h[iteracja], lr = wyniki_klasyfikacja$lr[iteracja], iter = wyniki_klasyfikacja$iter[iteracja], seed = seed, type = 'bin')
+        
+        Ocena_T <- ModelOcena(dane[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 1, dane_Y], predNN(binarna_trening[,dane_X], NN_Model, type = 'bin'))
+        Ocena_W <- ModelOcena(dane[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 2, dane_Y], predNN(binarna_walidacja[,dane_X], NN_Model, type = 'bin'))
+ 
+        wyniki_klasyfikacja[iteracja, "AUCT"] <- Ocena_T$Statystyka['AUC']
+        wyniki_klasyfikacja[iteracja, "CzuloscT"] <- Ocena_T$Statystyka['Czulosc']
+        wyniki_klasyfikacja[iteracja, "SpecyficznoscT"] <- Ocena_T$Statystyka['Specyficznosc']
+        wyniki_klasyfikacja[iteracja, "JakoscT"] <- Ocena_T$Statystyka['Jakosc']
+        
+        wyniki_klasyfikacja[iteracja, "AUCW"] <- Ocena_W$Statystyka['AUC']
+        wyniki_klasyfikacja[iteracja, "CzuloscW"] <- Ocena_W$Statystyka['Czulosc']
+        wyniki_klasyfikacja[iteracja, "SpecyficznoscW"] <- Ocena_W$Statystyka['Specyficznosc']
+        wyniki_klasyfikacja[iteracja, "JakoscW"] <- Ocena_W$Statystyka['Jakosc']
+        print(wyniki_klasyfikacja[iteracja,])
+        
+      }else if(algo == "Tree"){
+        
+        binarna_trening <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 1,]
+        binarna_walidacja <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 2,]
+        
+        Tree_Model <- Tree(dane_Y, dane_X, binarna_trening, type = wyniki_klasyfikacja$type[iteracja], depth = wyniki_klasyfikacja$depth[iteracja], minobs = wyniki_klasyfikacja$minobs[iteracja], overfit = wyniki_klasyfikacja$overfit[iteracja], cf = wyniki_klasyfikacja$cf[iteracja])
+        
+        Ocena_T <- ModelOcena(binarna_trening[,dane_Y], PredictTree(Tree_Model, binarna_trening[,dane_X])[,2])
+        Ocena_W <- ModelOcena(binarna_walidacja[,dane_Y], PredictTree(Tree_Model, binarna_walidacja[,dane_X])[,2])
+        
+        wyniki_klasyfikacja[iteracja, "AUCT"] <- Ocena_T$Statystyka['AUC']
+        wyniki_klasyfikacja[iteracja, "CzuloscT"] <- Ocena_T$Statystyka['Czulosc']
+        wyniki_klasyfikacja[iteracja, "SpecyficznoscT"] <- Ocena_T$Statystyka['Specyficznosc']
+        wyniki_klasyfikacja[iteracja, "JakoscT"] <- Ocena_T$Statystyka['Jakosc']
+        
+        wyniki_klasyfikacja[iteracja, "AUCW"] <- Ocena_W$Statystyka['AUC']
+        wyniki_klasyfikacja[iteracja, "CzuloscW"] <- Ocena_W$Statystyka['Czulosc']
+        wyniki_klasyfikacja[iteracja, "SpecyficznoscW"] <- Ocena_W$Statystyka['Specyficznosc']
+        wyniki_klasyfikacja[iteracja, "JakoscW"] <- Ocena_W$Statystyka['Jakosc']
+        print(wyniki_klasyfikacja[iteracja,])
+        
+      }else if(algo == "KNN"){
+        
+        binarna_trening <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 1,]
+        binarna_walidacja <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja$id_iteracja[iteracja]] == 2,]
+        
+        KNN_Model <- KNNtrain(binarna_trening[,dane_X], binarna_trening[,dane_Y], k=wyniki_klasyfikacja$k[iteracja], 0, 1)
+
+        Ocena_T <- ModelOcena( binarna_trening[,dane_Y] , KNNpred(KNNmodel = KNN_Model, binarna_trening[,dane_X], Ncores = detectCores() - 1)[,2])
+        Ocena_W <- ModelOcena( binarna_walidacja[,dane_Y] , KNNpred(KNNmodel = KNN_Model, binarna_walidacja[,dane_X], Ncores = detectCores() - 1)[,2])
+        
+        wyniki_klasyfikacja[iteracja, "AUCT"] <- Ocena_T$Statystyka['AUC']
+        wyniki_klasyfikacja[iteracja, "CzuloscT"] <- Ocena_T$Statystyka['Czulosc']
+        wyniki_klasyfikacja[iteracja, "SpecyficznoscT"] <- Ocena_T$Statystyka['Specyficznosc']
+        wyniki_klasyfikacja[iteracja, "JakoscT"] <- Ocena_T$Statystyka['Jakosc']
+        
+        wyniki_klasyfikacja[iteracja, "AUCW"] <- Ocena_W$Statystyka['AUC']
+        wyniki_klasyfikacja[iteracja, "CzuloscW"] <- Ocena_W$Statystyka['Czulosc']
+        wyniki_klasyfikacja[iteracja, "SpecyficznoscW"] <- Ocena_W$Statystyka['Specyficznosc']
+        wyniki_klasyfikacja[iteracja, "JakoscW"] <- Ocena_W$Statystyka['Jakosc']
+        print(wyniki_klasyfikacja[iteracja,])
+      }
+    }
+    # print(wyniki_klasyfikacja)
     return(wyniki_klasyfikacja)
   }
-  else if(is.factor(dane[,dane_Y]) & nlevels(dane[,dane_Y]) > 2){
+  else if(is.factor(dane[,dane_Y]) & nlevels(dane[,dane_Y]) > 2){                                             # KLASYFIKACJA WIELOKLASOWE
     wyniki_klasyfikacja_wielo <- data.frame(wyniki, JakoscT=0, JakoscW=0)
     
+    print("Problem: Klasyfikacja Wieloklasowa")
     
-    
+    for (iteracja in 1:nrow(wyniki_klasyfikacja_wielo)) {
+      
+      print(paste0("Model nr: ", iteracja))
+      
+      if(algo == 'NN'){
+        wieloklasowa_NN <- wieloklasowa
+        wieloklasowa_NN[,wieloklasowa_X] <- as.data.frame(sapply(wieloklasowa_NN[wieloklasowa_X], as.numeric))
+        wieloklasowa_NN[,wieloklasowa_X] <- as.data.frame(sapply(wieloklasowa_NN[,wieloklasowa_X], MinMax))
+        
+        wieloklasowa_trening <- wieloklasowa_NN[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 1,]
+        wieloklasowa_walidacja <- wieloklasowa_NN[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 2,]
+        
+        NN_Model <- trainNN(dane_Y, dane_X, wieloklasowa_trening, h = wyniki_klasyfikacja_wielo$h[iteracja], lr = wyniki_klasyfikacja_wielo$lr[iteracja], iter = wyniki_klasyfikacja_wielo$iter[iteracja], seed = seed, type = 'multi')
+        
+        Ocena_T <- ModelOcena(dane[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 1, dane_Y], predNN(wieloklasowa_trening[,dane_X], NN_Model, type = 'multi')[,'Class'])
+        Ocena_W <- ModelOcena(dane[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 2, dane_Y], predNN(wieloklasowa_walidacja[,dane_X], NN_Model, type = 'multi')[,'Class'])
+        
+        wyniki_klasyfikacja_wielo[iteracja, "JakoscT"] <- Ocena_T$Trafienia
+        wyniki_klasyfikacja_wielo[iteracja, "JakoscW"] <- Ocena_W$Trafienia
+        print(wyniki_klasyfikacja_wielo[iteracja,])
+        
+      }else if(algo == "Tree"){
+        
+        wieloklasowa_trening <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 1,]
+        wieloklasowa_walidacja <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 2,]
+        
+        Tree_Model <- Tree(dane_Y, dane_X, wieloklasowa_trening, type = wyniki_klasyfikacja_wielo$type[iteracja], depth = wyniki_klasyfikacja_wielo$depth[iteracja], minobs = wyniki_klasyfikacja_wielo$minobs[iteracja], overfit = wyniki_klasyfikacja_wielo$overfit[iteracja], cf = wyniki_klasyfikacja_wielo$cf[iteracja])
+        
+        Ocena_T <- ModelOcena(wieloklasowa_trening[,dane_Y], PredictTree(Tree_Model, wieloklasowa_trening[,dane_X])[,'Class'])
+        Ocena_W <- ModelOcena(wieloklasowa_walidacja[,dane_Y], PredictTree(Tree_Model, wieloklasowa_walidacja[,dane_X])[,'Class'])
+        
+        wyniki_klasyfikacja_wielo[iteracja, "JakoscT"] <- Ocena_T$Trafienia
+        wyniki_klasyfikacja_wielo[iteracja, "JakoscW"] <- Ocena_W$Trafienia
+        print(wyniki_klasyfikacja_wielo[iteracja,])
+        
+      }else if(algo == "KNN"){
+        
+        wieloklasowa_trening <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 1,]
+        wieloklasowa_walidacja <- dane[podzial_trening_walidacja[,wyniki_klasyfikacja_wielo$id_iteracja[iteracja]] == 2,]
+        
+        KNN_Model <- KNNtrain(wieloklasowa_trening[,dane_X], wieloklasowa_trening[,dane_Y], k=wyniki_klasyfikacja_wielo$k[iteracja], 0, 1)
+        
+        KNN_Pred_T <- KNNpred(KNNmodel = KNN_Model, wieloklasowa_trening[,dane_X], Ncores = detectCores() - 1)
+        KNN_Pred_W <- KNNpred(KNNmodel = KNN_Model, wieloklasowa_walidacja[,dane_X], Ncores = detectCores() - 1)
+        
+        Ocena_T <- ModelOcena( wieloklasowa_trening[,dane_Y] , KNN_Pred_T[,ncol(KNN_Pred_T)])
+        Ocena_W <- ModelOcena( wieloklasowa_walidacja[,dane_Y] , KNN_Pred_W[,ncol(KNN_Pred_W)])
+        
+        wyniki_klasyfikacja_wielo[iteracja, "JakoscT"] <- Ocena_T$Trafienia
+        wyniki_klasyfikacja_wielo[iteracja, "JakoscW"] <- Ocena_W$Trafienia
+        print(wyniki_klasyfikacja_wielo[iteracja,])
+      }
+    }
+    # print(wyniki_klasyfikacja_wielo)
     return(wyniki_klasyfikacja_wielo)
   }
   else{
