@@ -82,15 +82,18 @@ CV_KNN_multi <- CrossValidTune(wieloklasowa_Y, wieloklasowa_X, wieloklasowa, alg
 
 # Wykresy AUC, Jakosc / MSE, MAE, MAPE od parametrow 
 
+
+# Sieci Neuronowe - grupowanie i wykresy w zaleznosci od parametrow
+
 NN_reg_CV_wynik <- CV_NN_reg
 NN_reg_CV_wynik[is.na(NN_reg_CV_wynik)] <- 0
 NN_reg_CV_wynik$h <- as.character(NN_reg_CV_wynik$h)
 NN_reg_CV_wynik$h <- str_remove(NN_reg_CV_wynik$h, pattern = "c")
 NN_reg_CV_wynik <- NN_reg_CV_wynik %>% group_by( h, lr, iter)
 NN_reg_CV_wynik_gr <- as.data.frame(NN_reg_CV_wynik %>% summarise(MAET = mean(MAET), MSET = mean(MSET), MAPET = mean(MAPET), MAEW = mean(MAEW), MSEW = mean(MSEW), MAPEW = mean(MAPEW)))
-print(NN_reg_CV_wynik_gr)
 NN_reg_best_T <- NN_reg_CV_wynik_gr[which.min(NN_reg_CV_wynik_gr$MAPET),]
 NN_reg_best_W <- NN_reg_CV_wynik_gr[which.min(NN_reg_CV_wynik_gr$MAPEW),]
+print(NN_reg_CV_wynik_gr)
 print(NN_reg_best_T)
 print(NN_reg_best_W)
 
@@ -110,7 +113,6 @@ ggplot(NN_reg_CV_wynik_gr , aes(x=1:nrow(NN_reg_CV_wynik_gr))) +
 
 
 
-
 NN_bin_CrossValid_wynik <- CV_NN_bin
 NN_bin_CrossValid_wynik[is.na(NN_bin_CrossValid_wynik)] <- 0
 NN_bin_CrossValid_wynik$h <- as.character(NN_bin_CrossValid_wynik$h)
@@ -118,9 +120,9 @@ NN_bin_CrossValid_wynik$h <- str_remove(NN_bin_CrossValid_wynik$h, pattern = "c"
 NN_bin_CrossValid_wynik <- NN_bin_CrossValid_wynik %>% group_by( h, lr, iter)
 NN_bin_CrossValid_wynik_gr <- as.data.frame(NN_bin_CrossValid_wynik %>% summarise(AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),
                                                                                   AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
-print(NN_bin_CrossValid_wynik_gr)
 NN_bin_best_T <- NN_bin_CrossValid_wynik_gr[which.max(NN_bin_CrossValid_wynik_gr$JakoscT),]
 NN_bin_best_W <- NN_bin_CrossValid_wynik_gr[which.max(NN_bin_CrossValid_wynik_gr$JakoscW),]
+print(NN_bin_CrossValid_wynik_gr)
 print(NN_bin_best_T)
 print(NN_bin_best_W)
 
@@ -132,7 +134,6 @@ bin_lr_1 <- NN_bin_CrossValid_gr_lr[NN_bin_CrossValid_gr_lr$lr == unique(NN_bin_
 bin_lr_2 <- NN_bin_CrossValid_gr_lr[NN_bin_CrossValid_gr_lr$lr == unique(NN_bin_CrossValid_gr_lr$lr)[2], c("h", "JakoscW")]
 bin_lr_3 <- NN_bin_CrossValid_gr_lr[NN_bin_CrossValid_gr_lr$lr == unique(NN_bin_CrossValid_gr_lr$lr)[3], c("h", "JakoscW")]
 NN_bin_Porownanie_lr <- cbind("nr_wariantu" = c(1:nrow(bin_lr_1)), bin_lr_1, "JakoscW_2" = bin_lr_2$JakoscW, "JakoscW_3" = bin_lr_3$JakoscW)
-# NN_bin_Porownanie_lr
 
 ggplot(NN_bin_Porownanie_lr , aes(x=nr_wariantu)) +
   geom_line(aes(y = JakoscW, color='green'), size=1, ) +
@@ -150,12 +151,11 @@ NN_multi_CrossValid_wynik$h <- as.character(NN_multi_CrossValid_wynik$h)
 NN_multi_CrossValid_wynik$h <- str_remove(NN_multi_CrossValid_wynik$h, pattern = "c")
 NN_multi_CrossValid_wynik <- NN_multi_CrossValid_wynik %>% group_by( h, lr, iter)
 NN_multi_CrossValid_wynik_gr <- as.data.frame(NN_multi_CrossValid_wynik %>% summarise(JakoscT = mean(JakoscT), JakoscW = mean(JakoscW)))
-print(NN_multi_CrossValid_wynik_gr)
 NN_multi_best_T <- NN_multi_CrossValid_wynik_gr[which.max(NN_multi_CrossValid_wynik_gr$JakoscT),]
 NN_multi_best_W <- NN_multi_CrossValid_wynik_gr[which.max(NN_multi_CrossValid_wynik_gr$JakoscW),]
+print(NN_multi_CrossValid_wynik_gr)
 print(NN_multi_best_T)
 print(NN_multi_best_W)
-
 
 NN_multi_CrossValid_gr_lr <- NN_multi_CrossValid_wynik %>% group_by(h, lr)
 NN_multi_CrossValid_gr_lr <- as.data.frame(NN_multi_CrossValid_gr_lr %>% summarise(JakoscT = mean(JakoscT), JakoscW = mean(JakoscW), ))
@@ -164,11 +164,10 @@ bin_lr_1 <- NN_multi_CrossValid_gr_lr[NN_multi_CrossValid_gr_lr$lr == unique(NN_
 bin_lr_2 <- NN_multi_CrossValid_gr_lr[NN_multi_CrossValid_gr_lr$lr == unique(NN_multi_CrossValid_gr_lr$lr)[2], c("h", "JakoscW")]
 bin_lr_3 <- NN_multi_CrossValid_gr_lr[NN_multi_CrossValid_gr_lr$lr == unique(NN_multi_CrossValid_gr_lr$lr)[3], c("h", "JakoscW")]
 NN_multi_Porownanie_lr <- cbind("nr_wariantu" = c(1:nrow(bin_lr_1)), bin_lr_1, "JakoscW_2" = bin_lr_2$JakoscW, "JakoscW_3" = bin_lr_3$JakoscW)
-# NN_multi_Porownanie_lr
 
-ggplot(NN_multi_Porownanie_lr , aes(x=nr_wariantu)) +
-  geom_line(aes(y = JakoscW, color='green'), size=1, ) +
-  geom_line(aes(y = JakoscW_2, color='blue'), size=1,) +
+ggplot(NN_multi_Porownanie_lr , aes(x=nr_wariantu)) + 
+  geom_line(aes(y = JakoscW, color='green'), size=1, ) + 
+  geom_line(aes(y = JakoscW_2, color='blue'), size=1,) + 
   geom_line(aes(y = JakoscW_3, color='red'), size=1,) +
   labs(title='NN - Klas. Multi: porownanie wynikow dla roznych wspolczynnikow uczenia (lr)', x='Wariant warstw', y='Jakosc') +
   scale_color_discrete(name = "Learning Rate", labels = c(as.character(unique(NN_multi_CrossValid_gr_lr$lr)[2]), as.character(unique(NN_multi_CrossValid_gr_lr$lr)[1]), as.character(unique(NN_multi_CrossValid_gr_lr$lr)[3]))) +
@@ -176,13 +175,14 @@ ggplot(NN_multi_Porownanie_lr , aes(x=nr_wariantu)) +
 
 
 
+# Drzewa Decyzyjne - grupowanie wynikow i wykresy
 
 Tree_reg_CrossValid_gr <- CV_Tree_reg %>% group_by(depth, minobs)
 Tree_reg_CrossValid_gr[is.na(Tree_reg_CrossValid_gr)] <- 0
 Tree_reg_CrossValid_gr <- as.data.frame(Tree_reg_CrossValid_gr %>% summarise(MAET = mean(MAET), MSET = mean(MSET), MAPET = mean(MAPET), MAEW = mean(MAEW), MSEW = mean(MSEW), MAPEW = mean(MAPEW)))
-print(Tree_reg_CrossValid_gr)
 Tree_reg_best_T <- Tree_reg_CrossValid_gr[which.min(Tree_reg_CrossValid_gr$MAET),]
 Tree_reg_best_W <- Tree_reg_CrossValid_gr[which.min(Tree_reg_CrossValid_gr$MAEW),]
+print(Tree_reg_CrossValid_gr)
 print(Tree_reg_best_T)
 print(Tree_reg_best_W)
 
@@ -206,9 +206,9 @@ Tree_bin_CrossValid_gr <- CV_Tree_bin %>% group_by(depth, minobs, type, overfit,
 Tree_bin_CrossValid_gr[is.na(Tree_bin_CrossValid_gr)] <- 0
 Tree_bin_CrossValid_gr <- as.data.frame(Tree_bin_CrossValid_gr %>% summarise(AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),
                                                                              AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
-print(Tree_bin_CrossValid_gr)
 Tree_bin_best_T <- Tree_bin_CrossValid_gr[which.max(Tree_bin_CrossValid_gr$JakoscT),]
 Tree_bin_best_W <- Tree_bin_CrossValid_gr[which.max(Tree_bin_CrossValid_gr$JakoscW),]
+print(Tree_bin_CrossValid_gr)
 print(Tree_bin_best_T)
 print(Tree_bin_best_W)
 
@@ -223,9 +223,9 @@ ggplot(Tree_bin_CrossValid_gr , aes(x=1:nrow(Tree_bin_CrossValid_gr))) +
 Tree_multi_CrossValid_gr <- CV_Tree_multi %>% group_by(depth, minobs, type, overfit, cf)
 Tree_multi_CrossValid_gr[is.na(Tree_multi_CrossValid_gr)] <- 0
 Tree_multi_CrossValid_gr <- as.data.frame(Tree_multi_CrossValid_gr %>% summarise(JakoscT = mean(JakoscT), JakoscW = mean(JakoscW)))
-print(Tree_multi_CrossValid_gr)
 Tree_multi_best_T <- Tree_multi_CrossValid_gr[which.max(Tree_multi_CrossValid_gr$JakoscT),]
 Tree_multi_best_W <- Tree_multi_CrossValid_gr[which.max(Tree_multi_CrossValid_gr$JakoscW),]
+print(Tree_multi_CrossValid_gr)
 print(Tree_multi_best_T)
 print(Tree_multi_best_W)
 
@@ -238,13 +238,14 @@ ggplot(Tree_multi_CrossValid_gr , aes(x=1:nrow(Tree_multi_CrossValid_gr))) +
 
 
 
+# KNN - grupowanie wynikow
 
 KNN_reg_CrossValid_gr <- CV_KNN_reg %>% group_by(k)
 KNN_reg_CrossValid_gr[is.na(KNN_reg_CrossValid_gr)] <- 0
 KNN_reg_CrossValid_gr <- as.data.frame(KNN_reg_CrossValid_gr %>% summarise(MAET = mean(MAET), MSET = mean(MSET), MAPET = mean(MAPET), MAEW = mean(MAEW), MSEW = mean(MSEW), MAPEW = mean(MAPEW)))
-print(KNN_reg_CrossValid_gr)
 KNN_reg_best_T <- KNN_reg_CrossValid_gr[which.min(KNN_reg_CrossValid_gr$MAET),]
 KNN_reg_best_W <- KNN_reg_CrossValid_gr[which.min(KNN_reg_CrossValid_gr$MAEW),]
+print(KNN_reg_CrossValid_gr)
 print(KNN_reg_best_T)
 print(KNN_reg_best_W)
 
@@ -253,9 +254,9 @@ KNN_bin_CrossValid_gr <- CV_KNN_bin %>% group_by(k)
 KNN_bin_CrossValid_gr[is.na(KNN_bin_CrossValid_gr)] <- 0
 KNN_bin_CrossValid_gr <- as.data.frame(KNN_bin_CrossValid_gr %>% summarise(AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),
                                                                            AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
-print(KNN_bin_CrossValid_gr)
 KNN_bin_best_T <- KNN_bin_CrossValid_gr[which.max(KNN_bin_CrossValid_gr$JakoscT),]
 KNN_bin_best_W <- KNN_bin_CrossValid_gr[which.max(KNN_bin_CrossValid_gr$JakoscW),]
+print(KNN_bin_CrossValid_gr)
 print(KNN_bin_best_T)
 print(KNN_bin_best_W)
 
@@ -263,9 +264,9 @@ print(KNN_bin_best_W)
 KNN_multi_CrossValid_gr <- CV_KNN_multi %>% group_by(k)
 KNN_multi_CrossValid_gr[is.na(KNN_multi_CrossValid_gr)] <- 0
 KNN_multi_CrossValid_gr <- as.data.frame(KNN_multi_CrossValid_gr %>% summarise(JakoscT = mean(JakoscT), JakoscW = mean(JakoscW)))
-print(KNN_multi_CrossValid_gr)
 KNN_multi_best_T <- KNN_multi_CrossValid_gr[which.max(KNN_multi_CrossValid_gr$JakoscT),]
 KNN_multi_best_W <- KNN_multi_CrossValid_gr[which.max(KNN_multi_CrossValid_gr$JakoscW),]
+print(KNN_multi_CrossValid_gr)
 print(KNN_multi_best_T)
 print(KNN_multi_best_W)
 
@@ -274,11 +275,10 @@ print(KNN_multi_best_W)
 
 
 #######################################################################################################
-# Kroswalidacja na modelach z bibliotek R                                   # ZROBIC Z TEGO FUNKCJE
+# Biblioteki R - train na - nnet, rpart, caret
 
 
 cv_R <- trainControl(method="cv", number=10)
-
 
 # Sieci neuronowe
 
@@ -352,8 +352,7 @@ KNN_multi_R_Wynik = KNN_multi_R$results
 print(paste("KNN w R - multi: k = ", KNN_multi_R$finalModel$k, " | Jakosc = " ,KNN_multi_R_Wynik$Accuracy[KNN_multi_R_Wynik$k == KNN_multi_R$finalModel$k]))
 
 
-
-
+# Porownanie KNN
 
 VS_KNN_Reg <- data.frame(k = c(1:15))
 VS_KNN_Reg <- merge(VS_KNN_Reg, KNN_reg_CrossValid_gr[,c('k', "MAET")], by = 'k')
@@ -386,109 +385,3 @@ ggplot(VS_KNN_Multi , aes(x=k)) + geom_line(aes(y = JakoscT, color='green'), siz
 
 
 
-
-
-
-
-
-
-
-
-
-
-# BRUDNOPIS
-
-# binarna_NN <- binarna
-# binarna_NN <- as.data.frame(sapply(binarna_NN, as.numeric))
-# binarna_NN <- as.data.frame(sapply(binarna_NN, MinMax))
-# 
-# HELL <- trainNN(binarna_Y, binarna_X, binarna_NN, h = c(4,4), lr = 0.01, iter = 2000, seed = 333, type = 'bin')
-# # predNN(binarna_NN[,binarna_X], HELL, type = 'bin')
-# ModelOcena(as.factor(binarna_NN[,binarna_Y]), predNN(binarna_NN[,binarna_X], HELL, type = 'bin'))
-
-# wieloklasowa_NN <- wieloklasowa
-# wieloklasowa_NN[,wieloklasowa_X] <- as.data.frame(sapply(wieloklasowa_NN[wieloklasowa_X], as.numeric))
-# wieloklasowa_NN[,wieloklasowa_X] <- as.data.frame(sapply(wieloklasowa_NN[,wieloklasowa_X], MinMax))
-# wieloklasowa_X <- colnames(wieloklasowa_NN)[-ncol(wieloklasowa_NN)]
-# wieloklasowa_Y <- colnames(wieloklasowa_NN)[ncol(wieloklasowa_NN)]
-# summary(wieloklasowa_NN)
-# 
-# HELL_2 <- trainNN(wieloklasowa_Y, wieloklasowa_X, wieloklasowa_NN, h = c(8,8), lr = 0.9, iter = 80000, seed = 333, type = 'multi')
-# # predNN(as.matrix(wieloklasowa_NN[,wieloklasowa_X]), HELL_2, type = 'multi')
-# # summary(predNN(as.matrix(wieloklasowa_NN[,wieloklasowa_X]), HELL_2, type = 'multi'))
-# ModelOcena((wieloklasowa[,wieloklasowa_Y]), predNN(as.matrix(wieloklasowa_NN[,wieloklasowa_X]), HELL_2, type = 'multi')[,'Class'])
-
-# regresja_NN <- regresja
-# regresja_NN <- as.data.frame(sapply(regresja_NN, as.numeric))
-# regresja_NN <- as.data.frame(sapply(regresja_NN, MinMax))
-# summary(regresja_NN)
-#
-# HELL_3 <- trainNN(regresja_Y, regresja_X, regresja_NN, h = c(5,5), lr = 0.001, iter = 50000, seed = 333, type = 'reg')
-# # predNN(as.matrix(regresja_NN[,regresja_X]), HELL_3, type = 'reg')
-# ModelOcena((regresja[,regresja_Y]), MinMaxOdwrot(predNN(as.matrix(regresja_NN[,regresja_X]), HELL_3, type = 'reg'), y_min = min(regresja[,regresja_Y]), y_max = max(regresja[,regresja_Y])))
-
-
-
-# Tree_1 <- Tree(binarna_Y, binarna_X, binarna, type = "Entropy", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
-# Tree_wynik <- PredictTree(Tree_1, binarna[,binarna_X])
-# table(binarna[,binarna_Y], ifelse(Tree_wynik[,2] >= 0.5, 1, 0))
-# ModelOcena(binarna[,binarna_Y], as.numeric(Tree_wynik[,2]))
-
-# Tree_2 <- Tree(wieloklasowa_Y, wieloklasowa_X, wieloklasowa, type = "Entropy", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
-# Tree_wynik_2 <- PredictTree(Tree_2, wieloklasowa[,wieloklasowa_X])
-# ModelOcena(wieloklasowa[,wieloklasowa_Y], (Tree_wynik_2[,'Class']))
-
-# Tree_3 <- Tree(regresja_Y, regresja_X, regresja, type = "SS", depth = 6, minobs = 2, overfit = 'none', cf = 0.2)
-# Tree_wynik_3 <- PredictTree(Tree_3, regresja[,regresja_X])
-# ModelOcena(regresja[,regresja_Y], (Tree_wynik_3))
-
-
-
-# KNN_Model_reg <- KNNtrain(regresja[,regresja_X], regresja[,regresja_Y], k=2, 0, 1)
-# KNN_wynik_reg <- KNNpred(KNNmodel = KNN_Model_reg, regresja[,regresja_X], Ncores = 20)
-# ModelOcena(regresja[,regresja_Y], KNN_wynik_reg)
-
-# KNN_Model <- KNNtrain(binarna[,binarna_X], binarna[,binarna_Y], k=2, 0, 1)
-# KNN_wynik <- KNNpred(KNNmodel = KNN_Model, binarna[5:10,binarna_X], Ncores = 10)
-# ModelOcena(binarna[5:10,binarna_Y], KNN_wynik[,2])
-
-# KNN_Model_multi <- KNNtrain(wieloklasowa[,wieloklasowa_X], wieloklasowa[,wieloklasowa_Y], k=2, 0, 1)
-# KNN_wynik_multi <- KNNpred(KNNmodel = KNN_Model_multi, wieloklasowa[,wieloklasowa_X], Ncores = 20)
-# ModelOcena(wieloklasowa[,wieloklasowa_Y], KNN_wynik_multi[,length(KNN_wynik_multi)])
-
-
-
-# CrossValidTune_R <- function(data_Y_names, data_X_names, data, tuneGrid, method, metric, train_control, kFold, seed){
-#   
-#   set.seed(seed)
-#   n = nrow(data)
-#   lista <- data.frame(matrix(ncol = kFold, nrow = nrow(data)))
-#   
-#   
-#   if(method == 'knn'){
-#     KNN = train(x = data[,data_X_names], y = data[,data_Y_names], tuneGrid = tuneGrid, method = method, metric = metric, trControl = train_control)
-# 
-#     ocena_calosci <- list()
-#     
-#     for(i in 1:kFold)
-#     { 
-#       id_sample <- sample( 1:n, size = (1/kFold * n)-1, replace = F )
-#       walidacja_Y <- data[id_sample,data_Y_names]
-#       walidacja_X <- data[id_sample,data_X_names]
-#       wynik_predykcji <- predict(KNN, walidacja_X, type = "prob")
-#       
-#       print(walidacja_Y)
-#       print(wynik_predykcji)
-#       
-#       ocena <- ModelOcena(y_tar = walidacja_Y, y_hat = wynik_predykcji[,2])
-#       ocena_calosci[[i]] <- ocena
-#     }
-#     print(ocena_calosci)
-#     return(ocena_calosci)
-#     return(list("Wyniki" = KNN$results, "Best_Model" = KNN$finalModel, "Best_Model_k" = KNN$finalModel$k, "Best_Model_statistic" = KNN$finalModel$Accuracy))
-#   }
-#   
-#   # return(list("Wyniki" = KNN$results, "Best_Model" = KNN$finalModel))
-# }
-
-# kar <- CrossValidTune_R(binarna_Y, binarna_X, binarna_R, knn_grid_bin, 'knn', 'Accuracy',train_control = cv_R, kFold = 10, seed = 371)
