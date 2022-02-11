@@ -94,6 +94,62 @@ przeksztalcenie_reg<-function(dane){
 
 ## K-najblizszych sasiadow ##
 
+KNNtrain <- function(X, y_tar, k, XminNew=0, XmaxNew=1) 
+{
+  if (any(is.na(X) == TRUE) || any(is.na(y_tar) == TRUE) || k <= 0 || (is.data.frame(X) == FALSE & is.matrix(X) == FALSE) )
+  {
+    stop("Bledne dane lub parametry")
+  }
+  else
+  {
+    X <- data.frame(X)
+    X_new <- data.frame(matrix(0,ncol = ncol(X), nrow = nrow(X)))
+    colnames(X_new) <- colnames(X)
+    
+    kolumny <- vector()
+    minOrg <- vector()
+    maxOrg <- vector()
+    minmaxNew <- c(XminNew, XmaxNew)
+    
+    for(i in 1:ncol(X)) 
+    {
+      kolumny <- append(kolumny, i)
+      
+      if (is.numeric(X[,i])) 
+      {
+        X_new[,i] <- MinMax(X[,i])
+        #X_new[,i] <- ((X[,i] - min(X[,i])) / (max(X[,i]) - min(X[,i]))) * (XmaxNew - XminNew) + XminNew
+        minOrg <- append(minOrg, min(X[,i]))
+        maxOrg <- append(maxOrg, max(X[,i]))
+      }
+      else if(is.factor(X[,i]) & is.ordered(X[,i]) || is.factor(X[,i]))
+      {
+        X_new[,i] <- X[,i]
+        minOrg <- append(minOrg, NA)
+        maxOrg <- append(maxOrg, NA)
+      }
+      else
+      {
+        stop("Bledne kolumny")
+      }
+    }
+    
+    names(maxOrg) <- kolumny
+    names(minOrg) <- kolumny
+    attr(X_new, 'minOrg') <- minOrg
+    attr(X_new, 'maxOrg') <- maxOrg
+    attr(X_new, 'minmaxNew') <- minmaxNew
+    
+    model_treningowy <- list()
+    model_treningowy[["X"]] <- X_new
+    model_treningowy[["y"]] <- y_tar
+    model_treningowy[["k"]] <- k
+    
+    return(model_treningowy)
+  }
+}
+
+
 d_euklides <- function(x_i, x_n)
 {
   return(sqrt(sum((x_i - x_n)^2)))
@@ -111,48 +167,8 @@ d_porzadkowa <- function(x_i, x_n, unikalne)
 
 
 
-KNNtrain <- function(X, y_tar, k, XminNew, XmaxNew){
-  if(k > 0 && (is.matrix(X) == TRUE || is.data.frame(X) == TRUE) && all(!is.na(X)) && all(!is.na(y_tar))){
-    X_norm <- matrix(0,nrow(X),ncol(X))
-    minOrg <- c()
-    maxOrg <- c()
-    for (i in 1:ncol(X)) {
-      #sprawdzam czy mam dane sa wartosciami numerycznymi 
-      if(is.numeric(X[,i])){
-        for (j in i:nrow(X)) {
-          X_norm[j,i] <- ( (X[j,i] - min(X[,i])) / (max(X[,i]) - min(X[,i])) ) * (XmaxNew - XminNew) + XminNew
-          minOrg[i] <- min(X[,i])
-          maxOrg[i] <- max(X[,i])
-        }
-      }
-      #w innych przypadkach nie dokonuje normalizacji
-      else if(is.factor(X[,i])){
-        X_norm[,i] <- X[,i]
-        minOrg[i] <- NA
-        maxOrg[i] <- NA
-      }
-      else{
-        c("Bledne dane")
-      }
-    }
-    attr(X_norm,"minOrg") <- minOrg
-    attr(X_norm,"maxOrg") <- maxOrg
-    attr(X_norm,"minmaxNew") <- c("min"=XminNew,"max"=XmaxNew)
-    
-    knntr <- list()
-    knntr[["X"]] <- X_norm
-    knntr[["y"]] <- y_tar
-    knntr[["k"]] <- k
-    return( knntr )
-    
-  }
-  else 
-    "Bledne dane"
-}
-
-
-KNNpred <- function(KNNmodel, X){
-  
+KNNpred <- function(KNNmodel, X) 
+{
   if (is.na(KNNmodel) == TRUE || is.na(X) == TRUE || ncol(KNNmodel$X) != ncol(X) || colnames(KNNmodel$X) != colnames(X)){
     stop("Niekompletne dane!")
   }
@@ -296,10 +312,15 @@ KNNpred <- function(KNNmodel, X){
       {
         k_najblizej <- order(odleglosc[,i])[1:KNNmodel$k]
         
+        print(k_najblizej)
+        
         if(nlevels(KNNmodel$y) == 2)
         {
-          pozytywna <- sum(KNNmodel$y[k_najblizej] == 1) / KNNmodel$k
-          negatywna <- sum(KNNmodel$y[k_najblizej] == 0) / KNNmodel$k
+          print(as.numeric(KNNmodel$y[k_najblizej]) == 1)
+          print(as.numeric(KNNmodel$y[k_najblizej]) == 0)
+          
+          pozytywna <- sum(as.numeric(KNNmodel$y[k_najblizej]) == 1) / KNNmodel$k
+          negatywna <- sum(as.numeric(KNNmodel$y[k_najblizej]) == 0) / KNNmodel$k
           
           predykcja_klasy <- ifelse(pozytywna >= 0.5, 'P', 'N')
           
@@ -332,6 +353,8 @@ KNNpred <- function(KNNmodel, X){
     }
   }
 }
+
+
 
   ##  Drzewa decyzyjne  ##
 
@@ -818,7 +841,7 @@ MAPE <- function(y_tar, y_hat){ return( mean(abs((y_tar - y_hat)/y_tar) ))}
 #AUC_MT = suma(czulosc* specyficznosc t - specyficznosc t-1) + suma ((specyficznosc t - specyficznosc t-1)*(czulosc t - czulosc t-1))
 
 AUC <- function(y_tar, y_hat){
-  indx_modeluroc <- roc(y_tar, y_hat, quiet = TRUE)
+  indx_modeluroc <- pROC::roc(y_tar, y_hat, quiet = TRUE)
   #dla poprawnosci wynikow czulosc i specyficznosc sortuje rosnaco
   sensit<- sort(indx_modeluroc$"sensitivities", F) 
   specif<- sort(1 - indx_modeluroc$"specificities", F) 
@@ -829,7 +852,7 @@ AUC <- function(y_tar, y_hat){
 }
 #J = argt Czu?o?? + Specyficzno?? - 1
 J <- function(y_tar, y_hat){
-  indx_modeluroc <- roc(y_tar, y_hat, quiet = TRUE)
+  indx_modeluroc <- pROC::roc(y_tar, y_hat, quiet = TRUE)
   sensit <- indx_modeluroc$"sensitivities" 
   specif<- indx_modeluroc$"specificities"
   max_J <- 0
@@ -899,21 +922,22 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
   }
   
   
-  nCores <- detectCores()
-  klaster <- makeCluster(nCores-1)
-  registerDoParallel(klaster)
-  
+
   
   if(algorytm == "KNN"){
     cat("ID modelu: ")
+    
+    nCores <- detectCores()
+    klaster <- makeCluster(nCores-1)
+    registerDoParallel(klaster)
     
     if(typ == "bin"){
       tabela_bin <- data.frame(tabela, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
       wynik_bin <- foreach(indx_tabeli = 1:nrow(tabela_bin), .export = c("X", "Y", "dane", "tabela_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi", "d_euklides", "d_hamming", "d_porzadkowa"), .combine = rbind) %dopar%
-      
-      # for(indx_tabeli in 1:nrow(tabela_bin)){
+      # wynik_bin <- foreach(indx_tabeli = 1:1, .export = c("X", "Y", "dane", "tabela_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi", "d_euklides", "d_hamming", "d_porzadkowa"), .combine = rbind) %dopar%
       {
+      # for(indx_tabeli in 1:nrow(tabela_bin)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_bin$indx_modelu[indx_tabeli]] == 1,]
@@ -922,8 +946,6 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
         KNN_Model <- KNNtrain(dane_tr[,X], dane_tr[,Y], tabela_bin$k[indx_tabeli], 0, 1) 
         KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_tr[,X])
         KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_wal[,X])
-        
-        # print(KNN_pred_Trening)
         
         Trening_Ocena = ModelOcena((dane_tr[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
         Walidacja_Ocena = ModelOcena((dane_wal[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
@@ -1027,9 +1049,11 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
       tabela_bin <- data.frame(tabela, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, 
                                AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
-      wynik_bin <- foreach(indx_tabeli = 1:nrow(tabela_bin), .export = c("X", "Y", "dane", "tabela_bin", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
-      {
-      # for(indx_tabeli in 1:nrow(tabela_bin)){
+      # wynik_bin <- foreach(indx_tabeli = 1:nrow(tabela_bin), .export = c("X", "Y", "dane", "tabela_bin", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
+      # wynik_bin <- foreach(indx_tabeli = 1:1, .export = c("X", "Y", "dane", "tabela_bin", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
+        
+      # {
+      for(indx_tabeli in 1:nrow(tabela_bin)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_bin$indx_modelu[indx_tabeli]] == 1,]
@@ -1050,23 +1074,23 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
         tabela_bin[indx_tabeli, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
         tabela_bin[indx_tabeli, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
         
-        return(tabela_bin[indx_tabeli,])
+        # return(tabela_bin[indx_tabeli,])
         # return(tabela_bin)
       }
-      stopCluster(klaster)
-      
-      env <- foreach:::.foreachGlobals
-      rm(list=ls(name=env), pos=env)
-      
-      tabela_bin <- wynik_bin
+      # stopCluster(klaster)
+      # 
+      # env <- foreach:::.foreachGlobals
+      # rm(list=ls(name=env), pos=env)
+      # 
+      # tabela_bin <- wynik_bin
       return(tabela_bin)
     }
     else if(typ == "multi"){
       tabela_multi <- data.frame(tabela, ACCT=0, ACCW=0)
       
-      wynik_multi <- foreach(indx_tabeli = 1:nrow(tabela_multi), .export = c("X", "Y", "dane", "tabela_multi", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
-      {
-      # for(indx_tabeli in 1:nrow(tabela_multi)){
+      # wynik_multi <- foreach(indx_tabeli = 1:nrow(tabela_multi), .export = c("X", "Y", "dane", "tabela_multi", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "AUC", "J", "Specyficznosc", "Czulosc", "Jakosc", "Jakosc_multi"), .combine = rbind) %dopar%
+      # {
+      for(indx_tabeli in 1:nrow(tabela_multi)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_multi$indx_modelu[indx_tabeli]] == 1,]
@@ -1079,24 +1103,24 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
         tabela_multi[indx_tabeli, "ACCT"] <- ModelOcena(dane_tr[,Y], Tree_pred_Trening[,ncol(Tree_pred_Trening)])
         tabela_multi[indx_tabeli, "ACCW"] <- ModelOcena(dane_wal[,Y], Tree_pred_Walid[,ncol(Tree_pred_Walid)])
         
-        return(tabela_multi[indx_tabeli,])
+        # return(tabela_multi[indx_tabeli,])
         # return(tabela_multi)
       }
-      stopCluster(klaster)
+      # stopCluster(klaster)
+      # 
+      # env <- foreach:::.foreachGlobals
+      # rm(list=ls(name=env), pos=env)
       
-      env <- foreach:::.foreachGlobals
-      rm(list=ls(name=env), pos=env)
-      
-      tabela_multi <- wynik_multi
+      # tabela_multi <- wynik_multi
       return(tabela_multi)
     }
     else if(typ == "reg"){
       tabela_reg <- data.frame(tabela, MAET=0, MSET=0, MAPET=0, 
                                MAEW=0, MSEW=0, MAPEW=0)
       
-      wynik_reg <- foreach(indx_tabeli = 1:nrow(tabela_reg), .export = c("X", "Y", "dane", "tabela_reg", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "MAE", "MSE", "MAPE"), .combine = rbind) %dopar%
-      {
-      # for(indx_tabeli in 1:nrow(tabela_reg)){
+      # wynik_reg <- foreach(indx_tabeli = 1:nrow(tabela_reg), .export = c("X", "Y", "dane", "tabela_reg", "Tree", "PredictTree", "strTree", "BuildTree", "FindBestSplit", "SplitVar", "SplitNum", "PruneTree", "PE", "AssignInfo", "AssignInitialMeasures", "SS", "Gini", "Entropy", "Prob", "StopIfNot", "ModelOcena", "MinMax", "MAE", "MSE", "MAPE"), .combine = rbind) %dopar%
+      # {
+      for(indx_tabeli in 1:nrow(tabela_reg)){
         cat(paste0(indx_tabeli,"="))
         
         dane_tr <- dane[tabela_indx[,tabela_reg$indx_modelu[indx_tabeli]] == 1,]
@@ -1113,15 +1137,15 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 264)
         tabela_reg[indx_tabeli, "MSEW"] <- Ocena_Walidacja["MSE"]
         tabela_reg[indx_tabeli, "MAPEW"] <- Ocena_Walidacja["MAPE"]
         
-        return(tabela_reg[indx_tabeli,])
+        # return(tabela_reg[indx_tabeli,])
         # return(tabela_reg)
       }
-      stopCluster(klaster)
+      # stopCluster(klaster)
       
-      env <- foreach:::.foreachGlobals
-      rm(list=ls(name=env), pos=env)
+      # env <- foreach:::.foreachGlobals
+      # rm(list=ls(name=env), pos=env)
       
-      tabela_reg <- wynik_reg
+      # tabela_reg <- wynik_reg
       return(tabela_reg)
     }
   }
