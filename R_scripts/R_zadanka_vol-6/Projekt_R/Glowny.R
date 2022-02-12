@@ -147,8 +147,12 @@ print(Wlasne_Tree_reg_najlepsze_W)
 
 ### NN ###
 Wlasne_NN_bin_Tablica_wynikow <- NN_bin_CV
-Wlasne_NN_bin_Tablica_wynikow[is.na(Wlasne_NN_bin_Tablica_wynikow)] <- 0.0
-Wlasne_NN_bin_Tablica_wynikow_grupowana <- as.data.frame(Wlasne_NN_bin_Tablica_wynikow %>% group_by(depth, minobs, type, overfit, cf) %>% summarise(AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
+Wlasne_NN_bin_Tablica_wynikow[is.na(Wlasne_NN_bin_Tablica_wynikow)] <- 0
+Wlasne_NN_bin_Tablica_wynikow$h <- as.character(Wlasne_NN_bin_Tablica_wynikow$h)
+Wlasne_NN_bin_Tablica_wynikow$h <- str_remove(Wlasne_NN_bin_Tablica_wynikow$h, pattern = "c")
+Wlasne_NN_bin_Tablica_wynikow <- Wlasne_NN_bin_Tablica_wynikow %>% group_by( h, lr, iter)
+Wlasne_NN_bin_Tablica_wynikow_grupowana <- as.data.frame(Wlasne_NN_bin_Tablica_wynikow %>% summarise(AUCT = mean(AUCT), CzuloscT = mean(CzuloscT), SpecyficznoscT = mean(SpecyficznoscT), JakoscT = mean(JakoscT),AUCW = mean(AUCW), CzuloscW = mean(CzuloscW), SpecyficznoscW = mean(SpecyficznoscW), JakoscW = mean(JakoscW), ))
+Wlasne_NN_bin_Tablica_wynikow_grupowana <- Wlasne_NN_bin_Tablica_wynikow_grupowana %>% arrange(str_length(h), h)
 Wlasne_NN_bin_najlepsze_T <- Wlasne_NN_bin_Tablica_wynikow_grupowana[which.max(Wlasne_NN_bin_Tablica_wynikow_grupowana$JakoscT),]
 Wlasne_NN_bin_najlepsze_W <- Wlasne_NN_bin_Tablica_wynikow_grupowana[which.max(Wlasne_NN_bin_Tablica_wynikow_grupowana$JakoscW),]
 print("Wlasne NN - bin - tabela wynikow i najlepsze modele: ")
@@ -157,8 +161,12 @@ print(Wlasne_NN_bin_najlepsze_T)
 print(Wlasne_NN_bin_najlepsze_W)
 
 Wlasne_NN_multi_Tablica_wynikow <- NN_multi_CV
-Wlasne_NN_multi_Tablica_wynikow[is.na(Wlasne_NN_multi_Tablica_wynikow)] <- 0.0
-Wlasne_NN_multi_Tablica_wynikow_grupowana <- as.data.frame(Wlasne_NN_multi_Tablica_wynikow %>% group_by(depth, minobs, type, overfit, cf) %>% summarise(ACCT = mean(ACCT), ACCW = mean(ACCW)))
+Wlasne_NN_multi_Tablica_wynikow[is.na(Wlasne_NN_multi_Tablica_wynikow)] <- 0
+Wlasne_NN_multi_Tablica_wynikow$h <- as.character(Wlasne_NN_multi_Tablica_wynikow$h)
+Wlasne_NN_multi_Tablica_wynikow$h <- str_remove(Wlasne_NN_multi_Tablica_wynikow$h, pattern = "c")
+Wlasne_NN_multi_Tablica_wynikow <- Wlasne_NN_multi_Tablica_wynikow %>% group_by( h, lr, iter)
+Wlasne_NN_multi_Tablica_wynikow_grupowana <- as.data.frame(Wlasne_NN_multi_Tablica_wynikow %>% summarise(ACCT = mean(ACCT), ACCW = mean(ACCW)))
+Wlasne_NN_multi_Tablica_wynikow_grupowana <- Wlasne_NN_multi_Tablica_wynikow_grupowana %>% arrange(str_length(h), h)
 Wlasne_NN_multi_najlepsze_T <- Wlasne_NN_multi_Tablica_wynikow_grupowana[which.max(Wlasne_NN_multi_Tablica_wynikow_grupowana$ACCT),]
 Wlasne_NN_multi_najlepsze_W <- Wlasne_NN_multi_Tablica_wynikow_grupowana[which.max(Wlasne_NN_multi_Tablica_wynikow_grupowana$ACCW),]
 print("Wlasne NN - multi - tabela wynikow i najlepsze modele: ")
@@ -167,10 +175,14 @@ print(Wlasne_NN_multi_najlepsze_T)
 print(Wlasne_NN_multi_najlepsze_W)
 
 Wlasne_NN_reg_Tablica_wynikow <- NN_reg_CV
-Wlasne_NN_reg_Tablica_wynikow[is.na(Wlasne_NN_reg_Tablica_wynikow)] <- 0.0
-Wlasne_NN_reg_Tablica_wynikow_grupowana <- as.data.frame(Wlasne_NN_reg_Tablica_wynikow %>% group_by(depth, minobs, type, overfit, cf) %>% summarise(MAET = mean(MAET), MSET = mean(MSET), MAPET = mean(MAPET), MAEW = mean(MAEW), MSEW = mean(MSEW), MAPEW = mean(MAPEW)))
-Wlasne_NN_reg_najlepsze_T <- Wlasne_NN_reg_Tablica_wynikow_grupowana[which.min(Wlasne_NN_reg_Tablica_wynikow_grupowana$MAET),]
-Wlasne_NN_reg_najlepsze_W <- Wlasne_NN_reg_Tablica_wynikow_grupowana[which.min(Wlasne_NN_reg_Tablica_wynikow_grupowana$MAEW),]
+Wlasne_NN_reg_Tablica_wynikow[is.na(Wlasne_NN_reg_Tablica_wynikow)] <- 0
+Wlasne_NN_reg_Tablica_wynikow$h <- as.character(Wlasne_NN_reg_Tablica_wynikow$h)
+Wlasne_NN_reg_Tablica_wynikow$h <- str_remove(Wlasne_NN_reg_Tablica_wynikow$h, pattern = "c")
+Wlasne_NN_reg_Tablica_wynikow <- Wlasne_NN_reg_Tablica_wynikow %>% group_by( h, lr, iter)
+Wlasne_NN_reg_Tablica_wynikow_grupowana <- as.data.frame(Wlasne_NN_reg_Tablica_wynikow %>% summarise(MAET = mean(MAET), MSET = mean(MSET), MAPET = mean(MAPET), MAEW = mean(MAEW), MSEW = mean(MSEW), MAPEW = mean(MAPEW)))
+Wlasne_NN_reg_Tablica_wynikow_grupowana <- Wlasne_NN_reg_Tablica_wynikow_grupowana %>% arrange(str_length(h), h)
+Wlasne_NN_reg_najlepsze_T <- Wlasne_NN_reg_Tablica_wynikow_grupowana[which.max(Wlasne_NN_reg_Tablica_wynikow_grupowana$MAET),]
+Wlasne_NN_reg_najlepsze_W <- Wlasne_NN_reg_Tablica_wynikow_grupowana[which.max(Wlasne_NN_reg_Tablica_wynikow_grupowana$MAEW),]
 print("Wlasne NN - reg - tabela wynikow i najlepsze modele: ")
 print(Wlasne_NN_reg_Tablica_wynikow_grupowana)
 print(Wlasne_NN_reg_najlepsze_T)
@@ -255,7 +267,7 @@ ggplot(VS_KNN_bin , aes(x=k)) + geom_line(aes(y = JakoscW, color='blue'), size=1
 
 
 VS_KNN_multi <- data.frame(k = c(1:20))
-VS_KNN_multi <- merge(VS_KNN_multi, Wlasne_KNN_multi_Tablica_wynikow_grupowana[,c('k', "JakoscW")], by = 'k')
+VS_KNN_multi <- merge(VS_KNN_multi, Wlasne_KNN_multi_Tablica_wynikow_grupowana[,c('k', "ACCW")], by = 'k')
 VS_KNN_multi <- merge(VS_KNN_multi, R_KNN_multi_R_Wyniki[,c('k', "Accuracy")], by = 'k')
 ggplot(VS_KNN_multi , aes(x=k)) + geom_line(aes(y = ACCW, color='blue'), size=1, ) + 
                                   geom_line(aes(y = Accuracy, color='red'), size=1,) +
@@ -270,8 +282,10 @@ ggplot(VS_KNN_reg , aes(x=k)) + geom_line(aes(y = MAEW, color='blue'), size=1, )
                                 labs(title='KNN - reg', x='k', y='MAE') + 
                                 scale_color_discrete(name = "Algorytm: ", labels = c("Wlasny", "Biblioteka R")) + theme(legend.position = "bottom")
 
+
   ## Statystyka wynikow w zaleznosci od modeli ##
 
+# Tree
 ggplot(Wlasne_Tree_bin_Tablica_wynikow_grupowana , aes(x=c(1:nrow(Wlasne_Tree_bin_Tablica_wynikow_grupowana)), size = 1)) + 
       geom_line(aes(y = AUCT, color = 'black'), size=1, ) + 
       geom_line(aes(y = JakoscT, color = 'green'), size=1,) + 
@@ -289,7 +303,29 @@ ggplot(Wlasne_Tree_multi_Tablica_wynikow_grupowana , aes(x=c(1:nrow(Wlasne_Tree_
 ggplot(Wlasne_Tree_reg_Tablica_wynikow_grupowana , aes(x=c(1:nrow(Wlasne_Tree_reg_Tablica_wynikow_grupowana)), size = 1)) + 
       geom_line(aes(y = MAET, color='blue'), size=1, ) + 
       geom_line(aes(y = MAEW, color='red'), size=1,) + 
-      labs(title='Tree - multi', x='Nr modelu', y='MAE') + 
+      labs(title='Tree - reg', x='Nr modelu', y='MAE') + 
+      scale_color_discrete(name = "Wyniki: ", labels = c("MAET", "MAEW")) + theme(legend.position = "bottom")
+
+
+# NN
+ggplot(Wlasne_NN_bin_Tablica_wynikow_grupowana , aes(x=c(1:nrow(Wlasne_NN_bin_Tablica_wynikow_grupowana)), size = 1)) + 
+      geom_line(aes(y = AUCT, color = 'black'), size=1, ) + 
+      geom_line(aes(y = JakoscT, color = 'green'), size=1,) + 
+      geom_line(aes(y = AUCW, color = 'red'), size=1, ) + 
+      geom_line(aes(y = JakoscW, color = 'blue'), size=1,) + 
+      labs(title='NN - bin', x='Nr modelu', y='AUC / Dokladnosc') + 
+      scale_color_discrete(name = "Wyniki: ", labels = c("AUCT", "JakoscW","JakoscT", "AUCW")) + theme(legend.position = "bottom")
+
+ggplot(Wlasne_NN_multi_Tablica_wynikow_grupowana , aes(x=c(1:nrow(Wlasne_NN_multi_Tablica_wynikow_grupowana)), size = 1)) + 
+      geom_line(aes(y = ACCT, color='blue'), size=1, ) + 
+      geom_line(aes(y = ACCW, color='red'), size=1,) + 
+      labs(title='NN - multi', x='Nr modelu', y='Dokladnosc') + 
+      scale_color_discrete(name = "Wyniki: ", labels = c("JakoscT", "JakoscW")) + theme(legend.position = "bottom")
+
+ggplot(Wlasne_NN_reg_Tablica_wynikow_grupowana , aes(x=c(1:nrow(Wlasne_NN_reg_Tablica_wynikow_grupowana)), size = 1)) + 
+      geom_line(aes(y = MAET, color='blue'), size=1, ) + 
+      geom_line(aes(y = MAEW, color='red'), size=1,) + 
+      labs(title='NN - reg', x='Nr modelu', y='MAE') + 
       scale_color_discrete(name = "Wyniki: ", labels = c("MAET", "MAEW")) + theme(legend.position = "bottom")
 
 

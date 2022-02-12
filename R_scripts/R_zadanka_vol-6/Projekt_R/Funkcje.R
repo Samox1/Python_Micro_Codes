@@ -192,10 +192,8 @@ KNNpred <- function(KNNmodel, X)
     kolumny_factor_order <- 0
     kolumny_factor <- 0
     
-    for (i in 1:n_kolumn_znorm) 
-    {
-      if(is.numeric(X[,i]))
-      {
+    for (i in 1:n_kolumn_znorm) {
+      if(is.numeric(X[,i])){
         min_k <- as.numeric(attributes(KNNmodel$X)$minOrg[i])
         max_k <- as.numeric(attributes(KNNmodel$X)$maxOrg[i])
         newmin_k <- as.numeric(attributes(KNNmodel$X)$minmaxNew[1])
@@ -204,13 +202,11 @@ KNNpred <- function(KNNmodel, X)
         X_znormalizowane[,i] <- ((X[,i] - min_k) / (max_k - min_k)) * (newmax_k - newmin_k) + newmin_k
         kolumny_numeryczne <- kolumny_numeryczne + 1
       }
-      else if(is.factor(X[,i]))
-      {
+      else if(is.factor(X[,i])){
         X_znormalizowane[,i] <- X[,i]
         kolumny_factor <- kolumny_factor + 1
       }
-      else if(is.factor(X[,i]) & is.ordered(X[,i]))
-      {
+      else if(is.factor(X[,i]) & is.ordered(X[,i])){
         X_znormalizowane[,i] <- X[,i]
         kolumny_factor_order <- kolumny_factor_order + 1
       }
@@ -219,34 +215,24 @@ KNNpred <- function(KNNmodel, X)
     
     odleglosc <- matrix(0, n_wierszy_model, n_wierszy_znorm)
     
-    if(kolumny_numeryczne == n_kolumn_znorm)
-    {
-      for(i in 1:n_wierszy_model)
-      {
-        for(j in 1:n_wierszy_znorm)
-        {
+    if(kolumny_numeryczne == n_kolumn_znorm){
+      for(i in 1:n_wierszy_model){
+        for(j in 1:n_wierszy_znorm){
           odleglosc[i,j] <- d_euklides(KNNmodel$X[i,], X_znormalizowane[j,])
         }
       }
     }
-    else if(kolumny_factor == n_kolumn_znorm)
-    {
-      for(i in 1:n_wierszy_model)
-      {
-        for(j in 1:n_wierszy_znorm)
-        {
+    else if(kolumny_factor == n_kolumn_znorm){
+      for(i in 1:n_wierszy_model){
+        for(j in 1:n_wierszy_znorm){
           odleglosc[i,j] <- d_hamming(KNNmodel$X[i,], X_znormalizowane[j,], n_kolumn_znorm)
         }
       }
     }
-    else if(kolumny_factor_order == n_kolumn_znorm)
-    {
-      for(i in 1:n_wierszy_model)
-      {
-        for(j in 1:n_wierszy_znorm)
-        {
-          for(k in 1:n_kolumn_znorm)
-          {
+    else if(kolumny_factor_order == n_kolumn_znorm){
+      for(i in 1:n_wierszy_model){
+        for(j in 1:n_wierszy_znorm){
+          for(k in 1:n_kolumn_znorm){
             unikalne <- nlevels(X_znormalizowane[,k])
             odleglosc[i,j] <- d_porzadkowa(KNNmodel$X[i,], X_znormalizowane[j,], unikalne)
           }
@@ -255,30 +241,23 @@ KNNpred <- function(KNNmodel, X)
     }
     else
     {
-      for(i in 1:n_wierszy_model)
-      {
-        for(j in 1:n_wierszy_znorm)
-        {
+      for(i in 1:n_wierszy_model){
+        for(j in 1:n_wierszy_znorm){
           temp <- 0
           
-          for(k in 1:n_kolumn_znorm)
-          {
-            if(is.numeric(X_znormalizowane[,k]))
-            {
+          for(k in 1:n_kolumn_znorm){
+            if(is.numeric(X_znormalizowane[,k])){
               max_k <- as.numeric(attributes(KNNmodel$X)$maxOrg[k])
               min_k <- as.numeric(attributes(KNNmodel$X)$minOrg[k])
               
               temp <- temp + (abs(KNNmodel$X[i,k] - X_znormalizowane[j,k]) / (max_k -  min_k)) 
             }
-            else if(is.factor(X_znormalizowane[,k]))
-            {
-              if(KNNmodel$X[i,k] != X_znormalizowane[j,k])
-              {
+            else if(is.factor(X_znormalizowane[,k])){
+              if(KNNmodel$X[i,k] != X_znormalizowane[j,k]){
                 temp <- temp + 1
               }
             }
-            else if(is.factor(X_znormalizowane[,k]) & is.ordered(X_znormalizowane[,k]))
-            {
+            else if(is.factor(X_znormalizowane[,k]) & is.ordered(X_znormalizowane[,k])){
               z_i <- (i - 1) / (n_wierszy_model - 1)
               z_n <- (j - 1) / (n_wierszy_znorm - 1)
               temp <- temp + (abs(z_i - z_n) / (n_wierszy_model - 1))
@@ -290,12 +269,10 @@ KNNpred <- function(KNNmodel, X)
     }
     
     
-    if(is.numeric(KNNmodel$y))
-    {
+    if(is.numeric(KNNmodel$y)){
       predykcja <- double(n_kolumn_znorm)
       
-      for(i in 1:n_wierszy_znorm)
-      {
+      for(i in 1:n_wierszy_znorm){
         k_najblizej <- order(odleglosc[,i])[1:KNNmodel$k]
         
         y_predykcja <- mean(KNNmodel$y[k_najblizej])
@@ -304,18 +281,15 @@ KNNpred <- function(KNNmodel, X)
       }
       return(predykcja)
     }
-    else if(is.factor(KNNmodel$y))
-    {
+    else if(is.factor(KNNmodel$y)){
       predykcja <- as.data.frame(matrix(nrow = n_wierszy_znorm, ncol = nlevels(KNNmodel$y)+1))
       
-      for(i in 1:n_wierszy_znorm)
-      {
+      for(i in 1:n_wierszy_znorm){
         k_najblizej <- order(odleglosc[,i])[1:KNNmodel$k]
         
         print(k_najblizej)
         
-        if(nlevels(KNNmodel$y) == 2)
-        {
+        if(nlevels(KNNmodel$y) == 2){
           print(as.numeric(KNNmodel$y[k_najblizej]) == 1)
           print(as.numeric(KNNmodel$y[k_najblizej]) == 0)
           
@@ -329,14 +303,12 @@ KNNpred <- function(KNNmodel, X)
           predykcja[i, 2] <- negatywna
           predykcja[i, 3] <- predykcja_klasy
         }
-        else if(nlevels(KNNmodel$y) > 2)
-        {
+        else if(nlevels(KNNmodel$y) > 2){
           etykiety <- sort(unique(KNNmodel$y))
           names(predykcja) <- etykiety
           names(predykcja)[nlevels(KNNmodel$y)+1] <- 'Klasa'
           
-          for (j in 1:length(etykiety))
-          {
+          for (j in 1:length(etykiety)){
             pozytywna <- sum(KNNmodel$y[k_najblizej] == as.character(etykiety[j])) / KNNmodel$k
             predykcja[i,j] <- pozytywna
           }
@@ -347,8 +319,7 @@ KNNpred <- function(KNNmodel, X)
       }
       return(predykcja)
     }
-    else
-    {
+    else{
       stop("Dane y modelu sa niepoprawne!")
     }
   }
