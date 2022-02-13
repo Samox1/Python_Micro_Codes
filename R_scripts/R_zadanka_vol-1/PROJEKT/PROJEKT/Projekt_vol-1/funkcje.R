@@ -270,8 +270,8 @@ KNNpred <- function(KNNmodel, X)
         
         if(nlevels(KNNmodel$y) == 2)
         {
-          pozytywna <- sum(KNNmodel$y[k_najblizej] == 1) / KNNmodel$k
-          negatywna <- sum(KNNmodel$y[k_najblizej] == 0) / KNNmodel$k
+          pozytywna <- sum(as.numeric(KNNmodel$y[k_najblizej]) == 1) / KNNmodel$k
+          negatywna <- sum(as.numeric(KNNmodel$y[k_najblizej]) == 0) / KNNmodel$k
           
           predykcja_klasy <- ifelse(pozytywna >= 0.5, 'P', 'N')
           
@@ -590,9 +590,7 @@ BuildTree <- function(node, Y, X, data, depth, type , minobs){
 
 
 PE <- function( p, n, z ){
-  
   return( ( p + (z^2)/(2*n) + z*sqrt( p/n - (p^2)/(n) + (z^2)/(4*n^2) ) ) / ( 1 + z^2/n ) )
-  
 }
 
 PruneTree <- function( tree, cf){
@@ -604,20 +602,27 @@ PruneTree <- function( tree, cf){
   
   repeat{
     sciezka_lisci <- tree$Get("pathString", filterFun = isLeaf )
+    
     if( all( sciezka_lisci %in% liscie_byly) | sciezka_lisci[1] == "Root" ) break
+    
     temp <- strsplit( sciezka_lisci[ !sciezka_lisci %in% liscie_byly ][1], "/")[[1]]
     leaf <- eval( parse( text = paste( "tree", paste0( paste0( "'", temp[-1] ), "'", collapse = "$" ), sep = "$" ) ) )
+    
     parent <- leaf$parent
     sibling <- leaf$siblings[[1]]
+    
     leaf_class <- leaf$Class
     sibling_class <- sibling$Class
     parent_class <- parent$Class
+    
     leaf_prob <- leaf$Prob
     sibling_prob <- sibling$Prob
     parent_prob <- parent$Prob
+    
     leaf_count <- leaf$Count
     sibling_count <- sibling$Count
     parent_count <- parent$Count
+    
     leaf_isLeaf <- leaf$isLeaf
     sibling_isLeaf <- sibling$isLeaf
     
@@ -638,69 +643,63 @@ PruneTree <- function( tree, cf){
 }
 
 
-Tree<- function(Y, X, data, type, depth, minobs, overfit, cf){
+Tree <- function(Y, X, data, type, depth, minobs, overfit, cf){
   
   if(StopIfNot(Y, X, data, type, depth, minobs, overfit, cf) == FALSE){
     return(FALSE)
   }
-  
-  # for (i in X) {
-  #   if (is.factor(data[,i])) {
-  #     data[,i] <- as.character(data[,i])
-  #   }
-  #   else {
-  #     next
-  #   }
-  # }
 
-  tree<- Node$new("Root")
+  tree <- data.tree::Node$new("Root")
   tree$Count <- nrow(data)
   
+  # Dodanie do 'Root' potrzebnych informacji
   tree <- AssignInitialMeasures(tree, Y, data, type, depth)
   
+  # Budowanie Drzewa
   BuildTree(node = tree, Y = Y, X = X, data = data, depth = depth, type = type, minobs = minobs)
   
+  # Przyciecie drzewa - wykorzystanie parametru 'overfit' i 'cf'
   if(overfit == 'prune')
   {
     PruneTree(tree, cf)
   }
   
+  # Dodatnie info o drzewie decyzyjnym jako atrybuty
   AssignInfo(tree,Y,X,data,type,depth, minobs, overfit, cf)
   
   return(tree)
 }
 
 
-ObsPred <- function(tree, obs) {
+Predykcja_Drzewa <- function(tree, obs) {
   if (tree$isLeaf) {
-    return(c(as.numeric(tree$Prob), "Class" = tree$Class))}
+    return(c(as.numeric(tree$Prob), "Class" = tree$Class))
+  }
   
   if (is.numeric(tree$children[[1]]$BestSplit) | is.ordered(tree$children[[1]]$BestSplit)) {
-    child <- tree$children[[ifelse(obs[,tree$children[[1]]$feature] > (tree$children[[1]]$BestSplit), 2, 1)]]}
+    child <- tree$children[[ifelse(obs[,tree$children[[1]]$feature] > (tree$children[[1]]$BestSplit), 2, 1)]]
+  }
   else {
     split <- tree$children[[1]]$feature
-    child <- tree$children[[ifelse((obs[,tree$children[[1]]$feature] %in% split), 1, 2)]]}
-  return (ObsPred(child,obs))
+    child <- tree$children[[ifelse((obs[,tree$children[[1]]$feature] %in% split), 1, 2)]]
+  }
+  return (Predykcja_Drzewa(child,obs))
 }
 
 
 PredictTree <- function(tree, data) {
   
-  # (paste0("PREDICT TREE: ",is.factor(attributes(tree)$data[,attributes(tree)$Y])))
-  
   if (is.factor(attributes(tree)$data[,attributes(tree)$Y])) {
     res <- c()
     
     for (i in 1:nrow(data)) {
-      res <- rbind(res, (ObsPred(tree, data[i, ,drop = F])))}
-
-    #colnames(res[,1:(ncol(res)-1)]) <- c(1:(ncol(res)-1))
-    #colnames(res[,ncol(res)]) <- "Class"
+      res <- rbind(res, (Predykcja_Drzewa(tree, data[i, ,drop = F])))
+    }
   }
   else{
     res <- c()
     for (i in 1:nrow(data)) {
-      res[i] <- as.numeric(ObsPred(tree, data[i, ,drop = F])["Class"])}
+      res[i] <- as.numeric(Predykcja_Drzewa(tree, data[i, ,drop = F])["Class"])}
   }
   return (res)
 }
@@ -729,91 +728,88 @@ lossSS <- function( y_tar, y_hat ){
 SoftMax <- function(x){
   exp( x ) / sum( exp( x ) )
 }
-MinMax_nn <- function( x ){
-  return( ( x - min(x) ) / ( max(x) - min(x) ) )
-}  
 MinMaxOdwrot <- function( x, y_min, y_max ){
   return(  x * (y_max - y_min) + y_min )
 } 
 
 
 wprzod <- function( X, W1, W2, W3, typ ){
-  h1 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W1 )  )
-  h2 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( h1 %*% W2 )  )
+  Z1 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( X %*% W1 )  )
+  Z2 <- cbind( matrix( 1, nrow = nrow(X) ), sigmoid( Z1 %*% W2 )  )
   if (typ =="bin"){
-    y_hat <- sigmoid( h2 %*% W3 ) # klasyfikacja binarna
+    y_hat <- sigmoid( Z2 %*% W3 )                                           # klasyfikacja binarna
   }
   else if (typ == "multi"){
-    y_hat <- matrix( t( apply( h2 %*% W3, 1, SoftMax ) ), nrow = nrow(X) ) # klasyfikacja wieloklasowa
+    y_hat <- matrix( t( apply( Z2 %*% W3, 1, SoftMax ) ), nrow = nrow(X) )  # klasyfikacja wieloklasowa
   } 
   else if (typ == "reg"){
-    y_hat <- h2 %*% W3 # regresja
+    y_hat <- Z2 %*% W3                                                      # regresja
   }
-  return( list( y_hat = y_hat, H1 = h1, H2 = h2 ) )
+  return( list( y_hat = y_hat, Z1 = Z1, Z2 = Z2 ) )
 }
 
 
-wstecz <- function( X, y_tar, y_hat, W1, W2, W3, H1, H2, lr, typ ){
+wstecz <- function( X, y_tar, y_hat, W1, W2, W3, Z1, Z2, lr, typ ){
   if (typ =="bin"){
-    dy_hat <- (y_tar - y_hat) * dsigmoid( y_hat ) # klasyfikacja binarna
+    dy_hat <- (y_tar - y_hat) * dsigmoid( y_hat )                   # klasyfikacja binarna
   }
   else if (typ == "multi"){
-    dy_hat <- (y_tar - y_hat) / nrow( X ) # klasyfikacja wieloklasowa
+    dy_hat <- (y_tar - y_hat) / nrow( X )                           # klasyfikacja wieloklasowa
   } 
   else if (typ == "reg"){
-    dy_hat <- (y_tar - y_hat) # regresja
+    dy_hat <- (y_tar - y_hat)                                       # regresja
   }
-  dW3 <- t(H2) %*% dy_hat
-  dH2<- dy_hat %*% t(W3) * dsigmoid( H2 )
-  dW2 <- t(H1) %*% dH2[,-1]
-  dH1<- dH2[,-1] %*% t(W2) * dsigmoid( H1 )
-  dW1 <- t(X) %*% dH1[,-1]
+  dW3 <- t(Z2) %*% dy_hat
+  dZ2<- dy_hat %*% t(W3) * dsigmoid( Z2 )
+  dW2 <- t(Z1) %*% dZ2[,-1]
+  dZ1<- dZ2[,-1] %*% t(W2) * dsigmoid( Z1 )
+  dW1 <- t(X) %*% dZ1[,-1]
   W1 <- W1 + lr * dW1
   W2 <- W2 + lr * dW2
   W3 <- W3 + lr * dW3
   return( list( W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
-trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 123, typ = "bin" ){
+trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 399, typ = "bin" ){
   set.seed( seed )
+  # Error_NN <- double( iter )
+  
   X <- cbind( rep( 1, nrow(x) ), x )
-  
   h = unlist(h, use.names = FALSE)
-  
   W1 <- matrix( runif( ncol(X) * h[1], -1, 1 ), nrow = ncol(X) )
   W2 <- matrix( runif( (h[1]+1) * h[2], -1, 1 ), nrow = h[1] + 1 )
   W3 <- matrix( runif( (h[2]+1) * ncol(y_tar), -1, 1 ), nrow = h[2] + 1 )
   
-  error <- double( iter )
-  
   for( i in 1:iter ){
     sygnalwprzod <- wprzod( X, W1, W2, W3, typ=typ )
-    sygnalwtyl <- wstecz( X, y_tar, y_hat = sygnalwprzod$y_hat, W1, W2, W3, H1 = sygnalwprzod$H1, H2 = sygnalwprzod$H2, lr, typ=typ )
+    sygnalwtyl <- wstecz( X, y_tar, y_hat = sygnalwprzod$y_hat, W1, W2, W3, Z1 = sygnalwprzod$Z1, Z2 = sygnalwprzod$Z2, lr, typ=typ )
     W1 <- sygnalwtyl$W1
     W2 <- sygnalwtyl$W2
     W3 <- sygnalwtyl$W3
     cat( paste0( "\rIteracja: ", i , " / ", iter) )
     
-    error[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
+    # Error_NN[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
   }
   # xwartosci <- seq( 1, iter, length = 1000 )
-  # print( qplot( xwartosci, error[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+  # print( qplot( xwartosci, Error_NN[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
   return( list( y_hat = sygnalwprzod$y_hat, W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
 predNN <- function( xnew, nn, typ = "bin" ){
   xnew <- cbind( rep( 1, nrow(xnew) ), xnew )
-  h1 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( xnew %*% nn$W1 )  )
-  h2 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( h1 %*% nn$W2 )  )
+  Z1 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( xnew %*% nn$W1 )  )
+  Z2 <- cbind( matrix( 1, nrow = nrow(xnew) ), sigmoid( Z1 %*% nn$W2 )  )
+  
   if (typ =="bin"){
-    y_hat <- sigmoid( h2 %*% nn$W3 ) # klasyfikacja binarna
+    y_hat <- sigmoid( Z2 %*% nn$W3 )                                              # klasyfikacja binarna
   }
   else if (typ == "multi"){
-    y_hat <- matrix( t( apply( h2 %*% nn$W3, 1, SoftMax ) ), nrow = nrow(xnew) ) # klasyfikacja wieloklasowa
+    y_hat <- matrix( t( apply( Z2 %*% nn$W3, 1, SoftMax ) ), nrow = nrow(xnew) )  # klasyfikacja wieloklasowa
   } 
   else if (typ == "reg"){
-    y_hat <- h2 %*% nn$W3 # regresja
+    y_hat <- Z2 %*% nn$W3                                                         # regresja
   }
+  
   return( y_hat )
 }
 
@@ -878,7 +874,7 @@ Jakosc <- function(Mat)
 }
 
 
-Accuracy_multi <- function(y_tar, y_hat){
+Jakosc__ <- function(y_tar, y_hat){
   return( sum(as.numeric(y_tar) == as.numeric(y_hat)) / length(y_tar) )
 }
 
@@ -886,82 +882,51 @@ Accuracy_multi <- function(y_tar, y_hat){
 ModelOcena <- function(y_tar, y_hat)
 {
   
-  if(is.numeric(y_tar))
-  {
+  if(is.numeric(y_tar)){
     regresja <- c("MAE" = MAE(y_tar, y_hat), "MSE" = MSE(y_tar, y_hat), "MAPE" = MAPE(y_tar, y_hat))
     return(regresja)
   }
-  else if(is.factor(y_tar) & nlevels(y_tar) == 2)
-  {
-    if(length(y_tar) == 1)
-    {
-      Acc <- Accuracy_multi(y_tar, y_hat = ifelse(y_hat < 0.5, 0, 1))
+  else if(is.factor(y_tar) & nlevels(y_tar) == 2){
+    if(length(y_tar) == 1){
+      Acc <- Jakosc__(y_tar, y_hat = ifelse(y_hat < 0.5, 0, 1))
       miary <- c("AUC" = 0, "Czulosc" = 0, "Specyficznosc" = 0, "Jakosc" = Acc)
       return(miary)
-    }
-    else
-    {
+    }else{
       Mat <- table(y_tar, y_hat = ifelse(y_hat <= Youden(y_tar, y_hat), 0, 1))
       miary <- c( "AUC" = AUC(y_tar, y_hat), "Czulosc" = Czulosc(Mat), "Specyficznosc" = Specyficznosc(Mat), "Jakosc" = Jakosc(Mat))
       return(miary)
     }
     
-  }
-  else if(is.factor(y_tar) & nlevels(y_tar) > 2)
-  {
-    multi <- c("Acc" = Accuracy_multi(y_tar, y_hat))
+  }else if(is.factor(y_tar) & nlevels(y_tar) > 2){
+    multi <- c("Acc" = Jakosc__(y_tar, y_hat))
     return(multi)
-  }
-  else
-  {
+  }else{
     print("Niepoprawne dane")
   }
 }
 
-
-
-Test_ForEach <- function(x)
-{
-  wynik <- x + 10
-  return(wynik)
-}
-
-
-
-
-CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
+CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)), algorytm = 'KNN', seed = 399)
 {
   set.seed(seed)
 
-  # jakiego typu klasyfikacja czy regresja
-  if(is.numeric(dane[,Y]))
-  {
+  if(is.numeric(dane[,Y])){
     typ = "reg"
-  }
-  else if(is.factor(dane[,Y]))
-  {
-    if (nlevels(dane[,Y]) == 2)
-    {
+  }else if(is.factor(dane[,Y])){
+    if (nlevels(dane[,Y]) == 2){
       typ = "bin"
-    }
-    else if(nlevels(dane[,Y]) > 2)
-    {
+    }else if(nlevels(dane[,Y]) > 2){
       typ = "multi"
     }
   }
   
-    
-  dl_wektora = nrow(dane)
-  podzial_zbioru <- data.frame(matrix(ncol = kFold, nrow = nrow(dane)))
-  
-  tablica <- as.data.frame(expand_grid(k_=c(1:kFold), parTune))
-  
-  # tabela z podzialem danych na treningowe i walidacyjne
-  for(i in 1:kFold)
-  { 
-    id_trening <- sample( 1:dl_wektora, size = (1/kFold * dl_wektora)-1, replace = F )
-    podzial_zbioru[id_trening,i] <- 2
-    podzial_zbioru[-id_trening,i] <- 1
+  n = nrow(dane)
+  trening_walidacja <- data.frame(matrix(ncol = kFold, nrow = nrow(dane)))
+  macierz_parametrow <- as.data.frame(expand_grid(k_=c(1:kFold), parTune))
+
+  for(i in 1:kFold){ 
+    id_trening <- sample( 1:n, size = (1/kFold * n)-1, replace = F )
+    trening_walidacja[id_trening,i] <- 2
+    trening_walidacja[-id_trening,i] <- 1
   }
   
 
@@ -972,136 +937,174 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   
   if(algorytm == "KNN")
   {
-    cat("Model Progress: ")
+    # cat("Obliczenia dla KNN - problem klasyfikacji binarnej: ")
     cat('\n')
     
     if(typ == "bin")
     {
-      tablica_bin <- data.frame(tablica, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      cat("Obliczenia dla KNN - problem klasyfikacji binarnej: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
-      wynik <- foreach(id_modele = 1:nrow(tablica_bin), .export = c("X", "Y", "dane", "tablica_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "Youden", "Czulosc", "Jakosc", "Specyficznosc", "d_euklides"), .combine = rbind) %dopar%
-        
-        {
-            # cat(paste0(id_modele,"..."))
-            # print(paste0("Model: ", i, " / ", nrow(tablica_bin)))  
-          
-            # tablica_bin[id_modele,"AUCT"] <- id_modele
-            # tablica_bin[id_modele,"AUCT"] <- sum(runif(100000000, min = 0, max = id_modele))        # TO DZIALA
-            # tablica_bin[id_modele,"AUCT"] <- Test_ForEach(id_modele)
-          
+      macierz_parametrow_bin <- data.frame(macierz_parametrow, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_bin", envir = environment())
+      clusterExport(klaster, "KNNtrain", envir = environment())
+      clusterExport(klaster, "KNNpred") 
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "AUC")
+      clusterExport(klaster, "Youden")
+      clusterExport(klaster, "Czulosc")
+      clusterExport(klaster, "Jakosc")
+      clusterExport(klaster, "Specyficznosc")
+      clusterExport(klaster, "d_euklides")
+      clusterExport(klaster, "d_hamming")
+      clusterExport(klaster, "d_porzadkowa")
+      
+      # wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_bin), .export = c("X", "Y", "dane", "macierz_parametrow_bin", "KNNtrain", "KNNpred", "ModelOcena", "MinMax", "AUC", "Youden", "Czulosc", "Jakosc", "Specyficznosc", "d_euklides"), .combine = rbind) %dopar%
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_bin), .combine = rbind) %dopar%
+      {
+            trening_dane <- dane[trening_walidacja[,macierz_parametrow_bin$k_[id_modele]] == 1,]
+            walidacyjne_dane <- dane[trening_walidacja[,macierz_parametrow_bin$k_[id_modele]] == 2,]
+
+            KNN_Model <- KNNtrain(trening_dane[,X], trening_dane[,Y], macierz_parametrow_bin$k[id_modele], 0, 1)
+
+            KNN_pred_Trening <- KNNpred(KNN_Model, X=trening_dane[,X])
+            KNN_pred_Walid <- KNNpred(KNN_Model, X=walidacyjne_dane[,X])
+
+            Trening_Ocena = ModelOcena((trening_dane[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
+            Walidacja_Ocena = ModelOcena((walidacyjne_dane[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
+
+            macierz_parametrow_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+            macierz_parametrow_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+            macierz_parametrow_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+            macierz_parametrow_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+
+            macierz_parametrow_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+            macierz_parametrow_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+            macierz_parametrow_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+            macierz_parametrow_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
             
-            dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
-            dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
-
-            KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_bin$k[id_modele], 0, 1)
-
-            KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
-            KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
-
-            Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
-            Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
-
-            tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
-            tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
-            tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
-            tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
-
-            tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
-            tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
-            tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
-            tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-            
-            return(tablica_bin[id_modele,])
+            return(macierz_parametrow_bin[id_modele,])
         }
       
       stopCluster(klaster)
+
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
       
-      print(wynik)
-      # print(wynik)
-      
-      print(tablica_bin)
-      
-      # for(id_modele in 1:nrow(tablica_bin))
-      # {
-      #   cat(paste0(id_modele,"..."))
-      #   
-      #   dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
-      #   dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
-      #   
-      #   KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_bin$k[id_modele], 0, 1) 
-      #   
-      #   KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
-      #   KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
-      #   
-      #   Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(1-KNN_pred_Trening[,1]))
-      #   Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(1-KNN_pred_Walid[,1]))
-      # 
-      #   tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
-      #   tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
-      #   tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
-      #   tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
-      # 
-      #   tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
-      #   tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
-      #   tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
-      #   tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-      # }
-      
-      return(tablica_bin)
+      macierz_parametrow_bin <- wynik
+      return(macierz_parametrow_bin)
       
     }
     else if(typ == "multi")
     {
-      tablica_multi <- data.frame(tablica, ACCT=0, ACCW=0)
+      cat("Obliczenia dla KNN - problem klasyfikacji wieloklasowej: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
-      for(id_modele in 1:nrow(tablica_multi))
+      macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_multi", envir = environment())
+      clusterExport(klaster, "KNNtrain", envir = environment())
+      clusterExport(klaster, "KNNpred") 
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "Jakosc__")
+      clusterExport(klaster, "d_euklides")
+      clusterExport(klaster, "d_hamming")
+      clusterExport(klaster, "d_porzadkowa")
+      
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_multi), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_multi))
       {
-        cat(paste0(id_modele,"..."))
+        # cat(paste0(id_modele," => "))
         
-        dane_treningowe <- dane[podzial_zbioru[,tablica_multi$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane[podzial_zbioru[,tablica_multi$k_[id_modele]] == 2,]
+        trening_dane <- dane[trening_walidacja[,macierz_parametrow_multi$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane[trening_walidacja[,macierz_parametrow_multi$k_[id_modele]] == 2,]
         
-        KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_multi$k[id_modele], 0, 1) 
+        KNN_Model <- KNNtrain(trening_dane[,X], trening_dane[,Y], macierz_parametrow_multi$k[id_modele], 0, 1) 
         
-        KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
-        KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
+        KNN_pred_Trening <- KNNpred(KNN_Model, X=trening_dane[,X])
+        KNN_pred_Walid <- KNNpred(KNN_Model, X=walidacyjne_dane[,X])
         
-        tablica_multi[id_modele, "ACCT"] = ModelOcena((dane_treningowe[,Y]), as.numeric(KNN_pred_Trening[,"Klasa"]))
-        tablica_multi[id_modele, "ACCW"] = ModelOcena((dane_walidacyjne[,Y]), as.numeric(KNN_pred_Walid[,"Klasa"]))
+        macierz_parametrow_multi[id_modele, "ACCT"] = ModelOcena((trening_dane[,Y]), as.numeric(KNN_pred_Trening[,"Klasa"]))
+        macierz_parametrow_multi[id_modele, "ACCW"] = ModelOcena((walidacyjne_dane[,Y]), as.numeric(KNN_pred_Walid[,"Klasa"]))
       
+        return(macierz_parametrow_multi[id_modele,])
       }
       
-      return(tablica_multi)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_multi <- wynik
+      
+      return(macierz_parametrow_multi)
     }
     else if(typ == "reg")
     {
-      tablica_reg <- data.frame(tablica, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
+      cat("Obliczenia dla KNN - problem regresji: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      
+      macierz_parametrow_reg <- data.frame(macierz_parametrow, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
 
-      for(id_modele in 1:nrow(tablica_reg))
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_reg", envir = environment())
+      clusterExport(klaster, "KNNtrain", envir = environment())
+      clusterExport(klaster, "KNNpred") 
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "MAE")
+      clusterExport(klaster, "MSE")
+      clusterExport(klaster, "MAPE")
+      clusterExport(klaster, "d_euklides")
+      clusterExport(klaster, "d_hamming")
+      clusterExport(klaster, "d_porzadkowa")
+      
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_reg), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_reg))
       {
-        cat(paste0(id_modele,"..."))
+        # cat(paste0(id_modele," => "))
         
-        dane_treningowe <- dane[podzial_zbioru[,tablica_reg$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane[podzial_zbioru[,tablica_reg$k_[id_modele]] == 2,]
+        trening_dane <- dane[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 2,]
         
-        KNN_Model <- KNNtrain(dane_treningowe[,X], dane_treningowe[,Y], tablica_reg$k[id_modele], 0, 1) 
+        KNN_Model <- KNNtrain(trening_dane[,X], trening_dane[,Y], macierz_parametrow_reg$k[id_modele], 0, 1) 
         
-        KNN_pred_Trening <- KNNpred(KNN_Model, X=dane_treningowe[,X])
-        KNN_pred_Walid <- KNNpred(KNN_Model, X=dane_walidacyjne[,X])
+        KNN_pred_Trening <- KNNpred(KNN_Model, X=trening_dane[,X])
+        KNN_pred_Walid <- KNNpred(KNN_Model, X=walidacyjne_dane[,X])
         
-        Ocena_Trening <- ModelOcena(dane_treningowe[,Y], KNN_pred_Trening)
-        Ocena_Walidacja <- ModelOcena(dane_walidacyjne[,Y], KNN_pred_Walid)
+        Ocena_Trening <- ModelOcena(trening_dane[,Y], KNN_pred_Trening)
+        Ocena_Walidacja <- ModelOcena(walidacyjne_dane[,Y], KNN_pred_Walid)
         
-        tablica_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
-        tablica_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
-        tablica_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
+        macierz_parametrow_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
+        macierz_parametrow_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
+        macierz_parametrow_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
         
-        tablica_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
-        tablica_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
-        tablica_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+        macierz_parametrow_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
+        macierz_parametrow_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
+        macierz_parametrow_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+        
+        return(macierz_parametrow_reg[id_modele,])
       }
       
-      return(tablica_reg)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_reg <- wynik
+      
+      return(macierz_parametrow_reg)
     }
     
     
@@ -1113,94 +1116,210 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   ### Drzewa decyzyjne ###
   
 
-  
-  
   if(algorytm == "Tree")
   {
-    cat("Model Progress: ")
+    # cat("Model Progress: ")
     
     if(typ == "bin")
     {
-      tablica_bin <- data.frame(tablica, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      cat("Obliczenia dla Drzew Decyzyjnych - problem klasyfikacji binarnej: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
-      for(id_modele in 1:nrow(tablica_bin))
+      macierz_parametrow_bin <- data.frame(macierz_parametrow, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_bin", envir = environment())
+      clusterExport(klaster, "StopIfNot")
+      clusterExport(klaster, "Prob")
+      clusterExport(klaster, "Entropy")
+      clusterExport(klaster, "Gini")
+      clusterExport(klaster, "SS")
+      clusterExport(klaster, "AssignInitialMeasures")
+      clusterExport(klaster, "AssignInfo")
+      clusterExport(klaster, "SpliNum")
+      clusterExport(klaster, "SplitVar")
+      clusterExport(klaster, "FindBestSplit")
+      clusterExport(klaster, "BuildTree")
+      clusterExport(klaster, "PE")
+      clusterExport(klaster, "PruneTree")
+      clusterExport(klaster, "Tree", envir = environment())
+      clusterExport(klaster, "Predykcja_Drzewa")
+      clusterExport(klaster, "PredictTree")
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "AUC")
+      clusterExport(klaster, "Youden")
+      clusterExport(klaster, "Czulosc")
+      clusterExport(klaster, "Jakosc")
+      clusterExport(klaster, "Specyficznosc")
+
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_bin), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_bin))
       {
-        cat(paste0(id_modele,"..."))
+        # cat(paste0(id_modele," => "))
 
-        dane_treningowe <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
+        trening_dane <- dane[trening_walidacja[,macierz_parametrow_bin$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane[trening_walidacja[,macierz_parametrow_bin$k_[id_modele]] == 2,]
 
-        Tree_Model <- Tree(Y, X, dane_treningowe, type = tablica_bin$type[id_modele], depth =  tablica_bin$depth[id_modele], minobs =  tablica_bin$minobs[id_modele], overfit =  tablica_bin$overfit[id_modele], cf = tablica_bin$cf[id_modele])
+        Tree_Model <- Tree(Y, X, trening_dane, type = macierz_parametrow_bin$type[id_modele], depth =  macierz_parametrow_bin$depth[id_modele], minobs =  macierz_parametrow_bin$minobs[id_modele], overfit =  macierz_parametrow_bin$overfit[id_modele], cf = macierz_parametrow_bin$cf[id_modele])
 
-        Tree_pred_Trening <- PredictTree(Tree_Model, dane_treningowe[,X])
-        Tree_pred_Walid <- PredictTree(Tree_Model, dane_walidacyjne[,X])
+        Tree_pred_Trening <- PredictTree(Tree_Model, trening_dane[,X])
+        Tree_pred_Walid <- PredictTree(Tree_Model, walidacyjne_dane[,X])
 
-        Trening_Ocena = ModelOcena((dane_treningowe[,Y]), as.numeric(Tree_pred_Trening[,2]))
-        Walidacja_Ocena = ModelOcena((dane_walidacyjne[,Y]), as.numeric(Tree_pred_Walid[,2]))
+        Trening_Ocena = ModelOcena((trening_dane[,Y]), as.numeric(Tree_pred_Trening[,2]))
+        Walidacja_Ocena = ModelOcena((walidacyjne_dane[,Y]), as.numeric(Tree_pred_Walid[,2]))
 
-        tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
-        tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
-        tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
-        tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+        macierz_parametrow_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+        macierz_parametrow_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+        macierz_parametrow_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+        macierz_parametrow_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
 
-        tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
-        tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
-        tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
-        tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
-
+        macierz_parametrow_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+        macierz_parametrow_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+        macierz_parametrow_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+        macierz_parametrow_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
+        
+        return(macierz_parametrow_bin[id_modele,])
       }
       
-      return(tablica_bin)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_bin <- wynik
+      
+      return(macierz_parametrow_bin)
       
     }
     else if(typ == "multi")
     {
-      tablica_multi <- data.frame(tablica, ACCT=0, ACCW=0)
+      macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
       
-      for(id_modele in 1:nrow(tablica_multi))
+      cat("Obliczenia dla Drzew Decyzyjnych - problem klasyfikacji wieloklasowej: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_multi", envir = environment())
+      clusterExport(klaster, "StopIfNot")
+      clusterExport(klaster, "Prob")
+      clusterExport(klaster, "Entropy")
+      clusterExport(klaster, "Gini")
+      clusterExport(klaster, "SS")
+      clusterExport(klaster, "AssignInitialMeasures")
+      clusterExport(klaster, "AssignInfo")
+      clusterExport(klaster, "SpliNum")
+      clusterExport(klaster, "SplitVar")
+      clusterExport(klaster, "FindBestSplit")
+      clusterExport(klaster, "BuildTree")
+      clusterExport(klaster, "PE")
+      clusterExport(klaster, "PruneTree")
+      clusterExport(klaster, "Tree", envir = environment())
+      clusterExport(klaster, "Predykcja_Drzewa")
+      clusterExport(klaster, "PredictTree")
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "Jakosc__")
+      
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_multi), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_multi))
       {
-        cat(paste0(id_modele,"..."))
+        cat(paste0(id_modele," => "))
         
-        dane_treningowe <- dane[podzial_zbioru[,tablica_multi$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane[podzial_zbioru[,tablica_multi$k_[id_modele]] == 2,]
+        trening_dane <- dane[trening_walidacja[,macierz_parametrow_multi$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane[trening_walidacja[,macierz_parametrow_multi$k_[id_modele]] == 2,]
 
-        Tree_Model <- Tree(Y, X, dane_treningowe, type = tablica_multi$type[id_modele], depth =  tablica_multi$depth[id_modele], minobs =  tablica_multi$minobs[id_modele], overfit =  tablica_multi$overfit[id_modele], cf = tablica_multi$cf[id_modele]) 
+        Tree_Model <- Tree(Y, X, trening_dane, type = macierz_parametrow_multi$type[id_modele], depth =  macierz_parametrow_multi$depth[id_modele], minobs =  macierz_parametrow_multi$minobs[id_modele], overfit =  macierz_parametrow_multi$overfit[id_modele], cf = macierz_parametrow_multi$cf[id_modele]) 
         
-        Tree_pred_Trening <- PredictTree(Tree_Model, dane_treningowe[,X])
-        Tree_pred_Walid <- PredictTree(Tree_Model, dane_walidacyjne[,X])
+        Tree_pred_Trening <- PredictTree(Tree_Model, trening_dane[,X])
+        print(Tree_pred_Trening)
         
-        tablica_multi[id_modele, "ACCT"] <- ModelOcena(dane_treningowe[,Y], Tree_pred_Trening[,"Class"])
-        tablica_multi[id_modele, "ACCW"] <- ModelOcena(dane_walidacyjne[,Y], Tree_pred_Walid[,"Class"])
+        Tree_pred_Walid <- PredictTree(Tree_Model, walidacyjne_dane[,X])
+        
+        macierz_parametrow_multi[id_modele, "ACCT"] <- ModelOcena(trening_dane[,Y], Tree_pred_Trening[,"Class"])
+        macierz_parametrow_multi[id_modele, "ACCW"] <- ModelOcena(walidacyjne_dane[,Y], Tree_pred_Walid[,"Class"])
+        
+        return(macierz_parametrow_multi[id_modele,])
       }
       
-      return(tablica_multi)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_multi <- wynik
+      
+      return(macierz_parametrow_multi)
     }
     else if(typ == "reg")
     {
-      tablica_reg <- data.frame(tablica, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
+      macierz_parametrow_reg <- data.frame(macierz_parametrow, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
       
-      for(id_modele in 1:nrow(tablica_reg))
+      cat("Obliczenia dla Drzew Decyzyjnych - problem regresji: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_reg", envir = environment())
+      clusterExport(klaster, "StopIfNot")
+      clusterExport(klaster, "Prob")
+      clusterExport(klaster, "Entropy")
+      clusterExport(klaster, "Gini")
+      clusterExport(klaster, "SS")
+      clusterExport(klaster, "AssignInitialMeasures")
+      clusterExport(klaster, "AssignInfo")
+      clusterExport(klaster, "SpliNum")
+      clusterExport(klaster, "SplitVar")
+      clusterExport(klaster, "FindBestSplit")
+      clusterExport(klaster, "BuildTree")
+      clusterExport(klaster, "PE")
+      clusterExport(klaster, "PruneTree")
+      clusterExport(klaster, "Tree", envir = environment())
+      clusterExport(klaster, "Predykcja_Drzewa")
+      clusterExport(klaster, "PredictTree")
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "MAE")
+      clusterExport(klaster, "MSE")
+      clusterExport(klaster, "MAPE")
+      
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_reg), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_reg))
       {
-        cat(paste0(id_modele,"..."))
+        cat(paste0(id_modele," => "))
         
-        dane_treningowe <- dane[podzial_zbioru[,tablica_reg$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane[podzial_zbioru[,tablica_reg$k_[id_modele]] == 2,]
+        trening_dane <- dane[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 2,]
         
-        Tree_Model <- Tree(Y, X, dane_treningowe, type = tablica_reg$type[id_modele], depth =  tablica_reg$depth[id_modele], minobs =  tablica_reg$minobs[id_modele], overfit =  tablica_reg$overfit[id_modele], cf = tablica_reg$cf[id_modele]) 
+        Tree_Model <- Tree(Y, X, trening_dane, type = macierz_parametrow_reg$type[id_modele], depth =  macierz_parametrow_reg$depth[id_modele], minobs =  macierz_parametrow_reg$minobs[id_modele], overfit =  macierz_parametrow_reg$overfit[id_modele], cf = macierz_parametrow_reg$cf[id_modele]) 
 
-        Ocena_Trening <- ModelOcena(dane_treningowe[,Y], PredictTree(Tree_Model, dane_treningowe[,X]))
-        Ocena_Walidacja <- ModelOcena(dane_walidacyjne[,Y], PredictTree(Tree_Model, dane_walidacyjne[,X]))
+        Ocena_Trening <- ModelOcena(trening_dane[,Y], PredictTree(Tree_Model, trening_dane[,X]))
+        Ocena_Walidacja <- ModelOcena(walidacyjne_dane[,Y], PredictTree(Tree_Model, walidacyjne_dane[,X]))
     
-        tablica_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
-        tablica_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
-        tablica_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
+        macierz_parametrow_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
+        macierz_parametrow_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
+        macierz_parametrow_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
         
-        tablica_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
-        tablica_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
-        tablica_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+        macierz_parametrow_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
+        macierz_parametrow_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
+        macierz_parametrow_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+        
+        return(macierz_parametrow_reg[id_modele,])
       }
       
-      return(tablica_reg)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_reg <- wynik
+      
+      return(macierz_parametrow_reg)
     }
     
     
@@ -1214,122 +1333,223 @@ CrossValidTune <- function(dane, X, Y, kFold, parTune, algorytm, seed = 123)
   
   if(algorytm == "NN")
   {
-    cat("Model Progress: ")
+    
 
     if(typ == "bin")
     {
-      tablica_bin <- data.frame(tablica, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
+      cat("Obliczenia dla Sieci Neuronowych - problem klasyfikacji binarnej: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      
+      macierz_parametrow_bin <- data.frame(macierz_parametrow, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
 
-      for(id_modele in 1:nrow(tablica_bin))
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_bin", envir = environment())
+      clusterExport(klaster, "sigmoid")
+      clusterExport(klaster, "dsigmoid")
+      clusterExport(klaster, "ReLu")
+      clusterExport(klaster, "dReLu")
+      clusterExport(klaster, "lossSS")
+      clusterExport(klaster, "SoftMax")
+      clusterExport(klaster, "MinMaxOdwrot")
+      clusterExport(klaster, "wprzod")
+      clusterExport(klaster, "wstecz")
+      clusterExport(klaster, "trainNN")
+      clusterExport(klaster, "predNN")
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "AUC")
+      clusterExport(klaster, "Youden")
+      clusterExport(klaster, "Czulosc")
+      clusterExport(klaster, "Jakosc")
+      clusterExport(klaster, "Specyficznosc")
+      
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_bin), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_bin))
       {
-        cat(paste0("\t ", id_modele,"..."))
+        cat(paste0("\t ", id_modele," => "))
 
         dane_bin_NN <- dane
-        dane_bin_NN[,X] <- sapply(dane_bin_NN[,X], MinMax_nn)
+        dane_bin_NN[,X] <- sapply(dane_bin_NN[,X], MinMax)
         
-        dane_treningowe <- dane_bin_NN[podzial_zbioru[,tablica_bin$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane_bin_NN[podzial_zbioru[,tablica_bin$k_[id_modele]] == 2,]
+        trening_dane <- dane_bin_NN[trening_walidacja[,macierz_parametrow_bin$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane_bin_NN[trening_walidacja[,macierz_parametrow_bin$k_[id_modele]] == 2,]
 
-        X_treningowe_NN = as.matrix(dane_treningowe[,X])
-        Y_treningowe_NN = model.matrix( ~ dane_treningowe[,Y] - 1, dane_treningowe)
-        X_walidacyjne_NN = as.matrix(dane_walidacyjne[,X])
-        Y_walidacyjne_NN = model.matrix( ~ dane_walidacyjne[,Y] - 1, dane_walidacyjne )
+        NN_trening_X = as.matrix(trening_dane[,X])
+        NN_trening_Y = model.matrix( ~ trening_dane[,Y] - 1, trening_dane)
+        NN_walidacja_X = as.matrix(walidacyjne_dane[,X])
+        NN_walidacja_Y = model.matrix( ~ walidacyjne_dane[,Y] - 1, walidacyjne_dane )
         
-        NN_Model <- trainNN( X_treningowe_NN, Y_treningowe_NN, h = tablica_bin$h[id_modele], lr = tablica_bin$lr[id_modele], iter = tablica_bin$iter[id_modele], seed = 123, typ = typ)
+        NN_Model <- trainNN( NN_trening_X, NN_trening_Y, h = macierz_parametrow_bin$h[id_modele], lr = macierz_parametrow_bin$lr[id_modele], iter = macierz_parametrow_bin$iter[id_modele], seed = 399, typ = typ)
 
-        NN_pred_Trening <- predNN(X_treningowe_NN, NN_Model, typ = typ)
-        NN_pred_Walid <- predNN(X_walidacyjne_NN, NN_Model, typ = typ)
+        NN_pred_Trening <- predNN(NN_trening_X, NN_Model, typ = typ)
+        NN_pred_Walid <- predNN(NN_walidacja_X, NN_Model, typ = typ)
         
-        Trening_Ocena = ModelOcena(dane_treningowe[,Y], NN_pred_Trening[,2])
-        Walidacja_Ocena = ModelOcena(dane_walidacyjne[,Y], NN_pred_Walid[,2])
+        Trening_Ocena = ModelOcena(trening_dane[,Y], NN_pred_Trening[,2])
+        Walidacja_Ocena = ModelOcena(walidacyjne_dane[,Y], NN_pred_Walid[,2])
         
-        tablica_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
-        tablica_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
-        tablica_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
-        tablica_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
+        macierz_parametrow_bin[id_modele, "AUCT"] <- Trening_Ocena["AUC"]
+        macierz_parametrow_bin[id_modele, "CzuloscT"] <- Trening_Ocena["Czulosc"]
+        macierz_parametrow_bin[id_modele, "SpecyficznoscT"] <- Trening_Ocena["Specyficznosc"]
+        macierz_parametrow_bin[id_modele, "JakoscT"] <- Trening_Ocena["Jakosc"]
         
-        tablica_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
-        tablica_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
-        tablica_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
-        tablica_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
+        macierz_parametrow_bin[id_modele, "AUCW"] <- Walidacja_Ocena["AUC"]
+        macierz_parametrow_bin[id_modele, "CzuloscW"] <- Walidacja_Ocena["Czulosc"]
+        macierz_parametrow_bin[id_modele, "SpecyficznoscW"] <- Walidacja_Ocena["Specyficznosc"]
+        macierz_parametrow_bin[id_modele, "JakoscW"] <- Walidacja_Ocena["Jakosc"]
         
+        return(macierz_parametrow_bin[id_modele,])
       }
       
-      return(tablica_bin)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_bin <- wynik
+      
+      return(macierz_parametrow_bin)
       
     }
     else if(typ == "multi")
     {
-      tablica_multi <- data.frame(tablica, ACCT=0, ACCW=0)
+      cat("Obliczenia dla Sieci Neuronowych - problem klasyfikacji wieloklasowej: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
-      for(id_modele in 1:nrow(tablica_multi))
+      macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_multi", envir = environment())
+      clusterExport(klaster, "sigmoid")
+      clusterExport(klaster, "dsigmoid")
+      clusterExport(klaster, "ReLu")
+      clusterExport(klaster, "dReLu")
+      clusterExport(klaster, "lossSS")
+      clusterExport(klaster, "SoftMax")
+      clusterExport(klaster, "MinMaxOdwrot")
+      clusterExport(klaster, "wprzod")
+      clusterExport(klaster, "wstecz")
+      clusterExport(klaster, "trainNN")
+      clusterExport(klaster, "predNN")
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "Jakosc__")
+
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_multi), .combine = rbind) %dopar%
+      # for(id_modele in 1:nrow(macierz_parametrow_multi))
       {
-        cat(paste0("\t ", id_modele,"..."))
+        cat(paste0("\t ", id_modele," => "))
         
         dane_multi_NN <- dane
-        dane_multi_NN[,X] <- sapply(dane_multi_NN[,X], MinMax_nn)
+        dane_multi_NN[,X] <- sapply(dane_multi_NN[,X], MinMax)
         
-        dane_treningowe <- dane_multi_NN[podzial_zbioru[,tablica_multi$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane_multi_NN[podzial_zbioru[,tablica_multi$k_[id_modele]] == 2,]
+        trening_dane <- dane_multi_NN[trening_walidacja[,macierz_parametrow_multi$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane_multi_NN[trening_walidacja[,macierz_parametrow_multi$k_[id_modele]] == 2,]
         
-        X_treningowe_NN = as.matrix(dane_treningowe[,X])
-        Y_treningowe_NN = model.matrix( ~ dane_treningowe[,Y] - 1, dane_treningowe)
-        X_walidacyjne_NN = as.matrix(dane_walidacyjne[,X])
-        Y_walidacyjne_NN = model.matrix( ~ dane_walidacyjne[,Y] - 1, dane_walidacyjne )
+        NN_trening_X = as.matrix(trening_dane[,X])
+        NN_trening_Y = model.matrix( ~ trening_dane[,Y] - 1, trening_dane)
+        NN_walidacja_X = as.matrix(walidacyjne_dane[,X])
+        NN_walidacja_Y = model.matrix( ~ walidacyjne_dane[,Y] - 1, walidacyjne_dane )
         
-        NN_Model <- trainNN( X_treningowe_NN, Y_treningowe_NN, h = tablica_multi$h[id_modele], lr = tablica_multi$lr[id_modele], iter = tablica_multi$iter[id_modele], seed = 123, typ = typ)
+        NN_Model <- trainNN( NN_trening_X, NN_trening_Y, h = macierz_parametrow_multi$h[id_modele], lr = macierz_parametrow_multi$lr[id_modele], iter = macierz_parametrow_multi$iter[id_modele], seed = 399, typ = typ)
         
-        NN_pred_Trening <- predNN(X_treningowe_NN, NN_Model, typ = typ)
-        NN_pred_Walid <- predNN(X_walidacyjne_NN, NN_Model, typ = typ)
+        NN_pred_Trening <- predNN(NN_trening_X, NN_Model, typ = typ)
+        NN_pred_Walid <- predNN(NN_walidacja_X, NN_Model, typ = typ)
         
-        NN_pred_Trening_multi <- as.numeric( levels(dane_multi_NN[,dane_multi_Y])[apply( NN_pred_Trening, 1, which.max )] )
-        NN_pred_Walid_multi <- as.numeric( levels(dane_multi_NN[,dane_multi_Y])[apply( NN_pred_Walid, 1, which.max )] )
+        NN_pred_Trening_multi <- as.numeric( levels(dane_multi_NN[,Y])[apply( NN_pred_Trening, 1, which.max )] )
+        NN_pred_Walid_multi <- as.numeric( levels(dane_multi_NN[,Y])[apply( NN_pred_Walid, 1, which.max )] )
         
-        tablica_multi[id_modele, "ACCT"] <- ModelOcena(dane_treningowe[,Y], NN_pred_Trening_multi)
-        tablica_multi[id_modele, "ACCW"] <- ModelOcena(dane_walidacyjne[,Y], NN_pred_Walid_multi)
+        macierz_parametrow_multi[id_modele, "ACCT"] <- ModelOcena(trening_dane[,Y], NN_pred_Trening_multi)
+        macierz_parametrow_multi[id_modele, "ACCW"] <- ModelOcena(walidacyjne_dane[,Y], NN_pred_Walid_multi)
+        
+        return(macierz_parametrow_multi[id_modele,])
       }
       
-      return(tablica_multi)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_multi <- wynik
+      
+      return(macierz_parametrow_multi)
     }
     else if(typ == "reg")
     {
-      tablica_reg <- data.frame(tablica, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
+      cat("Obliczenia dla Sieci Neuronowych - problem regresji: ")
+      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
-      for(id_modele in 1:nrow(tablica_reg))
+      macierz_parametrow_reg <- data.frame(macierz_parametrow, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
+      
+      clusterExport(klaster, "X", envir = environment())
+      clusterExport(klaster, "Y", envir = environment())
+      clusterExport(klaster, "dane", envir = environment())
+      clusterExport(klaster, "macierz_parametrow_reg", envir = environment())
+      clusterExport(klaster, "sigmoid")
+      clusterExport(klaster, "dsigmoid")
+      clusterExport(klaster, "ReLu")
+      clusterExport(klaster, "dReLu")
+      clusterExport(klaster, "lossSS")
+      clusterExport(klaster, "SoftMax")
+      clusterExport(klaster, "MinMaxOdwrot")
+      clusterExport(klaster, "wprzod")
+      clusterExport(klaster, "wstecz")
+      clusterExport(klaster, "trainNN")
+      clusterExport(klaster, "predNN")
+      clusterExport(klaster, "ModelOcena")
+      clusterExport(klaster, "MinMax")
+      clusterExport(klaster, "MAE")
+      clusterExport(klaster, "MSE")
+      clusterExport(klaster, "MAPE")
+      
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_reg), .combine = rbind) %dopar%
+      for(id_modele in 1:nrow(macierz_parametrow_reg))
       {
-        cat(paste0("\t ", id_modele,"..."))
+        cat(paste0("\t ", id_modele," => "))
         
-        dane_reg_NN <- sapply(dane, MinMax_nn)
+        dane_reg_NN <- sapply(dane, MinMax)
         
-        dane_treningowe <- dane_reg_NN[podzial_zbioru[,tablica_reg$k_[id_modele]] == 1,]
-        dane_walidacyjne <- dane_reg_NN[podzial_zbioru[,tablica_reg$k_[id_modele]] == 2,]
+        trening_dane <- dane_reg_NN[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 1,]
+        walidacyjne_dane <- dane_reg_NN[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 2,]
         
-        X_treningowe_NN = as.matrix(dane_treningowe[,X])
-        Y_treningowe_NN = as.matrix(dane_treningowe[,Y])
-        X_walidacyjne_NN = as.matrix(dane_walidacyjne[,X])
-        Y_walidacyjne_NN = as.matrix(dane_walidacyjne[,Y])
+        NN_trening_X = as.matrix(trening_dane[,X])
+        NN_trening_Y = as.matrix(trening_dane[,Y])
+        NN_walidacja_X = as.matrix(walidacyjne_dane[,X])
+        NN_walidacja_Y = as.matrix(walidacyjne_dane[,Y])
         
-        NN_Model <- trainNN(X_treningowe_NN, Y_treningowe_NN, h = tablica_reg$h[id_modele], lr = tablica_reg$lr[id_modele], iter = tablica_reg$iter[id_modele], seed = 123, typ = typ)
+        NN_Model <- trainNN(NN_trening_X, NN_trening_Y, h = macierz_parametrow_reg$h[id_modele], lr = macierz_parametrow_reg$lr[id_modele], iter = macierz_parametrow_reg$iter[id_modele], seed = 399, typ = typ)
         
-        NN_pred_Trening <- predNN(X_treningowe_NN, NN_Model, typ = typ)
-        NN_pred_Walid <- predNN(X_walidacyjne_NN, NN_Model, typ = typ)
+        NN_pred_Trening <- predNN(NN_trening_X, NN_Model, typ = typ)
+        NN_pred_Walid <- predNN(NN_walidacja_X, NN_Model, typ = typ)
         
         NN_pred_Trening_reg <- MinMaxOdwrot(NN_pred_Trening[,1], y_min = min(dane[,Y]), y_max = max(dane[,Y]))
         NN_pred_Walid_reg <- MinMaxOdwrot(NN_pred_Walid[,1], y_min = min(dane[,Y]), y_max = max(dane[,Y]))
         
-        Ocena_Trening <- ModelOcena(dane[podzial_zbioru[,tablica_reg$k_[id_modele]] == 1,Y], NN_pred_Trening_reg)
-        Ocena_Walidacja <- ModelOcena(dane[podzial_zbioru[,tablica_reg$k_[id_modele]] == 2,Y], NN_pred_Walid_reg)
+        Ocena_Trening <- ModelOcena(dane[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 1,Y], NN_pred_Trening_reg)
+        Ocena_Walidacja <- ModelOcena(dane[trening_walidacja[,macierz_parametrow_reg$k_[id_modele]] == 2,Y], NN_pred_Walid_reg)
         
-        tablica_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
-        tablica_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
-        tablica_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
+        macierz_parametrow_reg[id_modele, "MAET"] <- Ocena_Trening["MAE"]
+        macierz_parametrow_reg[id_modele, "MSET"] <- Ocena_Trening["MSE"]
+        macierz_parametrow_reg[id_modele, "MAPET"] <- Ocena_Trening["MAPE"]
         
-        tablica_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
-        tablica_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
-        tablica_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+        macierz_parametrow_reg[id_modele, "MAEW"] <- Ocena_Walidacja["MAE"]
+        macierz_parametrow_reg[id_modele, "MSEW"] <- Ocena_Walidacja["MSE"]
+        macierz_parametrow_reg[id_modele, "MAPEW"] <- Ocena_Walidacja["MAPE"]
+        
+        return(macierz_parametrow_reg[id_modele,])
       }
       
-      return(tablica_reg)
+      stopCluster(klaster)
+      
+      env <- foreach:::.foreachGlobals
+      rm(list=ls(name=env), pos=env)
+      
+      macierz_parametrow_reg <- wynik
+      
+      return(macierz_parametrow_reg)
     }
   }
 }

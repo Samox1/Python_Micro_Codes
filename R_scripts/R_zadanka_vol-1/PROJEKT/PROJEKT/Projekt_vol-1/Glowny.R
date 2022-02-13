@@ -4,11 +4,11 @@ source("funkcje.R")
 # Dane do Projektu:
 # Klasyfikacja Binarna      = https://archive.ics.uci.edu/ml/datasets/Breast+Cancer         
 # Klasyfikacja Wieloklasowa = https://archive.ics.uci.edu/ml/datasets/Abalone
-# Regresja                  = https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set
+# Regresja                  = https://archive.ics.uci.edu/ml/datasets/Automobile
 
 
 bin_cancer <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer/breast-cancer.data", header = FALSE)
-bin_cancer <- read.csv("breast-cancer.data", header = FALSE)
+# bin_cancer <- read.csv("breast-cancer.data", header = FALSE)
 bin_cancer_X <- colnames(bin_cancer)[-1]
 bin_cancer_Y <- colnames(bin_cancer)[1]
 bin_cancer[,bin_cancer_Y] <- as.factor(bin_cancer[,bin_cancer_Y])
@@ -17,7 +17,6 @@ bin_cancer <- bin_cancer[! bin_cancer$V6 == "?",]       # Usuniecie wierszy z wa
 bin_cancer$V6 <- as.factor(as.character(bin_cancer$V6))
 bin_cancer <- bin_cancer[! bin_cancer$V9 == "?",]       # Usuniecie wierszy z wartosciami '?'
 bin_cancer$V9 <- as.factor(as.character(bin_cancer$V9))
-
 bin_cancer$V2 <- as.numeric(bin_cancer$V2)
 bin_cancer$V3 <- as.numeric(bin_cancer$V3)
 bin_cancer$V4 <- as.numeric(bin_cancer$V4)
@@ -27,52 +26,42 @@ bin_cancer$V7 <- as.numeric(bin_cancer$V7)
 bin_cancer$V8 <- as.numeric(bin_cancer$V8)
 bin_cancer$V9 <- as.numeric(bin_cancer$V9)
 bin_cancer$V10 <- as.numeric(bin_cancer$V10)
-
-
 summary(bin_cancer)
 
 
-# dane_multi <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header = FALSE, sep = "\t")
-# dane_multi <- drop_na(dane_multi)
-# multi_kolumny <- colnames(dane_multi)               
-# dane_multi_X <- multi_kolumny[-8]
-# dane_multi_Y <- multi_kolumny[8]
-# dane_multi[,8] <- as.factor(dane_multi[,8])
+multi_abalone <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header = FALSE, sep = ",")
+multi_abalone_X <- colnames(multi_abalone)[-1]
+multi_abalone_Y <- colnames(multi_abalone)[1]
+multi_abalone[,1] <- as.factor(as.numeric((multi_abalone[,1])))       # Dla pewnosci ze pierwsza kolumna - "Y" - jest factorem
+summary(multi_abalone)
 
 
-
-# dane_reg <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/cpu-performance/machine.data", header = FALSE)
-# dane_reg <- dane_reg[,-c(2,10)]
-# dane_reg[,1] <- as.numeric(dane_reg[,1])
-# reg_kolumny <- colnames(dane_reg)               
-# dane_reg_X <- reg_kolumny[-8]
-# dane_reg_Y <- reg_kolumny[8]
-
+reg_automobile <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/autos/imports-85.data", header = FALSE, sep = ",")
+reg_automobile_X <- colnames(reg_automobile)[-26]
+reg_automobile_Y <- colnames(reg_automobile)[26]
+reg_automobile <- reg_automobile[! reg_automobile$V26 == "?",]          # Usuniecie wierszy z wartosciami '?'
+reg_automobile <- as.data.frame(sapply(reg_automobile, as.numeric))     # Zamiana kolumn na numeryczne 
+summary(reg_automobile)
 
 
 # KNN
 
 print("KNN - bin")
-parTune_KNN_bin <- expand.grid(k=c(2:2))   
-KNN_bin_CrossValid <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 10, parTune_KNN_bin, algorytm="KNN", seed = 123)
-KNN_bin_CrossValid
-
-KNN_Model <- KNNtrain(bin_cancer[,bin_cancer_X], bin_cancer[,bin_cancer_Y], 20, 0, 1)
-KNN_pred_Trening <- KNNpred(KNN_Model, X=bin_cancer[,bin_cancer_X])
-KNN_pred_Trening
+hiper_parametry_KNN_bin <- expand.grid(k=c(2:10))   
+Kroswalidacja_KNN_bin <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 9, hiper_parametry_KNN_bin, algorytm="KNN", seed = 399)
+print(Kroswalidacja_KNN_bin)
 
 
 print("KNN - multi")
-parTune_KNN_multi <- expand.grid(k=c(2:50))
-KNN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 6, parTune_KNN_multi, algorytm="KNN", seed = 123)
-KNN_multi_CrossValid
-
+hiper_parametry_KNN_multi <- expand.grid(k=c(2:8))
+Kroswalidacja_KNN_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_KNN_multi, algorytm="KNN", seed = 399)
+print(Kroswalidacja_KNN_multi)
 
 
 print("KNN - reg")
-parTune_KNN_reg <- expand.grid(k=c(3,6,9))
-KNN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 6, parTune_KNN_reg, algorytm="KNN", seed = 123)
-KNN_reg_CrossValid
+hiper_parametry_KNN_reg <- expand.grid(k=c(2:12))
+Kroswalidacja_KNN_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_KNN_reg, algorytm="KNN", seed = 399)
+print(Kroswalidacja_KNN_reg)
 
 
 
@@ -80,98 +69,107 @@ KNN_reg_CrossValid
 # Tree
 
 print("Tree - bin")
-parTune_Tree_bin <- expand.grid(depth=c(2:8), minobs=c(2:8), type=c('Entropy', 'Gini'), overfit = c('none'), cf=c(0.0))
-Tree_bin_CrossValid <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 10, parTune_Tree_bin, algorytm="Tree", seed = 123)
-Tree_bin_CrossValid
+hiper_parametry_Tree_bin <- expand.grid(depth=c(3,5,10), minobs=c(2,10), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.4))
+Kroswalidacja_Tree_bin <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 9, hiper_parametry_Tree_bin, algorytm="Tree", seed = 399)
+print(Kroswalidacja_Tree_bin)
 
 
 print("Tree - multi")
-parTune_Tree_multi <- expand.grid(depth=c(2:8), minobs=c(2:8), type=c('Entropy', 'Gini'), overfit = c('none'), cf=c(0.0))
-Tree_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_Tree_multi, algorytm="Tree", seed = 123)
-Tree_multi_CrossValid
+hiper_parametry_Tree_multi <- expand.grid(depth=c(3,10), minobs=c(2,10), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.4))
+Kroswalidacja_Tree_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_Tree_multi, algorytm="Tree", seed = 399)
+print(Kroswalidacja_Tree_multi)
 
 
 print("Tree - reg")
-parTune_Tree_reg <- expand.grid(depth=c(2:8), minobs=c(2:8), type=c('SS'), overfit = c('none'), cf=0.0)
-Tree_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_Tree_reg, algorytm="Tree", seed = 123)
-Tree_reg_CrossValid
+hiper_parametry_Tree_reg <- expand.grid(depth=c(3,10), minobs=c(2,10), type=c('SS'), overfit = c('none'), cf=c(0.4))
+Kroswalidacja_Tree_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_Tree_reg, algorytm="Tree", seed = 399)
+print(Kroswalidacja_Tree_reg)
 
 
 
 # NN
 
 print("Sieci NN - bin")
-parTune_NN_bin <- expand.grid(h=list(c(3,5), c(4,6), c(2,7), c(3,4)), lr = c(0.01), iter = c(50000, 100000))
-NN_bin_CrossValid <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 10, parTune_NN_bin, algorytm="NN", seed = 123)
-NN_bin_CrossValid
+hiper_parametry_NN_bin <- expand.grid(h=list(c(2,2), c(3,6), c(6,3), c(6,6)), lr = c(0.01), iter = c(30000, 90000))
+Kroswalidacja_NN_bin <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 9, hiper_parametry_NN_bin, algorytm="NN", seed = 399)
+print(Kroswalidacja_NN_bin)
 
 
 print("Sieci NN - multi")
-parTune_NN_multi <- expand.grid(h=list(c(3,5), c(4,6), c(2,7), c(3,4)), lr = c(0.01), iter = c(50000, 100000))
-NN_multi_CrossValid <- CrossValidTune(dane_multi, dane_multi_X, dane_multi_Y, kFold = 10, parTune_NN_multi, algorytm="NN", seed = 123)
-NN_multi_CrossValid
+hiper_parametry_NN_multi <- expand.grid(h=list(c(2,2), c(3,6), c(6,3), c(6,6)), lr = c(0.01), iter = c(30000, 90000))
+Kroswalidacja_NN_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_NN_multi, algorytm="NN", seed = 399)
+print(Kroswalidacja_NN_multi)
 
 
 print("Sieci NN - reg")
-parTune_NN_reg <- expand.grid(h=list(c(3,5), c(4,6), c(2,7), c(3,4)), lr = c(0.01), iter = c(50000, 100000))
-NN_reg_CrossValid <- CrossValidTune(dane_reg, dane_reg_X, dane_reg_Y, kFold = 10, parTune_NN_reg, algorytm="NN", seed = 123)
-NN_reg_CrossValid
+hiper_parametry_NN_reg <- expand.grid(h=list(c(2,2), c(3,6), c(6,3), c(6,6)), lr = c(0.01), iter = c(30000, 90000))
+Kroswalidacja_NN_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_NN_reg, algorytm="NN", seed = 399)
+print(Kroswalidacja_NN_reg)
 
 
 
 
-cv_R <- trainControl(method="cv", number=10)
+# Wyniki dla modeli wbudowanych w biblioteki R
+
+kontrola_kroswalidacji <- trainControl(method="cv", number=9)
 
 print("KNN - R - bin")
-knn_grid_bin = expand.grid(k=2:50)
-KNN_bin_R = train(x=bin_cancer[,bin_cancer_X], y=bin_cancer[,bin_cancer_Y], tuneGrid=knn_grid_bin, method='knn', metric='Accuracy', trControl=cv_R)
-KNN_bin_R_Wynik = KNN_bin_R$results
+R_GRID_KNN_bin = expand.grid(k=2:20)
+R_CV_KNN_binarna = train(x=bin_cancer[,bin_cancer_X], y=bin_cancer[,bin_cancer_Y], tuneGrid=R_GRID_KNN_bin, method='knn', metric='Accuracy', trControl=kontrola_kroswalidacji)
+R_CV_KNN_binarna_Wynik = R_CV_KNN_binarna$results
+
 
 print("KNN - R - multi")
-knn_grid_multi = expand.grid(k=2:50)
-KNN_multi_R = train(x=dane_multi[,dane_multi_X], y=dane_multi[,dane_multi_Y], tuneGrid=knn_grid_multi, method='knn', metric='Accuracy', trControl=cv_R)
-KNN_multi_R_Wynik = KNN_multi_R$results
+R_GRID_KNN_multi = expand.grid(k=2:20)
+R_CV_KNN_wieloklasowa = train(x=multi_abalone[,multi_abalone_X], y=multi_abalone[,multi_abalone_Y], tuneGrid=R_GRID_KNN_multi, method='knn', metric='Accuracy', trControl=kontrola_kroswalidacji)
+R_CV_KNN_wieloklasowa_Wynik = R_CV_KNN_wieloklasowa$results
+
 
 print("KNN - R - reg")
-knn_grid_reg = expand.grid(k=2:50)
-KNN_reg_R = train(x=dane_reg[,dane_reg_X], y=dane_reg[,dane_reg_Y], tuneGrid=knn_grid_reg, method='knn', metric='MAE', trControl=cv_R)
-KNN_reg_R_Wynik = KNN_reg_R$results
+R_GRID_KNN_reg = expand.grid(k=2:20)
+R_CV_KNN_regresja = train(x=reg_automobile[,reg_automobile_X], y=reg_automobile[,reg_automobile_Y], tuneGrid=R_GRID_KNN_reg, method='knn', metric='MAE', trControl=kontrola_kroswalidacji)
+R_CV_KNN_regresja_Wynik = R_CV_KNN_regresja$results
+
 
 
 print("TREE - R - bin")
-tree_grid_bin = expand.grid(maxdepth=2:15)
-Tree_bin_R = train(x=bin_cancer[,bin_cancer_X], y=bin_cancer[,bin_cancer_Y], tuneGrid=tree_grid_bin, method='rpart2', metric='Accuracy', trControl=cv_R)
-Tree_bin_R_Wynik = Tree_bin_R$results
+R_GRID_TREE_bin = expand.grid(maxdepth=2:20)
+R_CV_TREE_binarna = train(x=bin_cancer[,bin_cancer_X], y=bin_cancer[,bin_cancer_Y], tuneGrid=R_GRID_TREE_bin, method='rpart2', metric='Accuracy', trControl=kontrola_kroswalidacji)
+R_CV_TREE_binarna_Wynik = R_CV_TREE_binarna$results
+
 
 print("TREE - R - multi")
-tree_grid_multi = expand.grid(maxdepth=2:15)
-Tree_multi_R = train(x=dane_multi[,dane_multi_X], y=dane_multi[,dane_multi_Y], tuneGrid=tree_grid_multi, method='rpart2', metric='Accuracy', trControl=cv_R)
-Tree_multi_R_Wynik = Tree_multi_R$results
+R_GRID_TREE_wieloklasowa = expand.grid(maxdepth=2:20)
+R_CV_TREE_wieloklasowa = train(x=multi_abalone[,multi_abalone_X], y=multi_abalone[,multi_abalone_Y], tuneGrid=R_GRID_TREE_wieloklasowa, method='rpart2', metric='Accuracy', trControl=kontrola_kroswalidacji)
+R_CV_TREE_wieloklasowa_Wynik = R_CV_TREE_wieloklasowa$results
+
 
 print("TREE - R - reg")
-tree_grid_reg = expand.grid(maxdepth=2:15)
-Tree_reg_R = train(x=dane_reg[,dane_reg_X], y=dane_reg[,dane_reg_Y], tuneGrid=tree_grid_reg, method='rpart2', metric='MAE', trControl=cv_R)
-Tree_reg_R_Wynik = Tree_reg_R$results
+R_GRID_TREE_regresja = expand.grid(maxdepth=2:20)
+R_CV_TREE_regresja = train(x=reg_automobile[,reg_automobile_X], y=reg_automobile[,reg_automobile_Y], tuneGrid=R_GRID_TREE_regresja, method='rpart2', metric='MAE', trControl=kontrola_kroswalidacji)
+R_CV_TREE_regresja_Wynik = R_CV_TREE_regresja$results
+
+
 
 print("Neural Network - R - bin")
-bin_cancer_norm <- MinMax_nn(bin_cancer[,bin_cancer_X])
-nn_grid_bin = expand.grid(size=3:15, decay = c(0.0001, 0.001))
-NN_bin_R = train(x=bin_cancer_norm, y=bin_cancer[,bin_cancer_Y], tuneGrid=nn_grid_bin, method='nnet', metric='Accuracy', trControl=cv_R)
-NN_bin_R_Wynik = NN_bin_R$results
+bin_cancer_norm <- MinMax(bin_cancer[,bin_cancer_X])
+R_GRID_NN_binarna = expand.grid(size=1:12, decay = c(0.0002, 0.02))
+R_CV_NN_binarna = train(x=bin_cancer_norm, y=bin_cancer[,bin_cancer_Y], tuneGrid=R_GRID_NN_binarna, method='nnet', metric='Accuracy', trControl=kontrola_kroswalidacji)
+R_CV_NN_binarna_Wynik = R_CV_NN_binarna$results
 
 
 print("Neural Network - R - multi")
-dane_multi_norm <- MinMax_nn(dane_multi[,dane_multi_X])
-nn_grid_multi = expand.grid(size=3:15, decay = c(0.0001, 0.001))
-NN_multi_R = train(x=dane_multi_norm, y=dane_multi[,dane_multi_Y], tuneGrid=nn_grid_multi, method='nnet', metric='Accuracy', trControl=cv_R)
-NN_multi_R_Wynik = NN_multi_R$results
+multi_abalone_norm <- MinMax(multi_abalone[,multi_abalone_X])
+R_GRID_NN_wieloklasowa = expand.grid(size=1:12, decay = c(0.0002, 0.02))
+R_CV_NN_wieloklasowa = train(x=multi_abalone_norm, y=multi_abalone[,multi_abalone_Y], tuneGrid=R_GRID_NN_wieloklasowa, method='nnet', metric='Accuracy', trControl=kontrola_kroswalidacji)
+R_CV_NN_wieloklasowa_Wynik = R_CV_NN_wieloklasowa$results
 
 
 print("Neural Network - R - reg")
-dane_reg_norm <- MinMax_nn(dane_reg)
-nn_grid_reg = expand.grid(size=3:15, decay = c(0.0001, 0.001))
-NN_reg_R = train(x=dane_reg_norm[,dane_reg_X], y=dane_reg_norm[,dane_reg_Y], tuneGrid=nn_grid_reg, method='nnet', metric='MAE', trControl=cv_R)
-NN_reg_R_Wynik = NN_reg_R$results
+reg_automobile_norm <- MinMax(reg_automobile)
+R_GRID_NN_regresja = expand.grid(size=1:12, decay = c(0.0002, 0.02))
+R_CV_NN_regresja = train(x=reg_automobile_norm[,reg_automobile_X], y=reg_automobile_norm[,reg_automobile_Y], tuneGrid=R_GRID_NN_regresja, method='nnet', metric='MAE', trControl=kontrola_kroswalidacji)
+R_CV_NN_regresja_Wynik = R_CV_NN_regresja$results
 
 
 
