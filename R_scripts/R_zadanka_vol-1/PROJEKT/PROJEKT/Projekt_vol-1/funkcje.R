@@ -943,7 +943,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     if(typ == "bin")
     {
       cat("Obliczenia dla KNN - problem klasyfikacji binarnej: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_bin <- data.frame(macierz_parametrow, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
@@ -1003,7 +1003,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     else if(typ == "multi")
     {
       cat("Obliczenia dla KNN - problem klasyfikacji wieloklasowej: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
       
@@ -1051,7 +1051,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     else if(typ == "reg")
     {
       cat("Obliczenia dla KNN - problem regresji: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_reg <- data.frame(macierz_parametrow, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
 
@@ -1123,7 +1123,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     if(typ == "bin")
     {
       cat("Obliczenia dla Drzew Decyzyjnych - problem klasyfikacji binarnej: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_bin <- data.frame(macierz_parametrow, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
       
@@ -1199,7 +1199,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
       macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
       
       cat("Obliczenia dla Drzew Decyzyjnych - problem klasyfikacji wieloklasowej: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       clusterExport(klaster, "X", envir = environment())
       clusterExport(klaster, "Y", envir = environment())
@@ -1260,7 +1260,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
       macierz_parametrow_reg <- data.frame(macierz_parametrow, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
       
       cat("Obliczenia dla Drzew Decyzyjnych - problem regresji: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       clusterExport(klaster, "X", envir = environment())
       clusterExport(klaster, "Y", envir = environment())
@@ -1338,7 +1338,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     if(typ == "bin")
     {
       cat("Obliczenia dla Sieci Neuronowych - problem klasyfikacji binarnej: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_bin <- data.frame(macierz_parametrow, AUCT=0, CzuloscT=0, SpecyficznoscT=0, JakoscT=0, AUCW=0, CzuloscW=0, SpecyficznoscW=0, JakoscW=0)
 
@@ -1415,7 +1415,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     else if(typ == "multi")
     {
       cat("Obliczenia dla Sieci Neuronowych - problem klasyfikacji wieloklasowej: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
       
@@ -1480,7 +1480,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     else if(typ == "reg")
     {
       cat("Obliczenia dla Sieci Neuronowych - problem regresji: ")
-      cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
+      # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
       macierz_parametrow_reg <- data.frame(macierz_parametrow, MAET=0, MSET=0, MAPET=0, MAEW=0, MSEW=0, MAPEW=0)
       

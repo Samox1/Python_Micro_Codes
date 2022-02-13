@@ -44,6 +44,8 @@ reg_automobile <- as.data.frame(sapply(reg_automobile, as.numeric))     # Zamian
 summary(reg_automobile)
 
 
+save.image(file="1.RData") 
+
 # KNN
 
 print("KNN - bin")
@@ -51,19 +53,21 @@ hiper_parametry_KNN_bin <- expand.grid(k=c(2:10))
 Kroswalidacja_KNN_bin <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 9, hiper_parametry_KNN_bin, algorytm="KNN", seed = 399)
 print(Kroswalidacja_KNN_bin)
 
+save.image(file="2.RData") 
 
 print("KNN - multi")
 hiper_parametry_KNN_multi <- expand.grid(k=c(2:8))
 Kroswalidacja_KNN_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_KNN_multi, algorytm="KNN", seed = 399)
 print(Kroswalidacja_KNN_multi)
 
+save.image(file="3.RData") 
 
 print("KNN - reg")
 hiper_parametry_KNN_reg <- expand.grid(k=c(2:12))
 Kroswalidacja_KNN_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_KNN_reg, algorytm="KNN", seed = 399)
 print(Kroswalidacja_KNN_reg)
 
-
+save.image(file="4.RData") 
 
 
 # Tree
@@ -73,18 +77,21 @@ hiper_parametry_Tree_bin <- expand.grid(depth=c(3,5,10), minobs=c(2,10), type=c(
 Kroswalidacja_Tree_bin <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 9, hiper_parametry_Tree_bin, algorytm="Tree", seed = 399)
 print(Kroswalidacja_Tree_bin)
 
+save.image(file="5.RData") 
 
 print("Tree - multi")
 hiper_parametry_Tree_multi <- expand.grid(depth=c(3,10), minobs=c(2,10), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.4))
 Kroswalidacja_Tree_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_Tree_multi, algorytm="Tree", seed = 399)
 print(Kroswalidacja_Tree_multi)
 
+save.image(file="6.RData") 
 
 print("Tree - reg")
 hiper_parametry_Tree_reg <- expand.grid(depth=c(3,10), minobs=c(2,10), type=c('SS'), overfit = c('none'), cf=c(0.4))
 Kroswalidacja_Tree_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_Tree_reg, algorytm="Tree", seed = 399)
 print(Kroswalidacja_Tree_reg)
 
+save.image(file="7.RData") 
 
 
 # NN
@@ -94,19 +101,21 @@ hiper_parametry_NN_bin <- expand.grid(h=list(c(2,2), c(3,6), c(6,3), c(6,6)), lr
 Kroswalidacja_NN_bin <- CrossValidTune(bin_cancer, bin_cancer_X, bin_cancer_Y, kFold = 9, hiper_parametry_NN_bin, algorytm="NN", seed = 399)
 print(Kroswalidacja_NN_bin)
 
+save.image(file="8.RData") 
 
 print("Sieci NN - multi")
 hiper_parametry_NN_multi <- expand.grid(h=list(c(2,2), c(3,6), c(6,3), c(6,6)), lr = c(0.01), iter = c(30000, 90000))
 Kroswalidacja_NN_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_NN_multi, algorytm="NN", seed = 399)
 print(Kroswalidacja_NN_multi)
 
+save.image(file="9.RData") 
 
 print("Sieci NN - reg")
 hiper_parametry_NN_reg <- expand.grid(h=list(c(2,2), c(3,6), c(6,3), c(6,6)), lr = c(0.01), iter = c(30000, 90000))
 Kroswalidacja_NN_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_NN_reg, algorytm="NN", seed = 399)
 print(Kroswalidacja_NN_reg)
 
-
+save.image(file="10.RData") 
 
 
 # Wyniki dla modeli wbudowanych w biblioteki R
@@ -130,6 +139,7 @@ R_GRID_KNN_reg = expand.grid(k=2:20)
 R_CV_KNN_regresja = train(x=reg_automobile[,reg_automobile_X], y=reg_automobile[,reg_automobile_Y], tuneGrid=R_GRID_KNN_reg, method='knn', metric='MAE', trControl=kontrola_kroswalidacji)
 R_CV_KNN_regresja_Wynik = R_CV_KNN_regresja$results
 
+save.image(file="11_R.RData") 
 
 
 print("TREE - R - bin")
@@ -149,6 +159,7 @@ R_GRID_TREE_regresja = expand.grid(maxdepth=2:20)
 R_CV_TREE_regresja = train(x=reg_automobile[,reg_automobile_X], y=reg_automobile[,reg_automobile_Y], tuneGrid=R_GRID_TREE_regresja, method='rpart2', metric='MAE', trControl=kontrola_kroswalidacji)
 R_CV_TREE_regresja_Wynik = R_CV_TREE_regresja$results
 
+save.image(file="12_R.RData") 
 
 
 print("Neural Network - R - bin")
@@ -172,7 +183,7 @@ R_CV_NN_regresja = train(x=reg_automobile_norm[,reg_automobile_X], y=reg_automob
 R_CV_NN_regresja_Wynik = R_CV_NN_regresja$results
 
 
-
+save.image(file="13_R.RData") 
 
 
 

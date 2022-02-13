@@ -1,5 +1,0 @@
-Klasyfikacja BINARNA = https://archive.ics.uci.edu/ml/datasets/Breast+Cancer
-
-Klasyfikacja MULTI = https://archive.ics.uci.edu/ml/datasets/Abalone		(prowadzacy)
-
-REGRESJA = https://archive.ics.uci.edu/ml/datasets/Real+estate+valuation+data+set
