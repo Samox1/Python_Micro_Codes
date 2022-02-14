@@ -12,13 +12,14 @@ library(pracma)
 library(psych)
 library(dplyr)
 library(fastDummies)
+source('funkcje.R')
 
 
 
 #KLASYFIKACJA WIELOKLASOWA
 
 #dane (obligatoryjny zbior danych)
-f <-file("https://archive.ics.uci.edu/ml/machine-learning-databases/car/car.data", open="r")
+f <- file("https://archive.ics.uci.edu/ml/machine-learning-databases/car/car.data", )
 data_kl_w_org <- read.table(f, dec=" ",sep=",", header=F)
 colnames(data_kl_w_org)<-c("buying","maint","persons","lug_boot","safety","Y")
 
