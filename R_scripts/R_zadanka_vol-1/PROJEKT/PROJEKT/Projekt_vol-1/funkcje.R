@@ -19,9 +19,6 @@ library("doSNOW")
 
 
 
-### KNN ###
-
-
 MinMax <- function( x, new_min = 0, new_max = 1 ){
   return( ( ( x - min(x) ) / ( max(x) - min(x) ) ) * ( new_max - new_min ) + new_min )
 }
@@ -307,9 +304,6 @@ KNNpred <- function(KNNmodel, X)
 
 
 
-
-
-### Drzewa decyzyjne ###
 
 StopIfNot <- function( Y, X, data, type, depth, minobs, overfit, cf){
   
@@ -706,10 +700,6 @@ PredictTree <- function(tree, data) {
 
 
 
-
-### Sieci neuronowe ###
-
-
 sigmoid <- function( x ){
   return( 1 / (1 + exp( -x ) ) )
 }
@@ -815,8 +805,6 @@ predNN <- function( xnew, nn, typ = "bin" ){
 
 
 
-
-### Statystyka Modeli i Kroswalidacja ###
 
 
 MAE <- function( y_tar, y_hat ){
@@ -937,7 +925,6 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
   
   if(algorytm == "KNN")
   {
-    # cat("Obliczenia dla KNN - problem klasyfikacji binarnej: ")
     cat('\n')
     
     if(typ == "bin")
