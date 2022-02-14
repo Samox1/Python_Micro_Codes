@@ -1155,7 +1155,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
       clusterExport(klaster, "Jakosc")
       clusterExport(klaster, "Specyficznosc")
 
-      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_bin), .combine = rbind) %dopar%
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_bin), .combine = rbind, .packages = 'data.tree') %dopar%
       # for(id_modele in 1:nrow(macierz_parametrow_bin))
       {
         # cat(paste0(id_modele," => "))
@@ -1225,7 +1225,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
       clusterExport(klaster, "MinMax")
       clusterExport(klaster, "Jakosc__")
       
-      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_multi), .combine = rbind) %dopar%
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_multi), .combine = rbind, .packages = 'data.tree') %dopar%
       # for(id_modele in 1:nrow(macierz_parametrow_multi))
       {
         cat(paste0(id_modele," => "))
@@ -1288,7 +1288,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
       clusterExport(klaster, "MSE")
       clusterExport(klaster, "MAPE")
       
-      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_reg), .combine = rbind) %dopar%
+      wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_reg), .combine = rbind, .packages = 'data.tree') %dopar%
       # for(id_modele in 1:nrow(macierz_parametrow_reg))
       {
         cat(paste0(id_modele," => "))
@@ -1506,7 +1506,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
       clusterExport(klaster, "MAPE")
       
       wynik <- foreach(id_modele = 1:nrow(macierz_parametrow_reg), .combine = rbind) %dopar%
-      for(id_modele in 1:nrow(macierz_parametrow_reg))
+      # for(id_modele in 1:nrow(macierz_parametrow_reg))
       {
         cat(paste0("\t ", id_modele," => "))
         

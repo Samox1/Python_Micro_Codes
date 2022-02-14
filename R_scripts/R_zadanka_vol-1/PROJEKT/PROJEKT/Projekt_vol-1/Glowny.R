@@ -30,10 +30,12 @@ summary(bin_cancer)
 
 
 multi_abalone <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header = FALSE, sep = ",")
-multi_abalone_X <- colnames(multi_abalone)[-1]
-multi_abalone_Y <- colnames(multi_abalone)[1]
-multi_abalone[,1] <- as.factor(as.numeric((multi_abalone[,1])))       # Dla pewnosci ze pierwsza kolumna - "Y" - jest factorem
+multi_abalone_X <- colnames(multi_abalone)[-9]
+multi_abalone_Y <- colnames(multi_abalone)[9]
+multi_abalone[,1] <- as.numeric(as.factor(multi_abalone[,1]))
+multi_abalone[,9] <- as.factor(multi_abalone[,9])
 summary(multi_abalone)
+summary(multi_abalone[,9])
 
 
 reg_automobile <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/autos/imports-85.data", header = FALSE, sep = ",")
@@ -80,14 +82,14 @@ print(Kroswalidacja_Tree_bin)
 save.image(file="5.RData") 
 
 print("Tree - multi")
-hiper_parametry_Tree_multi <- expand.grid(depth=c(3,10), minobs=c(2,10), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.4))
+hiper_parametry_Tree_multi <- expand.grid(depth=c(3,5,10), minobs=c(2,10), type=c('Entropy', 'Gini'), overfit = c('none', 'prune'), cf=c(0.4))
 Kroswalidacja_Tree_multi <- CrossValidTune(multi_abalone, multi_abalone_X, multi_abalone_Y, kFold = 9, hiper_parametry_Tree_multi, algorytm="Tree", seed = 399)
 print(Kroswalidacja_Tree_multi)
 
 save.image(file="6.RData") 
 
 print("Tree - reg")
-hiper_parametry_Tree_reg <- expand.grid(depth=c(3,10), minobs=c(2,10), type=c('SS'), overfit = c('none'), cf=c(0.4))
+hiper_parametry_Tree_reg <- expand.grid(depth=c(3,5,10), minobs=c(2,10), type=c('SS'), overfit = c('none'), cf=c(0.4))
 Kroswalidacja_Tree_reg <- CrossValidTune(reg_automobile, reg_automobile_X, reg_automobile_Y, kFold = 9, hiper_parametry_Tree_reg, algorytm="Tree", seed = 399)
 print(Kroswalidacja_Tree_reg)
 
