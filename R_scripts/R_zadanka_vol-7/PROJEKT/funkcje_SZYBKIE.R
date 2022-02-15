@@ -760,9 +760,9 @@ wstecz <- function( X, y_tar, y_hat, W1, W2, W3, Z1, Z2, lr, typ ){
   return( list( W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
-trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 399, typ = "bin" ){
+trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 614, typ = "bin" ){
   set.seed( seed )
-  # Error_NN <- double( iter )
+  Error_NN <- double( iter )
   
   X <- cbind( rep( 1, nrow(x) ), x )
   h = unlist(h, use.names = FALSE)
@@ -778,10 +778,11 @@ trainNN <- function( x, y_tar, h = c(5,5), lr = 0.01, iter = 10000, seed = 399, 
     W3 <- sygnalwtyl$W3
     cat( paste0( "\rIteracja: ", i , " / ", iter) )
     
-    # Error_NN[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
+    Error_NN[i] <- lossSS( y_tar, sygnalwprzod$y_hat )
   }
-  # xwartosci <- seq( 1, iter, length = 1000 )
-  # print( qplot( xwartosci, Error_NN[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+  xwartosci <- seq( 1, iter, length = 1000 )
+  print( qplot( xwartosci, Error_NN[xwartosci], geom = "line", main = "Error", xlab = "Iteracje" ) )
+  
   return( list( y_hat = sygnalwprzod$y_hat, W1 = W1, W2 = W2, W3 = W3 ) )
 }
 
@@ -862,6 +863,10 @@ Jakosc <- function(Mat)
 }
 
 
+# Jakosc__ <- function(y_tar, y_hat){
+#   return( sum(as.numeric(y_tar) == as.numeric(factor(y_hat, levels = levels(y_tar)))) / length(y_tar) )
+# }
+
 Jakosc__ <- function(y_tar, y_hat){
   return( sum(as.numeric(y_tar) == as.numeric(y_hat)) / length(y_tar) )
 }
@@ -893,7 +898,7 @@ ModelOcena <- function(y_tar, y_hat)
   }
 }
 
-CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)), algorytm = 'KNN', seed = 399)
+CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)), algorytm = 'KNN', seed = 614)
 {
   set.seed(seed)
   
@@ -1184,7 +1189,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
     else if(typ == "multi")
     {
       macierz_parametrow_multi <- data.frame(macierz_parametrow, ACCT=0, ACCW=0)
-      
+
       cat("Obliczenia dla Drzew Decyzyjnych - problem klasyfikacji wieloklasowej: ")
       # cat(paste0("Liczba modeli x kroswalidacja = ", nrow(macierz_parametrow) * kFold))
       
@@ -1223,8 +1228,6 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
           Tree_Model <- Tree(Y, X, trening_dane, type = macierz_parametrow_multi$type[id_modele], depth =  macierz_parametrow_multi$depth[id_modele], minobs =  macierz_parametrow_multi$minobs[id_modele], overfit =  macierz_parametrow_multi$overfit[id_modele], cf = macierz_parametrow_multi$cf[id_modele]) 
           
           Tree_pred_Trening <- PredictTree(Tree_Model, trening_dane[,X])
-          print(Tree_pred_Trening)
-          
           Tree_pred_Walid <- PredictTree(Tree_Model, walidacyjne_dane[,X])
           
           macierz_parametrow_multi[id_modele, "ACCT"] <- ModelOcena(trening_dane[,Y], Tree_pred_Trening[,"Class"])
@@ -1368,7 +1371,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
           NN_walidacja_X = as.matrix(walidacyjne_dane[,X])
           NN_walidacja_Y = model.matrix( ~ walidacyjne_dane[,Y] - 1, walidacyjne_dane )
           
-          NN_Model <- trainNN( NN_trening_X, NN_trening_Y, h = macierz_parametrow_bin$h[id_modele], lr = macierz_parametrow_bin$lr[id_modele], iter = macierz_parametrow_bin$iter[id_modele], seed = 399, typ = typ)
+          NN_Model <- trainNN( NN_trening_X, NN_trening_Y, h = macierz_parametrow_bin$h[id_modele], lr = macierz_parametrow_bin$lr[id_modele], iter = macierz_parametrow_bin$iter[id_modele], seed = 614, typ = typ)
           
           NN_pred_Trening <- predNN(NN_trening_X, NN_Model, typ = typ)
           NN_pred_Walid <- predNN(NN_walidacja_X, NN_Model, typ = typ)
@@ -1440,14 +1443,17 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
           NN_trening_Y = model.matrix( ~ trening_dane[,Y] - 1, trening_dane)
           NN_walidacja_X = as.matrix(walidacyjne_dane[,X])
           NN_walidacja_Y = model.matrix( ~ walidacyjne_dane[,Y] - 1, walidacyjne_dane )
-          
-          NN_Model <- trainNN( NN_trening_X, NN_trening_Y, h = macierz_parametrow_multi$h[id_modele], lr = macierz_parametrow_multi$lr[id_modele], iter = macierz_parametrow_multi$iter[id_modele], seed = 399, typ = typ)
+
+          NN_Model <- trainNN( NN_trening_X, NN_trening_Y, h = macierz_parametrow_multi$h[id_modele], lr = macierz_parametrow_multi$lr[id_modele], iter = macierz_parametrow_multi$iter[id_modele], seed = 614, typ = typ)
           
           NN_pred_Trening <- predNN(NN_trening_X, NN_Model, typ = typ)
           NN_pred_Walid <- predNN(NN_walidacja_X, NN_Model, typ = typ)
           
-          NN_pred_Trening_multi <- as.numeric( levels(dane_multi_NN[,Y])[apply( NN_pred_Trening, 1, which.max )] )
-          NN_pred_Walid_multi <- as.numeric( levels(dane_multi_NN[,Y])[apply( NN_pred_Walid, 1, which.max )] )
+          print(dane_multi_NN[,Y])
+          NN_pred_Trening_multi <- as.numeric( factor(levels(dane_multi_NN[,Y])[apply( NN_pred_Trening, 1, which.max )], levels =  levels(dane_multi_NN[,Y])))
+          print(NN_pred_Trening_multi)
+          
+          NN_pred_Walid_multi <- as.numeric( factor(levels(dane_multi_NN[,Y])[apply( NN_pred_Walid, 1, which.max )], levels =  levels(dane_multi_NN[,Y])))
           
           macierz_parametrow_multi[id_modele, "ACCT"] <- ModelOcena(trening_dane[,Y], NN_pred_Trening_multi)
           macierz_parametrow_multi[id_modele, "ACCW"] <- ModelOcena(walidacyjne_dane[,Y], NN_pred_Walid_multi)
@@ -1507,7 +1513,7 @@ CrossValidTune <- function(dane, X, Y, kFold = 9, parTune = expand.grid(k = c(5)
           NN_walidacja_X = as.matrix(walidacyjne_dane[,X])
           NN_walidacja_Y = as.matrix(walidacyjne_dane[,Y])
           
-          NN_Model <- trainNN(NN_trening_X, NN_trening_Y, h = macierz_parametrow_reg$h[id_modele], lr = macierz_parametrow_reg$lr[id_modele], iter = macierz_parametrow_reg$iter[id_modele], seed = 399, typ = typ)
+          NN_Model <- trainNN(NN_trening_X, NN_trening_Y, h = macierz_parametrow_reg$h[id_modele], lr = macierz_parametrow_reg$lr[id_modele], iter = macierz_parametrow_reg$iter[id_modele], seed = 614, typ = typ)
           
           NN_pred_Trening <- predNN(NN_trening_X, NN_Model, typ = typ)
           NN_pred_Walid <- predNN(NN_walidacja_X, NN_Model, typ = typ)

@@ -1,6 +1,5 @@
 library(caret)
 library(rpart) 
-library(data.tree)
 library(pROC)
 library(e1071)
 library(class)
@@ -71,8 +70,14 @@ save(hiper_parametry_KNN_bin, Kroswalidacja_KNN_bin, Kroswalidacja_KNN_bin_TABEL
 
 
 
+resample_multi <- sample( 1:nrow(data_klasyfikacja_wieloklasowa), size = 800, replace = F )
+data_klasyfikacja_wieloklasowa_sample <- data_klasyfikacja_wieloklasowa[resample_multi,]
+summary(data_klasyfikacja_wieloklasowa_sample)
+
+
+
 hiper_parametry_KNN_multi <- expand.grid(k=c(2,4,6,8,10,12))  
-Kroswalidacja_KNN_multi <- CrossValidTune(data_klasyfikacja_wieloklasowa, data_klasyfikacja_wieloklasowa_X, data_klasyfikacja_wieloklasowa_Y, kFold = 8, hiper_parametry_KNN_multi, algorytm="KNN", seed = 399)
+Kroswalidacja_KNN_multi <- CrossValidTune(data_klasyfikacja_wieloklasowa_sample, data_klasyfikacja_wieloklasowa_X, data_klasyfikacja_wieloklasowa_Y, kFold = 8, hiper_parametry_KNN_multi, algorytm="KNN", seed = 399)
 print(Kroswalidacja_KNN_multi)
 
 Kroswalidacja_KNN_multi_TABELA <- Kroswalidacja_KNN_multi
