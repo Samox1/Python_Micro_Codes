@@ -1,0 +1,13 @@
+> 1. Capture window with game
+2. Find box with trading no. 1 - GOLD 
+3. Image -> Text
+4. Save items with price in GOLD 
+
+5. Capture window with game
+6. Find box with trading no. 1 - SHARD 
+7. Image -> Text
+8. Save items with price in SHARD 
+
+9. Calculations GOLD / SHARDS per item
+
+10. Show calculations on tranparent GUI (overlay)
