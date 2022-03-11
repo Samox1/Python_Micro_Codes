@@ -1,16 +1,20 @@
 from time import sleep
 from matplotlib.image import imread
+import pandas
 import numpy as np
 import cv2
 import pyautogui
+import pytesseract
 
 
 # 1 - Screenshot of gameplay
-# sleep(2)
+sleep(2)
 screen_1 = pyautogui.screenshot()
 screen_1 = cv2.cvtColor(np.array(screen_1), cv2.COLOR_RGB2BGR)
-cv2.imwrite("image1.png", screen_1)
-#screen_1 = cv2.cvtColor(screen_1, cv2.COLOR_RGB2GRAY)
+# cv2.imwrite("image1.png", screen_1)
+# screen_1 = cv2.cvtColor(screen_1, cv2.COLOR_RGB2GRAY)
+
+# screen_1 = cv2.imread("Z_Screen_GOLD_BG_1.png")
 
 # 2 - Read "Trade_GOLD.png" to compare
 trade_gold = cv2.imread("Trade_GOLD.png")
@@ -55,3 +59,11 @@ cv2.waitKey(0)
 
 
 
+pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
+
+GOLD_table = pytesseract.image_to_string("Trade_GOLD_test.png")
+print(GOLD_table)
+
+print(GOLD_table.split("\n"))
+
+x, y = pyautogui.position()
