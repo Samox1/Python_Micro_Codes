@@ -11,3 +11,12 @@
 9. Calculations GOLD / SHARDS per item
 
 10. Show calculations on tranparent GUI (overlay)
+
+
+
+### 1. Change TO_DO_List
+
+### 2. Import PyInstaller
+https://stackoverflow.com/questions/5458048/how-can-i-make-a-python-script-standalone-executable-to-run-without-any-dependen
+
+### 3. Import only used functions
