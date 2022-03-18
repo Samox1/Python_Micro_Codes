@@ -1,5 +1,27 @@
-> 1. Capture window with game
-> 2. Find box with trading no. 1 - GOLD 
+### 1. Change TO_DO_List
+
+### 2. Import PyInstaller
+https://stackoverflow.com/questions/5458048/how-can-i-make-a-python-script-standalone-executable-to-run-without-any-dependen
+
+### 3. Import only used functions
+
+#### NEW PLAN
+
+1. GOLD - Items 
+    1.1 Select left-top corner of items
+    1.2 Select bottom-rigth corner of items
+2. GOLD - Items - price
+    2.1 Select left-top corner of price
+    2.2 Select bottom-rigth corner of price
+3. SHARDS - Items
+    
+
+
+
+#### OLD PLAN
+
+1. Capture window with game
+2. Find box with trading no. 1 - GOLD 
 3. Image -> Text
 4. Save items with price in GOLD 
 
@@ -11,12 +33,3 @@
 9. Calculations GOLD / SHARDS per item
 
 10. Show calculations on tranparent GUI (overlay)
-
-
-
-### 1. Change TO_DO_List
-
-### 2. Import PyInstaller
-https://stackoverflow.com/questions/5458048/how-can-i-make-a-python-script-standalone-executable-to-run-without-any-dependen
-
-### 3. Import only used functions

@@ -1,12 +1,10 @@
-import string
-from time import sleep
 from matplotlib.image import imread
 import pandas
 import numpy as np
 import cv2
 import pyautogui
 import pytesseract
-
+import string
 
 # ZROBIC PLIK KONFIGURACYJNY
 
