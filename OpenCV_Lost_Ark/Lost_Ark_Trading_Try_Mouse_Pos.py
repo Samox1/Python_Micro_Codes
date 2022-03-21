@@ -1,10 +1,9 @@
+from numpy import array
+from cv2 import imread, imshow, waitKey, cvtColor, COLOR_RGB2BGR, COLOR_RGB2GRAY
 from matplotlib.image import imread
-import pandas
-import numpy as np
-import cv2
-import pyautogui
-import pytesseract
-import string
+import pytesseract 
+from pyautogui import position, screenshot
+# import pandas
 
 # ZROBIC PLIK KONFIGURACYJNY
 
@@ -19,7 +18,7 @@ def Region_to_Read(what_string):
     print("OKEY")
 
     position_find_screen = pyautogui.screenshot(region = (position_left_top[0], position_left_top[1], position_right_bottom[0] - position_left_top[0], position_right_bottom[1] - position_left_top[1]))
-    position_find_screen_cv = cv2.cvtColor(np.array(position_find_screen), cv2.COLOR_RGB2BGR)
+    position_find_screen_cv = cv2.cvtColor(numpy.array(position_find_screen), cv2.COLOR_RGB2BGR)
 
     return(position_find_screen_cv)
 
