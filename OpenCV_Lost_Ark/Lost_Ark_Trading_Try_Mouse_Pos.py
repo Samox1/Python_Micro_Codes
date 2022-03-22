@@ -1,6 +1,5 @@
 from numpy import array
 from cv2 import imread, imshow, waitKey, cvtColor, COLOR_RGB2BGR, COLOR_RGB2GRAY
-from matplotlib.image import imread
 import pytesseract 
 from pyautogui import position, screenshot
 # import pandas
