@@ -4,7 +4,7 @@ import pytesseract
 from pyautogui import position, screenshot
 # import pandas
 
-# ZROBIC PLIK KONFIGURACYJNY
+### TODO: ZROBIC PLIK KONFIGURACYJNY
 
 def Region_to_Read(what_string):
     print("Move mouse to left-top corner of: " + what_string)
