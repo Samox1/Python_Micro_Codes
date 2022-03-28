@@ -63,6 +63,7 @@ print("HEllo")
 gold_items = ''
 gold_items_price = ''
 
+table_all_items = list()
 
 while True:
     
@@ -77,11 +78,13 @@ while True:
     if option == 1:
         gold_items = Region_to_Text("Gold_items")
         gold_items = [x for x in gold_items if x.strip() and not(x.startswith("[Sold"))]
+        table_all_items.append(gold_items)
         print(gold_items)
     elif option == 2:
         gold_items_price = Region_to_Text("Gold_items_price")
         gold_items_price = [x for x in gold_items_price if x.strip()]
         print(gold_items_price)
+        table_all_items.append(gold_items_price)
     elif option == 3:
         print("1")
     elif option == 4:
@@ -92,7 +95,9 @@ while True:
         print("1")
     elif option == 9:
         print(gold_items)
-        print(gold_items_price)  
+        print(gold_items_price)
+        print("Table - all items with price")
+        print(table_all_items)
     elif option == 0:
         print('Thanks message before exiting')
         exit()
