@@ -1,8 +1,10 @@
+import tkinter
 from numpy import array
 from cv2 import imread, imwrite, imshow, waitKey, cvtColor, COLOR_RGB2BGR, COLOR_RGB2GRAY
 import pytesseract 
 from pyautogui import position, screenshot
-
+from tkinter import *
+import tkinter.ttk as ttk
 
 ### TODO: ZROBIC PLIK KONFIGURACYJNY
 
@@ -52,7 +54,7 @@ def print_menu():
     print("3 - Shard Item")
     print("4 - Shard Item - units")
     print("5 - Shard Item - price")
-    print("6 - Show TABLE")
+    print("9 - Show TABLE")
 
 
 
@@ -60,49 +62,93 @@ def print_menu():
 pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
 
 print("HEllo")
-gold_items = ''
-gold_items_price = ''
+gold_items = list()
+gold_items_price = list()
+shard_items_units_price = list()
 
 table_all_items = list()
 
-while True:
-    
-    print_menu()
-    option = ''
 
-    try:
-        option = int(input('Enter your choice: '))
-    except:
-        print('Wrong input. Please enter a number ...')
+root = Tk()
+root.title('Lost Ark - Trading GOLD / SHARD')
+root.geometry("500x500")
+root.attributes('-alpha', 0.7)          # Alpha background
+root.attributes('-topmost', 'true')     # Always on top of other windows
 
-    if option == 1:
-        gold_items = Region_to_Text("Gold_items")
-        gold_items = [x for x in gold_items if x.strip() and not(x.startswith("[Sold"))]
-        table_all_items.append(gold_items)
-        print(gold_items)
-    elif option == 2:
-        gold_items_price = Region_to_Text("Gold_items_price")
-        gold_items_price = [x for x in gold_items_price if x.strip()]
-        print(gold_items_price)
-        table_all_items.append(gold_items_price)
-    elif option == 3:
-        print("1")
-    elif option == 4:
-        print("1")
-    elif option == 5:
-        print("1")
-    elif option == 6:
-        print("1")
-    elif option == 9:
-        print(gold_items)
-        print(gold_items_price)
-        print("Table - all items with price")
-        print(table_all_items)
-    elif option == 0:
-        print('Thanks message before exiting')
-        exit()
-    else:
-        print('Invalid option. Please enter a number between 1 and 4.')
+# Slider function:
+def slide(x):
+    root.attributes('-alpha', alpha_slider.get())
+    slide_label.config(text = round(alpha_slider.get(),2))
+
+# Create slider 
+alpha_slider = ttk.Scale(root, from_=0.1, to=1.0, value=0.5, orient=HORIZONTAL, command=slide)
+alpha_slider.pack(pady=20)
+
+# Slider label
+slide_label = Label(root, text='')
+slide_label.pack(pady=10)
+
+root.mainloop()
+
+### while True:
+###     
+###     print_menu()
+###     option = ''
+### 
+###     try:
+###         option = int(input('Enter your choice: '))
+###     except:
+###         print('Wrong input. Please enter a number ...')
+### 
+###     if option == 1:
+###         gold_items = Region_to_Text("Gold_items")
+###         gold_items = [x for x in gold_items if x.strip() and not(x.startswith("[Sold")) and len(x) > 3]
+###         table_all_items.append(gold_items)
+###         print(gold_items)
+### 
+###     elif option == 2:
+###         gold_items_price = Region_to_Text("Gold_items_price")
+###         gold_items_price = [x for x in gold_items_price if x.strip()]
+###         print(gold_items_price)
+###         table_all_items.append(gold_items_price)
+### 
+###     elif option == 3:
+###         print("Shard - Item #1")
+###         for i in (1,2,3,4,5):
+###             item = Region_to_Text("Shard_item : " + str(i))
+###             item = [x for x in item if x.strip()]
+###             print(item)
+###             units = Region_to_Text("Shard_item_units : " + str(i))
+###             units = [x for x in units if x.strip()]
+###             print(units)
+###             price = Region_to_Text("Shard_item_price : " + str(i))
+###             price = [x for x in price if x.strip()]
+###             print(price)
+###             shard_items_units_price.append((item, units, price))
+### 
+###         print(shard_items_units_price)
+### 
+###     elif option == 4:
+###         print("1")
+### 
+###     elif option == 5:
+###         print("1")
+### 
+###     elif option == 6:
+###         print("1")
+### 
+###     elif option == 9:
+###         print(gold_items)
+###         print(gold_items_price)
+###         print("Table - all items with price")
+###         print(table_all_items)
+### 
+###     elif option == 0:
+###         print('Thanks message before exiting')
+###         exit()
+### 
+###     else:
+###         print('Invalid option. Please enter a number between 1 and 4.')
 
 
 
