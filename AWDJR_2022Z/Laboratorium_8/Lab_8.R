@@ -119,6 +119,7 @@ predict(titanic.lr, newdata = test)
 predict(titanic.lr, newdata = test, type = "response")
 
 
+
 ### Regresja Poissona ###
 
 warp <- warpbreaks
