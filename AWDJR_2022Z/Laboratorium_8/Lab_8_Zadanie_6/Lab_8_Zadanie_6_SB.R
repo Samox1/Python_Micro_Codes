@@ -1,6 +1,6 @@
-### Laboratorium nr 7 - Zadanie 5
+### Laboratorium nr 8 - Zadanie 6
 # Autor: Szymon Baczyński
-# Data:  05.12.2022
+# Data:  12.12.2022
 
 rm(list = ls())
 
